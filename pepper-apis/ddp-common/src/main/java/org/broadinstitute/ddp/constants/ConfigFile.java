@@ -216,5 +216,7 @@ public class ConfigFile {
         public static final String SIGNER_SERVICE_ACCOUNT = prefix + "signerServiceAccount";
     }
 
-    public static class Test { }
+    public static class Test {
+        // testing
+    }
 }
