@@ -75,7 +75,7 @@ commands:
           name: Download tcell files from bucket
           command: |
             TCELL_GCP_PATH='<<parameters.tcell_gcp_path>>'
-            vault read -format=json  secret/pepper/prod/v1/conf | jq -r .data.gcp.serviceKey | gcloud auth activate-service-account --key-file=-
+            vault read -format=json  secret/pepper/${ENVIRONMENT}/conf | jq -r .data.gcp.serviceKey | gcloud auth activate-service-account --key-file=-
             TAR_FILE_URL=`gsutil ls $TCELL_GCP_PATH | sort -r | head -1`
 
             if [ -z $TAR_FILE_URL ]
@@ -160,7 +160,7 @@ commands:
           name: api-build.sh
           command: |
             echo "We are generating api-build.sh for application << parameters.application >> on ${ENVIRONMENT:-dev}"
-            ./api-build.sh v1 ${ENVIRONMENT:-dev} . << parameters.application >> --gae-config
+            ./api-build.sh v1 ${ENVIRONMENT} . << parameters.application >> --gae-config
           environment: # needed because api-build.sh scripts want to start new docker containers
             USE_DOCKER: false
 
@@ -280,7 +280,7 @@ commands:
       - run:
           name: Extract secret <<parameters.secret_name>> to file <<parameters.output_file>>
           command: |
-            gcloud --project "broad-ddp-${ENVIRONMENT}" secrets versions access latest \
+            gcloud --project "${ENVIRONMENT}" secrets versions access latest \
                 --secret='<<parameters.secret_name>>' > '<<parameters.output_file>>'
             pwd
             ls -l
@@ -324,7 +324,7 @@ commands:
             cp ../dsm-server/target/<<parameters.jar_base_name>>.jar .
             cp ../<< parameters.app_config_file >> .
             cat ../dsm-server/appengine/StudyManager.tmpl.yaml \
-              | sed "s/{{project_id}}/broad-ddp-${ENVIRONMENT}/g" \
+              | sed "s/{{project_id}}/${ENVIRONMENT}/g" \
               > << parameters.jar_base_name >>.yaml
             cp -r ../$TCELL_DIR .
             cp ../<< parameters.tcell_config_file >> $TCELL_DIR
@@ -393,7 +393,7 @@ commands:
           command: |
             set -u
             pwd
-            gcloud app deploy --version="${SHORT_GIT_SHA}" --stop-previous-version --project "broad-ddp-${ENVIRONMENT}" <<parameters.deploy_dir>>/<<parameters.jar_base_name>>.yaml
+            gcloud app deploy --version="${SHORT_GIT_SHA}" --stop-previous-version --project "${ENVIRONMENT}" <<parameters.deploy_dir>>/<<parameters.jar_base_name>>.yaml
       - update-deployment-sheet:
           jar_base_name: <<parameters.jar_base_name>>
       - delete-old-service-versions:
@@ -420,7 +420,7 @@ commands:
             # find what other versions are currently running
             # skip first line, exclude our version, print 2nd column
             AWK_COMMMAND="NR > 1 && !/${SHORT_GIT_SHA}/ {print \$2}"
-            VERSIONS_TO_DELETE=$(gcloud app versions list --service "${SERVICE}" --project "broad-ddp-${ENVIRONMENT}" | awk "${AWK_COMMMAND}")
+            VERSIONS_TO_DELETE=$(gcloud app versions list --service "${SERVICE}" --project "${ENVIRONMENT}" | awk "${AWK_COMMMAND}")
 
             # Sometime deleting versions fails. If there are less than 3 versions then we are not going to worry about it
             # and set flag so this job step does not fail when exit error value is generated
@@ -430,7 +430,7 @@ commands:
 
             for CURRENT_VERSION in $VERSIONS_TO_DELETE; do
               echo "Deleting version $CURRENT_VERSION of service $SERVICE"
-              gcloud app versions delete --quiet --service "$SERVICE" "$CURRENT_VERSION" --project "broad-ddp-${ENVIRONMENT}"
+              gcloud app versions delete --quiet --service "$SERVICE" "$CURRENT_VERSION" --project "${ENVIRONMENT}"
             done;
             exit 0
 
@@ -445,7 +445,7 @@ commands:
           command: |
             set -u
             set +x
-            vault read -format=json secret/pepper/${ENVIRONMENT}/v1/conf  | jq -r .data.gcp.serviceKey |
+            vault read -format=json secret/pepper/${ENVIRONMENT}/conf  | jq -r .data.gcp.serviceKey |
             /opt/build-utils/reportdeploy.sh "$RELEASE_SHEET_ID" '<<parameters.jar_base_name>> server' "$ENVIRONMENT" "$CIRCLE_BUILD_NUM" "$CIRCLE_BUILD_URL"
 
   auth-gcp-service-account:
@@ -467,7 +467,7 @@ commands:
               echo "Target vault env: $TARGET_ENV"
               echo "From $PWD"
             fi
-            vault read --format=json secret/pepper/${TARGET_ENV}/v1/conf |
+            vault read --format=json secret/pepper/${ENVIRONMENT}/conf |
               jq -r .data.gcp.serviceKey |
               gcloud auth activate-service-account --key-file=-
 
@@ -1060,7 +1060,7 @@ jobs:
           name: Deploy docs website
           command: |
             set -u
-            gcloud app deploy --version="${SHORT_GIT_SHA}" --stop-previous-version --project "broad-ddp-${ENVIRONMENT}" deploy/app.yaml
+            gcloud app deploy --version="${SHORT_GIT_SHA}" --stop-previous-version --project "${ENVIRONMENT}" deploy/app.yaml
       - delete-old-service-versions:
           deploy_dir: deploy
 

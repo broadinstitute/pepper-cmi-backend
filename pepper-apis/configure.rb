@@ -153,7 +153,7 @@ def read_secret_from_path(path, field = nil)
 end
 
 def read_secret(file_name, field = nil)
-  read_secret_from_path("secret/pepper/#{$env}/#{$version}/#{file_name}", field)
+  read_secret_from_path("secret/#{$env}/#{file_name}", field)
 end
 
 def copy_secret_from_path(path, field = nil, output_file_name = nil, silent = false)
@@ -167,7 +167,7 @@ def copy_secret_from_path(path, field = nil, output_file_name = nil, silent = fa
 end
 
 def copy_secret(file_name, field = nil, output_file_name = nil)
-  copy_secret_from_path("secret/pepper/#{$env}/#{$version}/#{file_name}", field, output_file_name)
+  copy_secret_from_path("secret/#{$env}/#{file_name}", field, output_file_name)
 end
 
 def render_from_path(path, output_file_name = nil)
