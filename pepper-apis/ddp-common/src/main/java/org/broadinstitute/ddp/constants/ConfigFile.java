@@ -215,4 +215,6 @@ public class ConfigFile {
         public static final String SCAN_RESULT_SUBSCRIPTION = prefix + "scanResultSubscription";
         public static final String SIGNER_SERVICE_ACCOUNT = prefix + "signerServiceAccount";
     }
+
+    public static class Test { }
 }
