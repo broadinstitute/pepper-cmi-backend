@@ -159,7 +159,7 @@ commands:
       - run:
           name: api-build.sh
           command: |
-            echo "We are generating api-build.sh for application << parameters.application >> on ${ENVIRONMENT:-dev}"
+            echo "We are generating api-build.sh for application << parameters.application >> on ${ENVIRONMENT}"
             ./api-build.sh v1 ${ENVIRONMENT} . << parameters.application >> --gae-config
           environment: # needed because api-build.sh scripts want to start new docker containers
             USE_DOCKER: false
