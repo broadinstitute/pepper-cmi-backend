@@ -56,7 +56,7 @@ read_vault_value() {
   local ver="$1"
   local env="$2"
   local name="$3"
-  vault read --field "$name" "secret/pepper/$env/$ver/elasticsearch"
+  vault read --field "$name" "secret/$env/elasticsearch"
 }
 
 set_api_credentials() {

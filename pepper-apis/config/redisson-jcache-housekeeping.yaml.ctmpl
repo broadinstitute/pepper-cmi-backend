@@ -1,6 +1,6 @@
 {{with $environment := env "ENVIRONMENT"}}
 {{with $version := env "VERSION"}}
-{{with $conf := secret  (printf "secret/pepper/%s/%s/conf" $environment $version)}}
+{{with $conf := secret  (printf "secret/%s/conf" $environment )}}
 ---
 singleServerConfig:
   idleConnectionTimeout: 10000

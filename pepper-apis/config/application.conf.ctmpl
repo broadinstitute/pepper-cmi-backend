@@ -3,13 +3,13 @@
 {{with $environment := env "ENVIRONMENT"}}
 {{with $version := env "VERSION"}}
 {{with $app := env "APP"}}
-{{with $conf := secret (printf "secret/pepper/%s/%s/conf" $environment $version)}}
-{{with $dsm_conf := secret (printf "secret/pepper/%s/%s/dsm/config" $environment $version)}}
+{{with $conf := secret (printf "secret/%s/%s/conf" $environment )}}
+{{with $dsm_conf := secret (printf "secret/%s/dsm/config" $environment )}}
 {{with $auth0 := index $conf.Data "auth0"}}
-{{with $testingConf := secret (printf "secret/pepper/%s/%s/testing" $environment $version)}}
+{{with $testingConf := secret (printf "secret/%s/testing" $environment )}}
 {{with $testingAuth := index $testingConf.Data "auth0"}}
 {{with $slack := index $conf.Data "slack"}}
-{{with $elasticsearchConf := secret (printf "secret/pepper/%s/%s/elasticsearch" $environment $version)}}
+{{with $elasticsearchConf := secret (printf "secret/%s/elasticsearch" $environment )}}
 {
     "dbUrl": "{{$conf.Data.dbUrl}}",
     "housekeepingDbUrl": "{{$conf.Data.housekeepingDbUrl}}",

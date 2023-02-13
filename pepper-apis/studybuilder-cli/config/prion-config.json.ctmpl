@@ -1,6 +1,6 @@
 {{$environment := env "ENVIRONMENT"}}
 {{$version := env "VERSION"}}
-{{with $response := secret (printf "secret/pepper/%s/%s/prion/conf" $environment $version)}}
+{{with $response := secret (printf "secret/%s/prion/conf" $environment )}}
 {{with $conf := $response.Data}}
 
 {

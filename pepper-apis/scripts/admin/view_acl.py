@@ -24,7 +24,7 @@ dbRoles = ['pepper_apis']
 
 # todo arz add dsm vault endpoint here as well so we don't have to move too much vault stuff around
 gcpProject = "broad-ddp-" + env
-vaultPath = "/secret/pepper/" + env + "/v1"
+vaultPath = "/secret/" + env + "/"
 readVaultPrefix = "vault read --format=json " + vaultPath
 
 # todo arz figure out cleaner shutdown of proxy, maybe prompt for shutdown instead of blindly shutting stuff down

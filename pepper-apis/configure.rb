@@ -234,7 +234,7 @@ def base64decode(input_file_name, output_file_name)
   File.delete(input_file_name)
 end
 
-puts "Creating pepper configuration for\n  #{$env}/#{$version}\ninto\n  #{output_dir}\n..."
+puts "Creating pepper configuration for\n  #{$env}/\ninto\n  #{output_dir}\n..."
 
 Dir.mktmpdir(nil, Dir.pwd) {|dir|
   Dir.chdir(dir) do
