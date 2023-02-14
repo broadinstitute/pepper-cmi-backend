@@ -128,6 +128,7 @@ def read_secret_from_path(path, field = nil)
 
   # Not sure why Vault requires the -1 flag, but it does.
   curl_cmd = ["curl","-1", "-H", "X-Vault-Token: #{$vault_token}", "#{$vault_url_root}/#{path}"]
+  puts "Getting secret "#{$vault_url_root}/#{path}"
   Open3.popen3(*curl_cmd) { |stdin, stdout, stderr, wait_thread|
     if wait_thread.value.success?
       json = JSON.load(stdout)
@@ -197,14 +198,16 @@ def render_from_path(path, output_file_name = nil)
                   "-e", "STUDY_KEY=#{$study_key}",
                   "-e", "IMAGE_NAME=#{$image_base}",
                   $dsde_toolbox_image_name,
-                  "consul-template", "retry.enabled-false", "-config=/etc/consul-template/config/config.json",
+                  "consul-template", "-consul-retry-attempts=0","-vault-retry-attempts=0", "-config=/etc/consul-template/config/config.json",
                   "-template=#{file_name}:#{output_file_name}",
                   "-once"
     ]
   else
-    vault_cmd = ["consul-template", "-config=/etc/consul-template/config/config.json",
+    vault_cmd = ["consul-template",  "-consul-retry-attempts=0", "-vault-retry-attempts=0", "-config=/etc/consul-template/config/config.json",
                  "-template=#{file_name}:#{output_file_name}", "-once"]
   end
+
+  puts "#{vault_cmd}"
 
   Open3.popen3(*vault_cmd) { |stdin, stdout, stderr, wait_thread|
     if wait_thread.value.success?

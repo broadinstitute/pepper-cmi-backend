@@ -3,7 +3,7 @@
 {{with $environment := env "ENVIRONMENT"}}
 {{with $version := env "VERSION"}}
 {{with $app := env "APP"}}
-{{with $conf := secret (printf "secret/%s/%s/conf" $environment )}}
+{{with $conf := secret (printf "secret/%s/conf" $environment )}}
 {{with $dsm_conf := secret (printf "secret/%s/dsm/config" $environment )}}
 {{with $auth0 := index $conf.Data "auth0"}}
 {{with $testingConf := secret (printf "secret/%s/testing" $environment )}}

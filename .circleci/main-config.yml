@@ -123,19 +123,19 @@ commands:
             shopt  -s extglob # We are going to use Bash extended glob patterns
             case "${CIRCLE_BRANCH}" in
             ?(*_)develop)
-              DEPLOY_ENV=pepper-cmi-dev
+              DEPLOY_ENV=pepper-cmi/dev
             ;;
             DDP-?(*))
-              DEPLOY_ENV=pepper-cmi-dev
+              DEPLOY_ENV=pepper-cmi/dev
             ;;
             ?(*_)test)
-              DEPLOY_ENV=pepper-cmi-dev
+              DEPLOY_ENV=pepper-cmi/dev
             ;;
             ?(*_)staging)
-              DEPLOY_ENV=pepper-cmi-dev
+              DEPLOY_ENV=pepper-cmi/dev
             ;;
             ?(*_)production)
-              DEPLOY_ENV=pepper-cmi-prod
+              DEPLOY_ENV=pepper-cmi/prod
             ;;
             *)
               echo "Cannot map << pipeline.git.branch >> to a deployment environment"
