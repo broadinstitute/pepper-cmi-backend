@@ -814,6 +814,7 @@ jobs:
                 additional_options: -am
                 restore_m2_cache: true
                 save_m2_cache: false
+            - set-deployment-env
             - render-configs
             - create-test-dbs
             - restore-ddp-cache
@@ -858,6 +859,7 @@ jobs:
             - setup-shared-env
             - compile-all-jars:
                 restore_m2_cache: true
+            - set-deployment-env
             - render-configs
             - create-test-dbs
             - restore-ddp-cache
@@ -895,6 +897,7 @@ jobs:
             - checkout:
                 path: *repo_path
             - setup-shared-env
+            - set-deployment-env
             - render-configs
             - run-maven-with-pepper-options: # Build stuff first so we can setup everything
                 phase: install
