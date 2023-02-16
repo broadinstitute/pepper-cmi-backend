@@ -19,7 +19,7 @@ basic_scaling:
 {{end}}
 
 vpc_access_connector:
-  name: "projects/broad-ddp-{{$environment}}/locations/us-central1/connectors/appengine-default-connect"
+  name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-managed-connect"
 
 network:
   instance_tag: study-server # necessary for firewall rules so that DSM will accept https requests from pepper
