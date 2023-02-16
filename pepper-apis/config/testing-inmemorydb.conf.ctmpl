@@ -142,7 +142,7 @@
     },
     "sendgridToken": "{{$testingConf.Data.sendgridToken}}",
     "sendgridTemplates": {
-        {{if eq $environment "pepper-cmi-dev"}}
+        {{if eq $environment "pepper-cmi/dev"}}
              "currentActivity": {
                 "template": "c3eb93e7-05a8-47c6-9c8c-4a6d88ca54cd"
              },
@@ -157,7 +157,7 @@
                  "template": "bfb0d8c1-f127-4ebf-a2fd-faef23b36a1f"
              }
          {{end}}
-         {{if eq $environment "pepper-cmi-test"}}
+         {{if eq $environment "pepper-cmi/test"}}
               "currentActivity": {
                  "template": "c3eb93e7-05a8-47c6-9c8c-4a6d88ca54cd"
               },
@@ -172,7 +172,7 @@
                    "template": "bfb0d8c1-f127-4ebf-a2fd-faef23b36a1f"
               }
           {{end}}
-          {{if eq $environment "pepper-cmi-staging"}}
+          {{if eq $environment "pepper-cmi/staging"}}
             "currentActivity": {
                "template": "c3eb93e7-05a8-47c6-9c8c-4a6d88ca54cd"
             },
@@ -187,7 +187,7 @@
                 "template": "bfb0d8c1-f127-4ebf-a2fd-faef23b36a1f"
             }
         {{end}}
-        {{if eq $environment "pepper-cmi-prod"}}
+        {{if eq $environment "pepper-cmi/prod"}}
           "currentActivity": {
              "template": "c3eb93e7-05a8-47c6-9c8c-4a6d88ca54cd"
           },
