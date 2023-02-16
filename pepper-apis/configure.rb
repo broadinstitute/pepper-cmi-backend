@@ -17,6 +17,11 @@ $env = ENV.fetch("ENVIRONMENT") { |_|
   exit 1
 }
 
+$gcp_project = ENV.fetch("GCP_PROJECT") { |_|
+  puts "GCP_PROJECT var not set"
+  exit 1
+}
+
 $app = ENV.fetch("APP", "UNKNOWN")
 
 
@@ -185,7 +190,7 @@ def render_from_path(path, output_file_name = nil)
   if $use_docker == true
     vault_cmd = [
              "docker", "run", "--rm", "-w", "/w", "-v", "#{Dir.pwd}:/w",
-                  "-e", "VAULT_TOKEN=#{$vault_token}", "-e", "ENVIRONMENT=#{$env}", "-e", "VERSION=#{$version}",
+                  "-e", "VAULT_TOKEN=#{$vault_token}",  "-e", "GCP_PROJECT=#{$gcp_project}", "-e", "ENVIRONMENT=#{$env}", "-e", "VERSION=#{$version}",
                   "-e", "GAE=#{$gae}",
                   "-e", "APP=#{$app}",
                   "-e", "BUILD_CONTAINERS=#{$build_containers_flag}",
