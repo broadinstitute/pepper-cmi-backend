@@ -167,7 +167,7 @@ commands:
           no_output_timeout: 2m
           command: |
             echo "We are generating api-build.sh for application << parameters.application >> on ${VAULT_PATH}"
-            ./api-build.sh v1 ${VAULT_PATH} . << parameters.application >> --gae-config
+            ./api-build.sh v1 ${VAULT_PATH} . ${ENVIRONMENT} << parameters.application >> --gae-config
           environment: # needed because api-build.sh scripts want to start new docker containers
             USE_DOCKER: false
 
