@@ -246,18 +246,6 @@ public class Auth0Util {
         return new Gson().fromJson(responseBody, RefreshTokenResponse.class);
     }
 
-    public static <T> T retryIfRateLimited(Request req, ResponseHandler<T> responseHandler) throws IOException {
-        Response res = req.execute();
-        return res.handleResponse(httpResponse -> {
-            if (httpResponse.getStatusLine().getStatusCode() == 429) {
-                sleepBeforeRetry();
-                return req.execute().handleResponse(responseHandler);
-            } else {
-                return res.handleResponse(responseHandler);
-            }
-        });
-    }
-
     /**
      * Uses the refreshToken to re-issue an access and id token.
      *
@@ -502,6 +490,19 @@ public class Auth0Util {
             }
         }
     }
+
+    public static <T> T retryIfRateLimited(Request req, ResponseHandler<T> responseHandler) throws IOException {
+        Response res = req.execute();
+        return res.handleResponse(httpResponse -> {
+            if (httpResponse.getStatusLine().getStatusCode() == 429) {
+                sleepBeforeRetry();
+                return req.execute().handleResponse(responseHandler);
+            } else {
+                return res.handleResponse(responseHandler);
+            }
+        });
+    }
+
 
     /**
      * Wrapper class around {@link User} and {@link TokenHolder} that
