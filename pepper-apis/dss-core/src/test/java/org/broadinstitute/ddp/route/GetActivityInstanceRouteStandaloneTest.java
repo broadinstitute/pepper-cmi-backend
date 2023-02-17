@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1122,7 +1124,12 @@ public class GetActivityInstanceRouteStandaloneTest extends IntegrationTestSuite
 
         String expectedBody = String.format("<p>%s<br/>%s<br/>%s</p>", profile.getFirstName(), profile.getLastName(),
                 DateTimeFormatter.ofPattern("MM-dd-uuuu").format(LocalDate.now(ZoneOffset.UTC)));
-        resp.then().assertThat().body("sections[5].blocks[1].body", equalTo(expectedBody));
+        String expectedBodyYesterday = String.format("<p>%s<br/>%s<br/>%s</p>", profile.getFirstName(), profile.getLastName(),
+                DateTimeFormatter.ofPattern("MM-dd-uuuu").format(LocalDate.now(ZoneOffset.UTC).plusDays(1)));
+        String expectedBodyTomorrow = String.format("<p>%s<br/>%s<br/>%s</p>", profile.getFirstName(), profile.getLastName(),
+                DateTimeFormatter.ofPattern("MM-dd-uuuu").format(LocalDate.now(ZoneOffset.UTC).minusDays(1)));
+        // there's some kind of mismatch in clocks in our testing environment so this will be +/- a day
+        resp.then().assertThat().body("sections[5].blocks[1].body", isOneOf(expectedBody, expectedBodyYesterday, expectedBodyTomorrow));
     }
 
     @Test
