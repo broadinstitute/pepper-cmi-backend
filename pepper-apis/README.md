@@ -90,7 +90,7 @@ database, which is the default.
     cd ddp-study-server/pepper-apis
     ```
 2. Render the configuration file (if you're on Linux, prepend `sudo` because this invokes docker)
-    * `./api-build.sh v1 dev . --config`
+    * `./api-build.sh v1 pepper-cmi/dev . pepper-cmi-dev --config`
 3. Build the project
     * `mvn -DskipTests clean install -pl dss-server -am`
    

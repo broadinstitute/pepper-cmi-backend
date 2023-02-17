@@ -33,7 +33,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
@@ -470,6 +469,14 @@ public class Auth0Util {
         return builder.sign(algorithm);
     }
 
+    private static void sleepBeforeRetry() {
+        try {
+            Thread.sleep(RETRY_TIMEOUT);
+        } catch (InterruptedException e) {
+            log.error("Interrupted during sleep", e);
+        }
+    }
+
     public static Response retryIfRateLimited(Request req) throws IOException {
         Response response = req.execute();
         int statusCode = response.returnResponse().getStatusLine().getStatusCode();
@@ -479,14 +486,6 @@ public class Auth0Util {
             return req.execute();
         } else {
             return response;
-        }
-    }
-
-    private static void sleepBeforeRetry() {
-        try {
-            Thread.sleep(RETRY_TIMEOUT);
-        } catch (InterruptedException e) {
-            log.error("Interrupted during sleep", e);
         }
     }
 
