@@ -33,9 +33,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 import org.broadinstitute.ddp.client.Auth0ManagementClient;
@@ -233,7 +231,7 @@ public class Auth0Util {
         String responseBody;
         try {
             AtomicBoolean responseOk = new AtomicBoolean(false);
-            responseBody = retryIfRateLimited(request).handleResponse(httpResponse -> {
+            responseBody = request.execute().handleResponse(httpResponse -> {
                 responseOk.set(200 == httpResponse.getStatusLine().getStatusCode());
                 return EntityUtils.toString(httpResponse.getEntity());
             });
@@ -258,7 +256,7 @@ public class Auth0Util {
                 .bodyString(new Gson().toJson(payload), ContentType.APPLICATION_JSON);
 
         try {
-            return retryIfRateLimited(request, (httpResponse -> {
+            return request.execute().handleResponse(httpResponse -> {
                 int status = httpResponse.getStatusLine().getStatusCode();
                 if (status == 200) {
                     return new Gson().fromJson(EntityUtils.toString(httpResponse.getEntity()),
@@ -267,7 +265,7 @@ public class Auth0Util {
                     throw new RuntimeException("Attempt to refresh token returned " + status + ":"
                             + EntityUtils.toString(httpResponse.getEntity()));
                 }
-            }));
+            });
         } catch (IOException e) {
             throw new RuntimeException("Could not refresh token", e);
         }
@@ -465,18 +463,6 @@ public class Auth0Util {
         }
     }
 
-    public static Response retryIfRateLimited(Request req) throws IOException {
-        Response response = req.execute();
-        int statusCode = response.returnResponse().getStatusLine().getStatusCode();
-        if (statusCode == 429) {
-            log.warn("Pausing for retry after hitting rate limit.");
-            sleepBeforeRetry();
-            return req.execute();
-        } else {
-            return response;
-        }
-    }
-
     public static <T> T retryIfRateLimited(com.auth0.net.Request<T> req) throws Auth0Exception {
         try {
             return req.execute();
@@ -490,19 +476,6 @@ public class Auth0Util {
             }
         }
     }
-
-    public static <T> T retryIfRateLimited(Request req, ResponseHandler<T> responseHandler) throws IOException {
-        Response res = req.execute();
-        return res.handleResponse(httpResponse -> {
-            if (httpResponse.getStatusLine().getStatusCode() == 429) {
-                sleepBeforeRetry();
-                return req.execute().handleResponse(responseHandler);
-            } else {
-                return res.handleResponse(responseHandler);
-            }
-        });
-    }
-
 
     /**
      * Wrapper class around {@link User} and {@link TokenHolder} that
