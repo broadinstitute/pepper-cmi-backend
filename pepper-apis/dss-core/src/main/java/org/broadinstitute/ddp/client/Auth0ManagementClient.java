@@ -64,8 +64,8 @@ public class Auth0ManagementClient {
     private static final Gson gson = new Gson();
 
     // Rate limit and retries
-    private static final int DEFAULT_MAX_RETRIES = 3;
-    private static final long DEFAULT_BACKOFF_MILLIS = 500L;
+    private static final int DEFAULT_MAX_RETRIES = 5;
+    private static final long DEFAULT_BACKOFF_MILLIS = 2000L;
     private static final int MAX_JITTER_MILLIS = 100;
     private static final int MAX_RESULTS_PER_PAGE = 50;
 

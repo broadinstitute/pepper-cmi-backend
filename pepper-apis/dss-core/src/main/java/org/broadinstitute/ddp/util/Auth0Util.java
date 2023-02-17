@@ -33,7 +33,10 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 import org.broadinstitute.ddp.client.Auth0ManagementClient;
@@ -52,6 +55,7 @@ import org.jdbi.v3.core.Handle;
 public class Auth0Util {
     public static final String USERNAME_PASSWORD_AUTH0_CONN_NAME = "Username-Password-Authentication";
     public static final String REFRESH_ENDPOINT = "oauth/token";
+    private static final long RETRY_TIMEOUT = 1000;
     private final String baseUrl;
     // map of cached jwk providers so we don't hammer auth0
     private static final Map<String, JwkProvider> jwkProviderMap = new HashMap<>();
@@ -152,7 +156,7 @@ public class Auth0Util {
         log.info("Trying to update the data for the user {}. Auth0 user id = {}", userGuid, userDto.getAuth0UserId());
 
         try {
-            mgmtAPI.users().update(auth0UserId, newUserData).execute();
+            retryIfRateLimited(mgmtAPI.users().update(auth0UserId, newUserData));
         } catch (APIException e) {
             // A specific Auth0 API issue occurred. Relay the status code
             String errMsg = "Auth0 API call failed with the code " + e.getStatusCode() + ". Reason: " + e.getMessage()
@@ -230,7 +234,7 @@ public class Auth0Util {
         String responseBody;
         try {
             AtomicBoolean responseOk = new AtomicBoolean(false);
-            responseBody = request.execute().handleResponse(httpResponse -> {
+            responseBody = retryIfRateLimited(request).handleResponse(httpResponse -> {
                 responseOk.set(200 == httpResponse.getStatusLine().getStatusCode());
                 return EntityUtils.toString(httpResponse.getEntity());
             });
@@ -241,6 +245,18 @@ public class Auth0Util {
             throw new RuntimeException("Could not get a refresh token", e);
         }
         return new Gson().fromJson(responseBody, RefreshTokenResponse.class);
+    }
+
+    public static <T> T retryIfRateLimited(Request req, ResponseHandler<T> responseHandler) throws IOException {
+        Response res = req.execute();
+        return res.handleResponse(httpResponse -> {
+            if (httpResponse.getStatusLine().getStatusCode() == 429) {
+                sleepBeforeRetry();
+                return req.execute().handleResponse(responseHandler);
+            } else {
+                return res.handleResponse(responseHandler);
+            }
+        });
     }
 
     /**
@@ -255,7 +271,7 @@ public class Auth0Util {
                 .bodyString(new Gson().toJson(payload), ContentType.APPLICATION_JSON);
 
         try {
-            return request.execute().handleResponse(httpResponse -> {
+            return retryIfRateLimited(request, (httpResponse -> {
                 int status = httpResponse.getStatusLine().getStatusCode();
                 if (status == 200) {
                     return new Gson().fromJson(EntityUtils.toString(httpResponse.getEntity()),
@@ -264,7 +280,7 @@ public class Auth0Util {
                     throw new RuntimeException("Attempt to refresh token returned " + status + ":"
                             + EntityUtils.toString(httpResponse.getEntity()));
                 }
-            });
+            }));
         } catch (IOException e) {
             throw new RuntimeException("Could not refresh token", e);
         }
@@ -288,7 +304,7 @@ public class Auth0Util {
      */
     public List<User> getAuth0UsersByEmail(String emailAddress, String mgmtApiToken) throws Auth0Exception {
         ManagementAPI auth0Mgmt = new ManagementAPI(baseUrl, mgmtApiToken);
-        return auth0Mgmt.users().listByEmail(emailAddress, null).execute();
+        return retryIfRateLimited(auth0Mgmt.users().listByEmail(emailAddress, null));
     }
 
     /**
@@ -298,7 +314,7 @@ public class Auth0Util {
         ManagementAPI auth0Mgmt = new ManagementAPI(baseUrl, mgmtApiToken);
         String query = "email:" + emailAddress + " AND identities.connection:" + connection;
         UserFilter userFilter = new UserFilter().withQuery(query).withSearchEngine("v3");
-        return auth0Mgmt.users().list(userFilter).execute().getItems();
+        return retryIfRateLimited(auth0Mgmt.users().list(userFilter)).getItems();
     }
 
     public Map<String, String> getAuth0UsersByEmails(Set<String> emailIds, String mgmtApiToken) {
@@ -325,7 +341,7 @@ public class Auth0Util {
                     .withSearchEngine("v3");
 
             try {
-                UsersPage page = auth0Mgmt.users().list(filter).execute();
+                UsersPage page = retryIfRateLimited(auth0Mgmt.users().list(filter));
                 for (User user : page.getItems()) {
                     results.put(user.getEmail(), user.getId());
                 }
@@ -375,7 +391,7 @@ public class Auth0Util {
                     .withSearchEngine("v3");
 
             try {
-                UsersPage page = auth0Mgmt.users().list(filter).execute();
+                UsersPage page = retryIfRateLimited(auth0Mgmt.users().list(filter));
                 for (User user : page.getItems()) {
                     results.put(user.getId(), user.getEmail());
                 }
@@ -411,7 +427,7 @@ public class Auth0Util {
         user.setEmail(emailId);
         user.setPassword(pwd);
         user.setConnection(USERNAME_PASSWORD_AUTH0_CONN_NAME);
-        return auth0Mgmt.users().create(user).execute();
+        return retryIfRateLimited(auth0Mgmt.users().create(user));
     }
 
     /**
@@ -435,7 +451,7 @@ public class Auth0Util {
 
         String mgmtToken = mgmtClient.getToken();
         ManagementAPI mgmtAPI = new ManagementAPI(auth0Domain, mgmtToken);
-        mgmtAPI.connections().deleteUser(connectionId, email).execute();
+        retryIfRateLimited(mgmtAPI.connections().deleteUser(connectionId, email));
     }
 
     /**
@@ -452,6 +468,40 @@ public class Auth0Util {
         builder.withIssuer(issuer);
         builder.withExpiresAt(new Date(expiresAt));
         return builder.sign(algorithm);
+    }
+
+    public static Response retryIfRateLimited(Request req) throws IOException {
+        Response response = req.execute();
+        int statusCode = response.returnResponse().getStatusLine().getStatusCode();
+        if (statusCode == 429) {
+            log.warn("Pausing for retry after hitting rate limit.");
+            sleepBeforeRetry();
+            return req.execute();
+        } else {
+            return response;
+        }
+    }
+
+    private static void sleepBeforeRetry() {
+        try {
+            Thread.sleep(RETRY_TIMEOUT);
+        } catch (InterruptedException e) {
+            log.error("Interrupted during sleep", e);
+        }
+    }
+
+    public static <T> T retryIfRateLimited(com.auth0.net.Request<T> req) throws Auth0Exception {
+        try {
+            return req.execute();
+        } catch (APIException e) {
+            if (e.getStatusCode() == 429) {
+                log.warn("Pausing for retry after hitting rate limit.");
+                sleepBeforeRetry();
+                return req.execute();
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
