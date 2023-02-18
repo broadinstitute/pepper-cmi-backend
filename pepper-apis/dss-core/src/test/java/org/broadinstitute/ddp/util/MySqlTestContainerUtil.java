@@ -18,7 +18,7 @@ public class MySqlTestContainerUtil {
     public static final String TESTING_ROOT_USERNAME = "root";
     public static final String TESTING_ROOT_PASSWORD = "test";
 
-    public static final String MYSQL_VERSION = "mysql:8.0.32";
+    public static final String MYSQL_VERSION = "mysql:8.0.4";
 
     // classpath location for init script for disposable mysql test db
     public static final String TEST_DB_MYSQL_CONF_DIR = "testdbs";
@@ -152,7 +152,7 @@ public class MySqlTestContainerUtil {
         return testDb.getJdbcUrl()  + "?user=" + TESTING_ROOT_USERNAME
                 + "&password=" + TESTING_ROOT_PASSWORD
                 + "&characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC"
-                + "&useSSL=false&sessionVariables=innodb_strict_mode=on,tx_isolation='READ-COMMITTED',"
+                + "&useSSL=false&sessionVariables=innodb_strict_mode=on,transaction_isolation='READ-COMMITTED',"
                 + "sql_mode='TRADITIONAL'";
     }
 }
