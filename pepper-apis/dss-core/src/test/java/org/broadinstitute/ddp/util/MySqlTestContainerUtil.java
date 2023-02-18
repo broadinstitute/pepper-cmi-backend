@@ -18,7 +18,7 @@ public class MySqlTestContainerUtil {
     public static final String TESTING_ROOT_USERNAME = "root";
     public static final String TESTING_ROOT_PASSWORD = "test";
 
-    public static final String MYSQL_VERSION = "mysql:8.0.4";
+    public static final String MYSQL_VERSION = "mysql:8.0";
 
     // classpath location for init script for disposable mysql test db
     public static final String TEST_DB_MYSQL_CONF_DIR = "testdbs";
