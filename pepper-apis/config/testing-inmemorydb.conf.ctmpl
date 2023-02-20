@@ -13,8 +13,8 @@
 {
     {{if eq $gae "true"}}
         "useDisposableTestDbs": false,
-        "dbUrl": "jdbc:tc:mysql///studyservicedb?user=root&password=rootpw&characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&sessionVariables=innodb_strict_mode=on,tx_isolation='READ-COMMITTED',sql_mode='TRADITIONAL'",
-        "housekeepingDbUrl": "jdbc:tc:mysql:///housekeepingdb?user=root&password=rootpw&characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&sessionVariables=innodb_strict_mode=on,tx_isolation='READ-COMMITTED',sql_mode='TRADITIONAL'",
+        "dbUrl": "jdbc:tc:mysql:8.0:///studyservicedb?user=root&password=rootpw&characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&sessionVariables=innodb_strict_mode=on,tx_isolation='READ-COMMITTED',sql_mode='TRADITIONAL'",
+        "housekeepingDbUrl": "jdbc:tc:mysql:8.0:///housekeepingdb?user=root&password=rootpw&characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&sessionVariables=innodb_strict_mode=on,tx_isolation='READ-COMMITTED',sql_mode='TRADITIONAL'",
     {{else}}
         # If set to true, tests will use MySQL from Docker container and dbUrl and housekeepingDbUrl will be ignored
         "useDisposableTestDbs": true,
