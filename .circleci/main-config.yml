@@ -488,6 +488,8 @@ commands:
         type: string
         default: *circleci_path
     steps:
+      - setup_remote_docker:
+         version: 20.10.14
       - run:
           name: Split tests
           command: |

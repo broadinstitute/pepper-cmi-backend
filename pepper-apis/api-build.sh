@@ -136,8 +136,6 @@ function run_tests() {
     # -v option a bit of magic to enable docker run inside another docker.
     docker run --rm \
          -v /var/run/docker.sock:/var/run/docker.sock \
-         -v $PWD:$PWD \
-         -w $PWD \
         --add-host sonarqube.dsp-techops.broadinstitute.org:${sonar_ip} \
         --volume "$PWD/surefire-reports":"/app/target/surefire-reports" \
         --volume "$PWD/checkstyle-result.xml":"/app/target/checkstyle-result.xml" \
