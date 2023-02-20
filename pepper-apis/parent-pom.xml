@@ -421,12 +421,6 @@
             <artifactId>itext-licensekey</artifactId>
             <version>${itext.licensekey.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
-            <version>1.17.6</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
