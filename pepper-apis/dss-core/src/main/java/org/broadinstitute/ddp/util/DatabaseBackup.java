@@ -82,7 +82,7 @@ public class DatabaseBackup {
                     postStackDriverMetric(dto.getDatabaseName());
                 } else {
                     //check if submittedTime > 6hrs
-                    Instant start = dto.getStartInstant();
+                    Instant start = BackupJobDto.parseDateString(dto.getStartTime());
                     Instant startPlus6Hrs = start.plus(6, ChronoUnit.HOURS);
                     if (Instant.now().isAfter(startPlus6Hrs)) {
                         log.error("Backup job for database instance {} failed to complete.", dto.getDatabaseName());
@@ -93,10 +93,8 @@ public class DatabaseBackup {
         });
     }
 
-    // todo arz move from long to string end time and start time
-
     private void updateBackupJobTable(JdbiBackupJob jdbiBackupJob, String runName, String endTime, String status) {
-        int rowCount = jdbiBackupJob.updateEndTimeStatus(runName, endTime, status);
+        int rowCount = jdbiBackupJob.updateEndTimeStatus(runName, BackupJobDto.parseDateString(endTime).toEpochMilli(), status);
         if (rowCount != 1) {
             log.error("{} rows updated in backup_job for run name: {} ", rowCount, runName);
         }
@@ -156,7 +154,8 @@ public class DatabaseBackup {
         }
         //add a row into backup_job table
         JdbiBackupJob backupJob = handle.attach(JdbiBackupJob.class);
-        backupJob.insert(response.getName(), response.getInsertTime(), endTime, instance, response.getStatus());
+        backupJob.insert(response.getName(), BackupJobDto.parseDateString(response.getInsertTime()).toEpochMilli(),
+                BackupJobDto.parseDateString(endTime).toEpochMilli(), instance, response.getStatus());
     }
 
 

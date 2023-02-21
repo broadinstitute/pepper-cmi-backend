@@ -27,7 +27,7 @@ public class JdbiBackupJobTest extends TxnAwareBaseTest {
         //avoid inserting test data and deleting the data after the tests.
         //avoid coding a delete method for tests when its not needed for actual App code.
         initializeDb(cfg);
-        String startTime = "2023-02-21T16:19:00.094Z";
+        long startTime = BackupJobDto.parseDateString("2023-02-21T16:19:00.094Z").toEpochMilli();
         TransactionWrapper.useTxn(TransactionWrapper.DB.HOUSEKEEPING, handle -> {
             JdbiBackupJob backupJob = handle.attach(JdbiBackupJob.class);
             Long jobId = backupJob.insert(RUN_NAME, startTime, null, RUN_DB, RUN_STATUS);
@@ -63,7 +63,7 @@ public class JdbiBackupJobTest extends TxnAwareBaseTest {
     }
 
     private void testUpdateJob(Handle handle) {
-        String endTime = "2023-02-21T19:19:00.094Z";
+        long endTime = BackupJobDto.parseDateString("2023-02-21T19:19:00.094Z").toEpochMilli();
         String doneStatus = "DONE";
         int rowCount = handle.attach(JdbiBackupJob.class)
                 .updateEndTimeStatus(RUN_NAME, endTime, doneStatus);

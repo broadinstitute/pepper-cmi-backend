@@ -27,11 +27,12 @@ public class BackupJobDto {
     @ColumnName("status")
     private String status;
 
-    public Instant getStartInstant() {
+    public static Instant parseDateString(String dateString) {
         try {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX").parse(startTime).toInstant();
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX").parse(dateString).toInstant();
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
+
 }
