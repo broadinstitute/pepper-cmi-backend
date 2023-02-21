@@ -1,5 +1,9 @@
 package org.broadinstitute.ddp.db.dto.housekeeping;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
@@ -12,14 +16,22 @@ public class BackupJobDto {
     private String runName;
 
     @ColumnName("start_time")
-    private long startTime;
+    private String startTime;
 
     @ColumnName("end_time")
-    private Long endTime;
+    private String endTime;
 
     @ColumnName("database_name")
     private String databaseName;
 
     @ColumnName("status")
     private String status;
+
+    public Instant getStartInstant() {
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX").parse(startTime).toInstant();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

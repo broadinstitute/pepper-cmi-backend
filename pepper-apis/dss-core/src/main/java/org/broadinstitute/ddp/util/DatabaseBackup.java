@@ -78,11 +78,11 @@ public class DatabaseBackup {
                 } else if (response.getError() != null && CollectionUtils.isNotEmpty(response.getError().getErrors())) {
                     logErrors(dto.getDatabaseName(), response.getError());
                 } else if (RUN_STATUS_DONE.equalsIgnoreCase(response.getStatus())) {
-                    updateBackupJobTable(jdbiBackupJob, dto.getRunName(), response.getEndTime().getValue(), response.getStatus());
+                    updateBackupJobTable(jdbiBackupJob, dto.getRunName(), response.getEndTime(), response.getStatus());
                     postStackDriverMetric(dto.getDatabaseName());
                 } else {
                     //check if submittedTime > 6hrs
-                    Instant start = Instant.ofEpochMilli(dto.getStartTime());
+                    Instant start = dto.getStartInstant();
                     Instant startPlus6Hrs = start.plus(6, ChronoUnit.HOURS);
                     if (Instant.now().isAfter(startPlus6Hrs)) {
                         log.error("Backup job for database instance {} failed to complete.", dto.getDatabaseName());
@@ -93,8 +93,9 @@ public class DatabaseBackup {
         });
     }
 
+    // todo arz move from long to string end time and start time
 
-    private void updateBackupJobTable(JdbiBackupJob jdbiBackupJob, String runName, Long endTime, String status) {
+    private void updateBackupJobTable(JdbiBackupJob jdbiBackupJob, String runName, String endTime, String status) {
         int rowCount = jdbiBackupJob.updateEndTimeStatus(runName, endTime, status);
         if (rowCount != 1) {
             log.error("{} rows updated in backup_job for run name: {} ", rowCount, runName);
@@ -149,13 +150,13 @@ public class DatabaseBackup {
     }
 
     private void saveJobDetails(Handle handle, String instance, Operation response) {
-        Long endTime = null;
+        String endTime = null;
         if (response.getEndTime() != null) {
-            endTime = response.getEndTime().getValue();
+            endTime = response.getEndTime();
         }
         //add a row into backup_job table
         JdbiBackupJob backupJob = handle.attach(JdbiBackupJob.class);
-        backupJob.insert(response.getName(), response.getInsertTime().getValue(), endTime, instance, response.getStatus());
+        backupJob.insert(response.getName(), response.getInsertTime(), endTime, instance, response.getStatus());
     }
 
 

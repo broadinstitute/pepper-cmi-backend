@@ -17,13 +17,13 @@ public interface JdbiBackupJob extends SqlObject {
             + " values(:runName, :startTime,:endTime,:databaseName, :status)")
     @GetGeneratedKeys
     long insert(@Bind("runName") String runName,
-                @Bind("startTime") long startTime,
-                @Bind("endTime") Long endTime,
+                @Bind("startTime") String startTime,
+                @Bind("endTime") String endTime,
                 @Bind("databaseName") String databaseName,
                 @Bind("status") String status);
 
     @SqlUpdate("update backup_job set end_time = :endTime, status = :status where run_name = :runName")
-    int updateEndTimeStatus(@Bind("runName") String runName, @Bind("endTime") Long endTime, @Bind("status") String status);
+    int updateEndTimeStatus(@Bind("runName") String runName, @Bind("endTime") String endTime, @Bind("status") String status);
 
     @SqlQuery("select run_name, start_time, end_time, database_name, status from backup_job where status = 'PENDING' ")
     @RegisterConstructorMapper(BackupJobDto.class)

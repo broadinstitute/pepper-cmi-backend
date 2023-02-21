@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +27,7 @@ public class JdbiBackupJobTest extends TxnAwareBaseTest {
         //avoid inserting test data and deleting the data after the tests.
         //avoid coding a delete method for tests when its not needed for actual App code.
         initializeDb(cfg);
-        long startTime = Instant.now().toEpochMilli();
+        String startTime = "2023-02-21T16:19:00.094Z";
         TransactionWrapper.useTxn(TransactionWrapper.DB.HOUSEKEEPING, handle -> {
             JdbiBackupJob backupJob = handle.attach(JdbiBackupJob.class);
             Long jobId = backupJob.insert(RUN_NAME, startTime, null, RUN_DB, RUN_STATUS);
@@ -64,7 +63,7 @@ public class JdbiBackupJobTest extends TxnAwareBaseTest {
     }
 
     private void testUpdateJob(Handle handle) {
-        Long endTime = Instant.now().toEpochMilli();
+        String endTime = "2023-02-21T19:19:00.094Z";
         String doneStatus = "DONE";
         int rowCount = handle.attach(JdbiBackupJob.class)
                 .updateEndTimeStatus(RUN_NAME, endTime, doneStatus);
