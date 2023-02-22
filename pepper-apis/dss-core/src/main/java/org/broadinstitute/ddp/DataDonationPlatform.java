@@ -521,8 +521,15 @@ public class DataDonationPlatform {
         // todo arz here pickup from here
 
         // User activity answers routes
-        FormActivityService formService = new FormActivityService(interpreter);
-        var fileUploadService = FileUploadService.fromConfig(cfg);
+        FormActivityService formService = null;
+        FileUploadService fileUploadService = null;
+
+        try {
+            formService = new FormActivityService(interpreter);
+            fileUploadService = FileUploadService.fromConfig(cfg);
+        } catch (Throwable t) {
+            log.error("Error setting up form activity and file upload service", t);
+        }
 
         log.info("setup file upload service");
 
