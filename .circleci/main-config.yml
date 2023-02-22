@@ -839,7 +839,7 @@ jobs:
                 paths:
                   - repo
 
-  dss-compile-and-run-test-suite-job:
+  dss-compile-and-run-test-suite-job: # todo arz re-enable me, currently seg faulting on circle
     description: Job that runs DSS tests that cannot be done in parallel
     executor:
       name: test-executor

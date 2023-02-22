@@ -24,11 +24,6 @@ public class Keys {
         public static final TriggerKey FileUploadTrigger = TriggerKey.triggerKey("file-upload", "cleanup");
     }
 
-    public static class DbBackups {
-        public static final JobKey RequestJob = JobKey.jobKey("request", "db-backups");
-        public static final JobKey CheckJob = JobKey.jobKey("check", "db-backups");
-    }
-
     public static class Export {
         public static final JobKey DataExportJob = JobKey.jobKey("data", "export");
         public static final JobKey OnDemandJob = JobKey.jobKey("on-demand", "export");
@@ -37,11 +32,6 @@ public class Keys {
         public static final TriggerKey CustomExportTrigger = TriggerKey.triggerKey("custom", "export");
         public static final TriggerKey DataExportTrigger = TriggerKey.triggerKey("data", "export");
         public static final TriggerKey SyncTrigger = TriggerKey.triggerKey("sync", "export");
-    }
-
-    public static class GcpOps {
-        public static final TriggerKey DbBackupTrigger = TriggerKey.triggerKey("db-backup", "gcp-operations");
-        public static final TriggerKey BackupCheckTrigger = TriggerKey.triggerKey("backup-check", "gcp-operations");
     }
 
     public static class Kits {
