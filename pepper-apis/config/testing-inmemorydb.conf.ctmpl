@@ -85,7 +85,7 @@
     # by default, boot in-processs for testing.  change rendered .conf file manually for local development
     "bootTestAppInSeparateProcess": false,
     "apiBaseUrl": "http://localhost:5555",
-    "baseTestUrl": "http://localhost:5556",
+    "baseTestUrl": "http://localhost:5557",
     "socialTestEmail": "{{$testingConf.Data.socialTestEmail}}",
     "socialTestPassword": "{{$testingConf.Data.socialTestPassword}}",
     "usePubSubEmulator": true,
