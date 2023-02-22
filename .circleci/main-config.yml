@@ -11,7 +11,7 @@ references:
   ci_support_image: &ci_support_image
                       broadinstitute/study-server-build:2022-06-01A
   root_path: &root_path
-               /home/circleci
+               /home/circleci/pepper-cmi
   repo_path: &repo_path
                /home/circleci/pepper-cmi/pepper-cmi-repo
   m2_cache_key: &m2_cache_key
