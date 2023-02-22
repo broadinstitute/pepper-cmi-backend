@@ -665,7 +665,7 @@ commands:
           additional_options: '-Dexec.mainClass=org.broadinstitute.ddp.route.IntegrationTestSuite -Dexec.classpathScope=test'
           background: true
       - wait_for_server:
-          port: 5556
+          port: 5557
           timeout: 60
 
   compile-all-jars:
