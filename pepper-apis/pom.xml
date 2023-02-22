@@ -810,6 +810,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <forkedProcessExitTimeoutInSeconds>300</forkedProcessExitTimeoutInSeconds>
                     <argLine>-Xmx1g -XX:MaxPermSize=256m</argLine>
                     <systemPropertyVariables>
                         <testFailureIgnore>true</testFailureIgnore>
