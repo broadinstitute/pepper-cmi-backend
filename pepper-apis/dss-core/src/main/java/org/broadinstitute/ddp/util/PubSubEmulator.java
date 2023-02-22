@@ -33,7 +33,8 @@ public class PubSubEmulator {
 
     private static StartedProcess pubsubProcess;
 
-    private static final String EMULATOR_HOST = System.getenv(PUBSUB_EMULATOR_HOST);
+    private static final String EMULATOR_HOST = StringUtils.isNotBlank(System.getenv(PUBSUB_EMULATOR_HOST))
+            ? System.getenv(PUBSUB_EMULATOR_HOST) : System.getProperty(PUBSUB_EMULATOR_HOST);
 
     private static final String PUBSUB_BASE_URL = "http://" + EMULATOR_HOST;
 
