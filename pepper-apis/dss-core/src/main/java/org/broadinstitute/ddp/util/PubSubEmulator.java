@@ -160,7 +160,7 @@ public class PubSubEmulator {
             log.debug("Could not connect to pubsub server. Must not be running");
             return false;
         } catch (IOException e) {
-            String msg = "There was problem initializing CloseableHttpClient";
+            String msg = "There was problem initializing CloseableHttpClient for " + PUBSUB_BASE_URL;
             log.error(msg, e);
             throw new DDPException(msg, e);
         }
