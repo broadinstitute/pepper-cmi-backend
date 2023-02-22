@@ -379,11 +379,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.apis</groupId>
-            <artifactId>google-api-services-sqladmin</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
         </dependency>

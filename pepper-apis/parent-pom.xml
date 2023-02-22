@@ -454,12 +454,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.apis</groupId>
-            <artifactId>google-api-services-sqladmin</artifactId>
-            <version>v1-rev20230111-2.0.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
             <version>9.4.39-2</version>
