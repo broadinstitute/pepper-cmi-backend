@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.broadinstitute.ddp.constants.RouteConstants.API;
@@ -59,6 +60,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+@Slf4j
 public class EventServiceTest extends IntegrationTestSuite.TestCase {
     private static TestDataSetupUtil.GeneratedTestData testData;
     private static String token;
@@ -90,6 +92,8 @@ public class EventServiceTest extends IntegrationTestSuite.TestCase {
                 .replace(PathParam.STUDY_GUID, testData.getStudyGuid())
                 .replace(PathParam.INSTANCE_GUID, TestData.activityInstanceGuid);
         url = RouteTestUtil.getTestingBaseUrl() + endpoint;
+
+        log.info("Using url " + url + " for testing");
     }
 
     private static void setupTestActivityData(Handle handle) {

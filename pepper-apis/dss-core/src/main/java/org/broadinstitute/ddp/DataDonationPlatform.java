@@ -299,6 +299,8 @@ public class DataDonationPlatform {
         }
         //@TODO figure out how to do this only at deployment time.
         CacheService.getInstance().resetAllCaches();
+
+        log.info("Starging txn wrapper");
         TransactionWrapper.useTxn(TransactionWrapper.DB.APIS, LanguageStore::init);
 
         if (appEnginePort != null) {
@@ -309,10 +311,13 @@ public class DataDonationPlatform {
         threadPool(-1, -1, requestThreadTimeout);
         JettyConfig.setupJetty(preferredSourceIPHeader);
 
+        log.info("jetty setup complete");
         // The first route mapping call will also initialize the Spark server. Make that first call
         // the GAE lifecycle hooks so we capture the GAE call as soon as possible, and respond
         // only once server has fully booted.
         registerAppEngineCallbacks(DEFAULT_BOOT_WAIT_SECS);
+
+        log.info("app engine callback done");
 
         ActivityInstanceDao activityInstanceDao = new ActivityInstanceDao();
 
@@ -367,15 +372,23 @@ public class DataDonationPlatform {
         }
 
         post(API.REGISTRATION, new UserRegistrationRoute(interpreter, new TaskPubSubPublisher()), responseSerializer);
+        log.info("setup registration");
+
 
         before(API.USERS, new StudyAdminAuthFilter());
         post(API.USERS, new UserCreationRoute(new TaskPubSubPublisher()), responseSerializer);
         post(API.TEMP_USERS, new CreateTemporaryUserRoute(), responseSerializer);
 
+        log.info("setup users");
+
         post(API.SENDGRID_EVENT, new SendGridEventRoute(new SendGridEventService()), responseSerializer);
         post(API.AUTH0_LOG_EVENT, new Auth0LogEventRoute(new Auth0LogEventService()), responseSerializer);
 
+        log.info("setup sendgrid and auth0 listeners");
+
         RestHighLevelClient esClient = ElasticsearchServiceUtil.getElasticsearchClient(cfg);
+
+        log.info("setup elastic");
 
         // Admin APIs
         before(API.ADMIN_BASE + "/*", new StudyAdminAuthFilter());
@@ -388,6 +401,8 @@ public class DataDonationPlatform {
         get(API.ADMIN_STUDY_PARTICIPANT_LOOKUP_BY_GUID,
                 new AdminParticipantLookupByGuidRoute(new ESParticipantsLookupService(esClient)), responseSerializer);
 
+        log.info("setup admin");
+
         // These filters work in a tandem:
         // - StudyLanguageResolutionFilter figures out and sets the user language in the attribute store
         // - StudyLanguageContentLanguageSettingFilter sets the "Content-Language" header later on
@@ -398,6 +413,8 @@ public class DataDonationPlatform {
                 API.INVITATION_VERIFY, API.INVITATION_CHECK);
         afterWithExclusion(API.BASE + "/studies/*", new StudyLanguageContentLanguageSettingFilter(),
                 API.INVITATION_VERIFY, API.INVITATION_CHECK);
+
+        log.info("setup study base and invitations");
 
         // Study related routes
         get(API.STUDY_ALL, new GetStudiesRoute(), responseSerializer);
@@ -419,8 +436,13 @@ public class DataDonationPlatform {
                 .addTempUserAllowlist(HttpMethod.patch, API.USER_ACTIVITY_ANSWERS)
                 .addTempUserAllowlist(HttpMethod.put, API.USER_ACTIVITY_ANSWERS)
         );
+
+        log.info("setup user before routs");
+
         patch(API.UPDATE_USER_PASSWORD, new UpdateUserPasswordRoute(), responseSerializer);
         patch(API.UPDATE_USER_EMAIL, new UpdateUserEmailRoute(), responseSerializer);
+
+        log.info("setup password and email updates");
 
         // Governed participant routes
         get(API.USER_STUDY_PARTICIPANTS, new GetGovernedStudyParticipantsRoute(), responseSerializer);
@@ -430,6 +452,9 @@ public class DataDonationPlatform {
         get(API.USER_PROFILE, new GetProfileRoute(), responseSerializer);
         post(API.USER_PROFILE, new AddProfileRoute(), responseSerializer);
         patch(API.USER_PROFILE, new PatchProfileRoute(), responseSerializer);
+
+        log.info("setup user profile");
+
 
         delete(API.USER_SPECIFIC, new DeleteUserRoute(new UserDeleteService(esClient)), responseSerializer);
 
@@ -461,6 +486,8 @@ public class DataDonationPlatform {
         WorkflowService workflowService = new WorkflowService(interpreter);
         get(API.USER_STUDY_WORKFLOW, new GetWorkflowRoute(workflowService), responseSerializer);
 
+        log.info("setup workflow");
+
         // User study announcements
         get(API.USER_STUDY_ANNOUNCEMENTS, new GetUserAnnouncementsRoute(i18nContentRenderer), responseSerializer);
 
@@ -488,6 +515,9 @@ public class DataDonationPlatform {
         patch(API.USER_ACTIVITIES_INSTANCE, new PatchActivityInstanceRoute(activityInstanceDao), responseSerializer);
         delete(API.USER_ACTIVITIES_INSTANCE, new DeleteActivityInstanceRoute(actInstService), jsonSerializer);
         get(API.USER_ACTIVITY_SUMMARY, new GetActivityInstanceSummaryRoute(actInstService), responseSerializer);
+
+        log.info("setup activity instances");
+
 
         // User activity answers routes
         FormActivityService formService = new FormActivityService(interpreter);
@@ -521,8 +551,14 @@ public class DataDonationPlatform {
         get(API.DSM_PARTICIPANT_MEDICAL_INFO, new GetDsmMedicalRecordRoute(medicalRecordService), responseSerializer);
         get(API.DSM_PARTICIPANT_INSTITUTIONS, new GetDsmParticipantInstitutionsRoute(), responseSerializer);
 
+        log.info("setup dsm ptp, institution mr");
+
+
         post(API.DSM_NOTIFICATION, new ReceiveDsmNotificationRoute(), jsonSerializer);
         post(API.DSM_TERMINATE_USER, new DsmExitUserRoute(), responseSerializer);
+
+        log.info("setup dsm notification");
+
 
         PdfService pdfService = new PdfService();
         PdfBucketService pdfBucketService = new PdfBucketService(cfg);
@@ -530,6 +566,9 @@ public class DataDonationPlatform {
         get(API.DSM_PARTICIPANT_RELEASE_PDF, new GetDsmReleasePdfRoute(pdfService, pdfBucketService, pdfGenerationService));
         get(API.DSM_PARTICIPANT_CONSENT_PDF, new GetDsmConsentPdfRoute(pdfService, pdfBucketService, pdfGenerationService));
         get(API.DSM_PARTICIPANT_PDF, new GetPdfRoute(pdfService, pdfBucketService, pdfGenerationService));
+
+        log.info("setup dsm pdf");
+
 
         get(API.DSM_ONDEMAND_ACTIVITIES, new GetDsmOnDemandActivitiesRoute(), responseSerializer);
         get(API.DSM_ONDEMAND_ACTIVITY, new GetDsmTriggeredInstancesRoute(), responseSerializer);
