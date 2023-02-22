@@ -1114,7 +1114,6 @@ workflows:
     when:
       equal: ["build-test", << pipeline.parameters.action >>]
     jobs:
-      - dss-compile-and-run-test-suite-job
       - dss-parallel-compile-and-test-job:
           parallelism: << pipeline.parameters.test_parallelism >> # the caller of this workflow will tell us the parallelism
       - dsm-compile-and-run-tests-job
@@ -1136,13 +1135,11 @@ workflows:
         - equal: ["build-test-deploy", << pipeline.parameters.action >>]
         - << pipeline.parameters.dss >>
     jobs:
-      - dss-compile-and-run-test-suite-job
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
       - dss-deploy-jar-from-workspace-job:
           requires:
             - dss-parallel-compile-and-test-job
-            - dss-compile-and-run-test-suite-job
 
   # Run DSM tests
   dsm-build-test-deploy-workflow:
@@ -1163,12 +1160,10 @@ workflows:
         - equal: ["build-test-store", << pipeline.parameters.action >>]
         - << pipeline.parameters.dss >>
     jobs:
-      - dss-compile-and-run-test-suite-job #running tests before we store!
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
       - dss-store-jar-job:
           requires:
-            - dss-compile-and-run-test-suite-job
             - dss-parallel-compile-and-test-job
 
   # Deploy DSS applications from previously built jars in buckets
