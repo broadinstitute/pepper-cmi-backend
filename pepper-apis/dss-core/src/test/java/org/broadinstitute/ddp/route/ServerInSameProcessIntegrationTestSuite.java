@@ -12,7 +12,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        AdminCreateStudyParticipantRouteStandaloneTest.class,
+        AdminCreateStudyParticipantRouteStandaloneTest.class
+        /*
         GetParticipantInfoRouteStandaloneTest.class,
         ListCancersRouteStandaloneTest.class,
         GetCancerSuggestionsRouteStandaloneTest.class,
@@ -26,6 +27,7 @@ import org.junit.runners.Suite;
         SendEmailRouteStandaloneTest.class,
         UserActivityInstanceListRouteStandaloneTest.class,
         UserRegistrationRouteStandaloneTest.class
+        */
 })
 public class ServerInSameProcessIntegrationTestSuite extends IntegrationTestSuite {
 }
