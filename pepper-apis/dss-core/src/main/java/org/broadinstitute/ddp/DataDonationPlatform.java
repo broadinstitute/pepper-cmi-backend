@@ -300,7 +300,7 @@ public class DataDonationPlatform {
         //@TODO figure out how to do this only at deployment time.
         CacheService.getInstance().resetAllCaches();
 
-        log.info("Starging txn wrapper");
+        log.info("Starting txn wrapper");
         TransactionWrapper.useTxn(TransactionWrapper.DB.APIS, LanguageStore::init);
 
         if (appEnginePort != null) {

@@ -38,8 +38,8 @@ references:
                           housekeepingdb
   studyserver_test_db: &studyserver_test_db
                          studyservicedb
-  test_parallellism: &test_parallelism 1
-  ddp_server_port: &ddp_server_port 5556
+  test_parallellism: &test_parallelism 15
+  ddp_server_port: &ddp_server_port 5557
   ddp_cache_dir: &ddp_cache_dir #caching test artifacts like Auth0 users
                    /home/circleci/.ddp-cache
   ddp_cache_md5_file: &ddp_cache_md5_file
@@ -52,7 +52,7 @@ executors:
       # start pubsub emulator
       - image: broadinstitute/study-server-build:pubsub-1
       - image: cimg/redis:5.0
-      - image: cimg/mysql:5.7
+      - image: cimg/mysql:8.0
         environment: &DB_VARS
           MYSQL_ROOT_PASSWORD: rootpw
           MYSQL_DATABASE: test_db
