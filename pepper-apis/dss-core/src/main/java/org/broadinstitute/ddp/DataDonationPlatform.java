@@ -518,10 +518,13 @@ public class DataDonationPlatform {
 
         log.info("setup activity instances");
 
+        // todo arz here pickup from here
 
         // User activity answers routes
         FormActivityService formService = new FormActivityService(interpreter);
         var fileUploadService = FileUploadService.fromConfig(cfg);
+
+        log.info("setup file upload service");
 
         patch(API.USER_ACTIVITY_ANSWERS,
                 new PatchFormAnswersRoute(formService, activityValidationService, fileUploadService, interpreter),
@@ -531,14 +534,23 @@ public class DataDonationPlatform {
                 new PutFormAnswersRoute(workflowService, actInstService, activityValidationService, interpreter, addressService),
                 responseSerializer
         );
+
+        log.info("setup activity answers");
+
         post(API.USER_ACTIVITY_UPLOADS, new CreateUserActivityUploadRoute(fileUploadService), responseSerializer);
         get(API.USER_QUESTION_OPTIONS, new GetOptionsForActivityInstanceQuestionRoute(i18nContentRenderer), responseSerializer);
+
+        log.info("setup user uploads and question options");
 
         // User study invitations
         get(API.USER_STUDY_INVITES, new ListUserStudyInvitationsRoute(), jsonSerializer);
 
+        log.info("setup user invites");
+
         // Study exit request
         post(API.USER_STUDY_EXIT, new SendExitNotificationRoute());
+
+        log.info("setup send exit notice");
 
         Config auth0Config = cfg.getConfig(ConfigFile.AUTH0);
         before(API.DSM_BASE + "/*", new DsmAuthFilter(auth0Config.getString(ConfigFile.AUTH0_DSM_CLIENT_ID),
