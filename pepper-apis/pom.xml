@@ -801,7 +801,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
+                <version>2.20</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
@@ -810,7 +810,6 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <forkCount>0</forkCount>
                     <forkedProcessExitTimeoutInSeconds>300</forkedProcessExitTimeoutInSeconds>
                     <argLine>-Xmx1g -XX:MaxPermSize=256m</argLine>
                     <systemPropertyVariables>
