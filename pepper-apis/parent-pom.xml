@@ -706,7 +706,6 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
                     <systemPropertyVariables>
                         <testFailureIgnore>true</testFailureIgnore>
                         <!-- set these variables as -D vars in mvn commandline. -->
