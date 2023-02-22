@@ -38,7 +38,7 @@ references:
                           housekeepingdb
   studyserver_test_db: &studyserver_test_db
                          studyservicedb
-  test_parallellism: &test_parallelism 15
+  test_parallellism: &test_parallelism 20
   ddp_server_port: &ddp_server_port 5557
   ddp_cache_dir: &ddp_cache_dir #caching test artifacts like Auth0 users
                    /home/circleci/.ddp-cache
