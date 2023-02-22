@@ -11,9 +11,9 @@ references:
   ci_support_image: &ci_support_image
                       broadinstitute/study-server-build:2022-06-01A
   root_path: &root_path
-               /home/circleci/pepper-cmi
+               /home/circleci
   repo_path: &repo_path
-               /home/circleci/pepper-cmi/pepper-cmi-repo
+               /home/circleci/repo
   m2_cache_key: &m2_cache_key
                   pom.xml2-{{ checksum "pom.xml" }}-{{ checksum "pex-antlr/pom.xml" }}-{{ checksum "dss-core/pom.xml" }}-{{ checksum "studybuilder-cli/pom.xml" }}-{{ checksum "dss-server/pom.xml" }}-{{ checksum "housekeeping/pom.xml" }}-{{ checksum "dss-database/pom.xml" }}-{{ checksum "dsm-core/pom.xml" }}-{{ checksum "ddp-common/pom.xml" }}-{{ checksum "dsm-server/pom.xml" }}
   m2_cache_restore_key: &m2_cache_keys
@@ -21,15 +21,15 @@ references:
       - *m2_cache_key
       - pom.xml2-
   m2_repo_path: &m2_repo_path
-                  /home/circleci/pepper-cmi/.m2/repository
+                  /home/circleci/.m2/repository
   pepper_apis_path: &pepper_apis_path
-                      /home/circleci/pepper-cmi/repo/pepper-apis
+                      /home/circleci/repo/pepper-apis
   docs-path: &docs-path
-               /home/circleci/pepper-cmi/repo/pepper-apis/docs
+               /home/circleci/repo/pepper-apis/docs
   api-spec-path: &api-spec-path
-                   /home/circleci/pepper-cmi/repo/pepper-apis/docs/specification
+                   /home/circleci/repo/pepper-apis/docs/specification
   circleci_path: &circleci_path
-                   /home/circleci/pepper-cmi/repo/.circleci
+                   /home/circleci/repo/.circleci
   builds_bucket: &builds_bucket
                    ddp-build-artifacts
   jar_build_bucket_dir: &jar_build_bucket_dir
@@ -41,9 +41,9 @@ references:
   test_parallellism: &test_parallelism 15
   ddp_server_port: &ddp_server_port 5556
   ddp_cache_dir: &ddp_cache_dir #caching test artifacts like Auth0 users
-                   /home/circleci/pepper-cmi/.ddp-cache
+                   /home/circleci/.ddp-cache
   ddp_cache_md5_file: &ddp_cache_md5_file
-                        /home/circleci/pepper-cmi/.ddp-cache-md5.txt
+                        /home/circleci/.ddp-cache-md5.txt
 
 executors:
   test-executor:
