@@ -21,7 +21,7 @@
     {{end}}
     "maxConnections": 50,
     "defaultTimezone": "{{$testingConf.Data.defaultTimezone}}",
-    "port": 5556,
+    "port": 5557,
     "doLiquibase": true,
     # If set to true, will run liquibase migrations in DataDonationPlatform startup.
     "doLiquibaseInStudyServer": true,
