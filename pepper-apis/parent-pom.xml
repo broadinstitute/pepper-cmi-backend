@@ -703,6 +703,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <forkCount>0</forkCount>
                     <forkedProcessExitTimeoutInSeconds>300</forkedProcessExitTimeoutInSeconds>
                     <argLine>-Xmx1g -XX:MaxPermSize=256m</argLine>
                     <systemPropertyVariables>
