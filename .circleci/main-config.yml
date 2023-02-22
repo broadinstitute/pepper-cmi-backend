@@ -38,7 +38,7 @@ references:
                           housekeepingdb
   studyserver_test_db: &studyserver_test_db
                          studyservicedb
-  test_parallellism: &test_parallelism 15
+  test_parallellism: &test_parallelism 1
   ddp_server_port: &ddp_server_port 5556
   ddp_cache_dir: &ddp_cache_dir #caching test artifacts like Auth0 users
                    /home/circleci/.ddp-cache
@@ -914,6 +914,7 @@ jobs:
                 additional_options: -am
             - create-test-dbs
             - start-ddp-test-server # starts DDP server. And execute Liquibase DB population
+            - compute-parallel-test-split
             - restore-ddp-cache
             - run-maven-with-pepper-options: # Running the tests. Only those assigned to this parallel job!
                 phase: test
