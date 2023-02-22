@@ -706,8 +706,8 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <forkCount>3</forkCount>
-                    <reuseForks>true</reuseForks>
+                    <forkCount>0</forkCount>
+                    <reuseForks>false</reuseForks>
                     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
                     <systemPropertyVariables>
                         <testFailureIgnore>true</testFailureIgnore>
