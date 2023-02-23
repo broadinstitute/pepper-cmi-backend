@@ -810,6 +810,8 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <reportsDirectory>${project.build.directory}/test-reports</reportsDirectory>
                     <forkCount>3</forkCount>
                     <reuseForks>true</reuseForks>
                     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
