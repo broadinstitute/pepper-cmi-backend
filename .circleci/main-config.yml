@@ -921,7 +921,7 @@ jobs:
                 phase: test
                 skip_tests: false
                 module: dss-core
-                additional_options: '-PCircleciParallelBuild -Dsurefire.excludesFile=$IGNORE_CLASS_LIST_PATH -DcachingDisabled=true --log-file test.out'
+                additional_options: '-PCircleciParallelBuild -Dsurefire.excludesFile=$IGNORE_CLASS_LIST_PATH -DcachingDisabled=true'
                 save_m2_cache: true
             - save-ddp-cache
             - run:
