@@ -265,6 +265,7 @@ public class DataDonationPlatform {
     }
 
     private static void start() throws MalformedURLException {
+        log.info("Starting DSS backend");
         LogbackConfigurationPrinter.printLoggingConfiguration();
         Config cfg = ConfigManager.getInstance().getConfig();
         int maxConnections = cfg.getInt(ConfigFile.NUM_POOLED_CONNECTIONS);
@@ -287,6 +288,7 @@ public class DataDonationPlatform {
         }
 
         String dbUrl = cfg.getString(ConfigFile.DB_URL);
+        log.info("Starting connection pool");
         TransactionWrapper.init(
                 new TransactionWrapper.DbConfiguration(TransactionWrapper.DB.APIS, maxConnections, dbUrl));
         Config sqlConfig = ConfigFactory.load(ConfigFile.SQL_CONFIG_FILE);
