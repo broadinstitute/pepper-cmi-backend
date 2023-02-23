@@ -12,6 +12,7 @@ public class RedisConnectionValidator {
         String host = StringUtils.substringBetween(redisAddress, "//", ":");
         String portString = StringUtils.substringAfterLast(redisAddress, ":");
         doTest(host, Integer.parseInt(portString));
+        log.info("Will look for redis at " + host + ":" + portString);
     }
 
     public static void doTest(String host, int port) {
