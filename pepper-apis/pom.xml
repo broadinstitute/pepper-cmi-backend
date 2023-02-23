@@ -808,7 +808,7 @@
                         <artifactId>surefire-junit47</artifactId>
                         <version>2.22.1</version>
                     </dependency>
-                </dependencies>
+                </dependencies> todo arz testconainers config to set max connextions to 5000
                 <configuration>
                     <forkCount>3</forkCount>
                     <reuseForks>true</reuseForks>

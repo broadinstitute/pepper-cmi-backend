@@ -58,7 +58,7 @@ executors:
           MYSQL_DATABASE: test_db
           MYSQL_USER: user
           MYSQL_PASSWORD: passw0rd
-    resource_class: medium+ #default medium not big enough for tests
+    resource_class: large #default medium not big enough for tests
 
   build-deploy-executor:
     docker: # todo: create new image endpoint, add this in admin tab for faster starts
