@@ -616,7 +616,7 @@ commands:
                     -Ditext.license=output-config/itextkey.xml \
                     $CONFIG_FILE_OPTION  \
                     -Dmaven.repo.local=<< parameters.m2_repo >> <<parameters.additional_options>> \
-                    $MODULES_OPTION
+                    $MODULES_OPTION || true
           background: <<parameters.background>>
       - when:
           condition: << parameters.save_m2_cache >>
@@ -663,7 +663,7 @@ commands:
       - run-maven-with-pepper-options:
           module: dss-core
           phase: exec:java
-          additional_options: '-Dexec.mainClass=org.broadinstitute.ddp.route.IntegrationTestSuite -Dexec.classpathScope=test --log-file IntegrationTestSuite.out'
+          additional_options: '-Dexec.mainClass=org.broadinstitute.ddp.route.IntegrationTestSuite -Dexec.classpathScope=test'
           background: true
       - wait_for_server:
           port: 5557
