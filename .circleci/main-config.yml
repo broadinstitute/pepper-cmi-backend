@@ -616,7 +616,7 @@ commands:
                     -Ditext.license=output-config/itextkey.xml \
                     $CONFIG_FILE_OPTION  \
                     -Dmaven.repo.local=<< parameters.m2_repo >> <<parameters.additional_options>> \
-                    $MODULES_OPTION || true
+                    $MODULES_OPTION || true # todo arz write out test results cleanly
           background: <<parameters.background>>
       - when:
           condition: << parameters.save_m2_cache >>
