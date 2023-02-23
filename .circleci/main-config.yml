@@ -663,7 +663,7 @@ commands:
       - run-maven-with-pepper-options:
           module: dss-core
           phase: exec:java
-          additional_options: '-Dexec.mainClass=org.broadinstitute.ddp.route.IntegrationTestSuite -Dexec.classpathScope=test'
+          additional_options: '-Dexec.mainClass=org.broadinstitute.ddp.route.IntegrationTestSuite -Dexec.classpathScope=test --log-file IntegrationTestSuite.out'
           background: true
       - wait_for_server:
           port: 5557
@@ -921,7 +921,7 @@ jobs:
                 phase: test
                 skip_tests: false
                 module: dss-core
-                additional_options: '-PCircleciParallelBuild -Dsurefire.excludesFile=$IGNORE_CLASS_LIST_PATH -DcachingDisabled=true'
+                additional_options: '-PCircleciParallelBuild -Dsurefire.excludesFile=$IGNORE_CLASS_LIST_PATH -DcachingDisabled=true --log-file test.out'
                 save_m2_cache: true
             - save-ddp-cache
             - run:
