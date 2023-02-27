@@ -300,6 +300,7 @@ public class DataDonationPlatform {
             LiquibaseUtil.releaseResources();
         }
         //@TODO figure out how to do this only at deployment time.
+        log.info("clearing caches");
         CacheService.getInstance().resetAllCaches();
 
         log.info("Starting txn wrapper");

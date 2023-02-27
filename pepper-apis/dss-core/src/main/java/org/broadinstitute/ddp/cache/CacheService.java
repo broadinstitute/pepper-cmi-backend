@@ -67,6 +67,7 @@ public class CacheService {
                 throw new DDPException("Path for configuration file: " + redissonConfigPath + " could not be found");
             }
             URI redissonConfigPathUri = redissonConfigPath.toUri();
+            log.info("Will use redis cache " + redissonConfigPathUri.toASCIIString());
             cacheManager = buildCacheManager(redissonConfigPathUri);
             // Separate configuration needs to be instantiated for non-JCache API elements
             try {
@@ -82,7 +83,6 @@ public class CacheService {
     }
 
     private CacheManager buildCacheManager(URI redissonConfigUri) {
-
         return Caching.getCachingProvider().getCacheManager(redissonConfigUri, null);
     }
 

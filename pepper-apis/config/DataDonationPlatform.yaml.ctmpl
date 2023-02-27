@@ -21,12 +21,12 @@ basic_scaling:
 vpc_access_connector:
   name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-managed-connect"
 
-network:
+network: # todo arz fixme caching disabled
   instance_tag: study-server # necessary for firewall rules so that DSM will accept https requests from pepper
 {{if and (or (eq $environment "pepper-cmi-prod") (eq $environment "pepper-cmi-staging") (eq $environment "pepper-cmi-dev") (eq $environment "pepper-cmi-test")) (eq $gae "true") }}
-entrypoint: java -javaagent:tcell/tcellagent.jar -Xmx1640m -jar DataDonationPlatform.jar #  -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_enable_heap_sampling=true,-cprof_service=pepper-backend,-cprof_cpu_use_per_thread_timers=true,-logtostderr
+entrypoint: java -javaagent:tcell/tcellagent.jar -Xmx1640m -jar -DcachingDisabled=true DataDonationPlatform.jar #  -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_enable_heap_sampling=true,-cprof_service=pepper-backend,-cprof_cpu_use_per_thread_timers=true,-logtostderr
 {{else}}
-entrypoint: java -javaagent:tcell/tcellagent.jar -Xmx1640m -jar DataDonationPlatform.jar
+entrypoint: java -javaagent:tcell/tcellagent.jar -Xmx1640m -jar -DcachingDisabled=true DataDonationPlatform.jar
 {{end}}
 # GAE does not like the "=" character in entrypoint and does not support "." in environment variables
 env_variables:
