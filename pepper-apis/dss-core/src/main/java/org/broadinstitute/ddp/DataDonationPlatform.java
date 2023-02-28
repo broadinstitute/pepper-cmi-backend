@@ -255,6 +255,7 @@ public class DataDonationPlatform {
 
     public static void main(String[] args) {
         log.info("Starting DSS backend");
+        LogbackConfigurationPrinter.printLoggingConfiguration();
         try {
             synchronized (isReady) {
                 start();
@@ -268,7 +269,6 @@ public class DataDonationPlatform {
 
     private static void start() throws MalformedURLException {
         log.info("start");
-        LogbackConfigurationPrinter.printLoggingConfiguration();
         Config cfg = ConfigManager.getInstance().getConfig();
         int maxConnections = cfg.getInt(ConfigFile.NUM_POOLED_CONNECTIONS);
 
