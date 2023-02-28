@@ -110,16 +110,16 @@
     {{end}}
     },
     "sendgridToken": "{{$conf.Data.sendgridToken}}",
-    {{if eq $environment "dev"}}
+    {{if eq $environment "pepper-cmi-dev"}}
             "sendMetrics": false,
     {{end}}
-    {{if eq $environment "test"}}
+    {{if eq $environment "pepper-cmi-test"}}
         "sendMetrics": false,
     {{end}}
-    {{if eq $environment "staging"}}
+    {{if eq $environment "pepper-cmi-staging"}}
         "sendMetrics": false,
     {{end}}
-    {{if eq $environment "prod"}}
+    {{if eq $environment "pepper-cmi-prod"}}
         "sendMetrics": true,
     {{end}}
     "googleGeocodingApiKey": "{{$conf.Data.geocodingKey}}",
@@ -156,21 +156,21 @@
     "dsmJwtSecret": "{{$dsm_conf.Data.portal.jwtDdpSecret}}",
     "dsmJwtSigner": "org.broadinstitute.kdux",
     "apiBaseUrl": "{{$conf.Data.apiBaseUrl}}",
-    {{if eq $environment "dev"}}
+    {{if eq $environment "pepper-cmi-dev"}}
         "baseTestUrl": "https://pepper-dev.datadonationplatform.org",
         "baseWebDriverUrl": "https://basil-dev.datadonationplatform.org",
-        "dsmBaseUrl": "https://dsm-dev.datadonationplatform.org:443"
+        "dsmBaseUrl": "https://fixme.datadonationplatform.org:443"
     {{end}}
-    {{if eq $environment "test"}}
+    {{if eq $environment "pepper-cmi-test"}}
         "baseTestUrl": "https://pepper-test.datadonationplatform.org",
-        "dsmBaseUrl": "https://dsm-test.datadonationplatform.org:443"
+        "dsmBaseUrl": "https://fixme.datadonationplatform.org:443"
     {{end}}
-    {{if eq $environment "staging"}}
+    {{if eq $environment "pepper-cmi-staging"}}
         "baseTestUrl": "https://pepper-staging.datadonationplatform.org",
-        "dsmBaseUrl": "https://dsm-staging.datadonationplatform.org:443"
+        "dsmBaseUrl": "https://fixme.datadonationplatform.org:443"
     {{end}}
-    {{if eq $environment "prod"}}
-        "dsmBaseUrl": "https://dsm.datadonationplatform.org:443"
+    {{if eq $environment "pepper-cmi-prod"}}
+        "dsmBaseUrl": "https://fixme.datadonationplatform.org:443"
     {{end}}
 }
 {{end}}
