@@ -228,6 +228,7 @@ public class DataDonationPlatform {
      * Stop the server using the default wait time.
      */
     public static void shutdown() {
+        log.info("Shutting down ddp");
         shutdown(1000);
     }
 
@@ -253,6 +254,7 @@ public class DataDonationPlatform {
     }
 
     public static void main(String[] args) {
+        log.info("Starting DSS backend");
         try {
             synchronized (isReady) {
                 start();
@@ -265,7 +267,7 @@ public class DataDonationPlatform {
     }
 
     private static void start() throws MalformedURLException {
-        log.info("Starting DSS backend");
+        log.info("start");
         LogbackConfigurationPrinter.printLoggingConfiguration();
         Config cfg = ConfigManager.getInstance().getConfig();
         int maxConnections = cfg.getInt(ConfigFile.NUM_POOLED_CONNECTIONS);
