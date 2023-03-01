@@ -159,7 +159,7 @@
     {{if eq $environment "pepper-cmi/dev"}}
         "baseTestUrl": "https://pepper-dev.datadonationplatform.org",
         "baseWebDriverUrl": "https://basil-dev.datadonationplatform.org",
-        "dsmBaseUrl": "https://fixme.datadonationplatform.org:443"
+        "dsmBaseUrl": "https://study-manager-backend-dot-pepper-cmi-dev.uc.r.appspot.com:443"
     {{end}}
     {{if eq $environment "pepper-cmi/test"}}
         "baseTestUrl": "https://pepper-test.datadonationplatform.org",

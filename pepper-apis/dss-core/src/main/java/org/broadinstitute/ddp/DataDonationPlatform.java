@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -182,6 +184,7 @@ import org.broadinstitute.ddp.util.ConfigUtil;
 import org.broadinstitute.ddp.util.ElasticsearchServiceUtil;
 import org.broadinstitute.ddp.util.LiquibaseUtil;
 import org.broadinstitute.ddp.util.LogbackConfigurationPrinter;
+import org.broadinstitute.ddp.util.RedisConnectionValidator;
 import org.broadinstitute.ddp.util.ResponseUtil;
 import org.broadinstitute.ddp.util.RouteUtil;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -656,6 +659,14 @@ public class DataDonationPlatform {
                 MDCLogBreadCrumbFilter.LOG_BREADCRUMB));
 
         awaitInitialization();
+
+        try {
+            Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
+                RedisConnectionValidator.doTest();
+            }, 5, 60, TimeUnit.SECONDS.SECONDS);
+        } catch (Exception e) {
+            log.error("Redis connection validator thread has failed", e);
+        }
         log.info("ddp startup complete");
     }
 

@@ -7,12 +7,14 @@ import redis.clients.jedis.Jedis;
 
 @Slf4j
 public class RedisConnectionValidator {
+
+
     public static void doTest() {
         String redisAddress = ConfigManager.getInstance().getConfig().getString(ConfigFile.REDIS_SERVER_ADDRESS);
         String host = StringUtils.substringBetween(redisAddress, "//", ":");
         String portString = StringUtils.substringAfterLast(redisAddress, ":");
-        doTest(host, Integer.parseInt(portString));
         log.info("Will look for redis at " + host + ":" + portString);
+        doTest(host, Integer.parseInt(portString));
     }
 
     public static void doTest(String host, int port) {
