@@ -661,6 +661,7 @@ public class DataDonationPlatform {
         awaitInitialization();
 
         try {
+            log.info("Starting redis thread");
             Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
                 RedisConnectionValidator.doTest();
             }, 5, 60, TimeUnit.SECONDS.SECONDS);
