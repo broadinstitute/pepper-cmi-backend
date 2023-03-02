@@ -13,7 +13,7 @@ public class RedisConnectionValidator {
         String redisAddress = ConfigManager.getInstance().getConfig().getString(ConfigFile.REDIS_SERVER_ADDRESS);
         String host = StringUtils.substringBetween(redisAddress, "//", ":");
         String portString = StringUtils.substringAfterLast(redisAddress, ":");
-        log.info("Will look for redis at " + host + ":" + portString);
+        log.debug("Will look for redis at " + host + ":" + portString);
         doTest(host, Integer.parseInt(portString));
     }
 
@@ -25,7 +25,7 @@ public class RedisConnectionValidator {
 
             String valRead = jedis.hget(testHash, "hello");
             if (valToWrite.equals(valRead)) {
-                log.info("Redis is fine");
+                log.debug("Redis test value written successfully");
             }
         } catch (RuntimeException e) {
             log.error("There was a problem reading/writing to Redis", e);
