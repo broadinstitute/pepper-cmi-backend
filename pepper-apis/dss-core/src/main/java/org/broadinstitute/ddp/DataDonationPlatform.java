@@ -664,7 +664,7 @@ public class DataDonationPlatform {
             log.info("Starting redis thread");
             Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
                 RedisConnectionValidator.doTest();
-            }, 5, 60 * 5, TimeUnit.SECONDS);
+            }, 5, 60 * 5, TimeUnit.SECONDS); // todo arz add jitter with multiple backends
         } catch (Exception e) {
             log.error("Redis connection validator thread has failed", e);
         }
@@ -696,7 +696,7 @@ public class DataDonationPlatform {
         get(RouteConstants.GAE.STOP_ENDPOINT, (request, response) -> {
             log.info("Received GAE stop request [{}]", RouteConstants.GAE.STOP_ENDPOINT);
             //flush out any pending GA events
-            GoogleAnalyticsMetricsTracker.getInstance().flushOutMetrics();
+            //GoogleAnalyticsMetricsTracker.getInstance().flushOutMetrics();
 
             response.status(HttpStatus.SC_OK);
             return "";

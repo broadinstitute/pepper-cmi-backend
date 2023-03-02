@@ -142,6 +142,7 @@ public class GoogleAnalyticsMetricsTracker {
                     Optional<StudySettings> studySettings = studyDao.findSettings(studyDto.getId());
                     studySettings.ifPresent(settings -> settingsMap.put(studyDto.getGuid(), settings));
                 }
+                // todo arz fixme add boolean for isactive and disabled hundreds of inactive dev studies
                 log.info("Loaded StudySettings for {} studies.", settingsMap.size());
                 return settingsMap;
             });
