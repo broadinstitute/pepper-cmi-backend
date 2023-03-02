@@ -664,7 +664,7 @@ public class DataDonationPlatform {
             log.info("Starting redis thread");
             Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
                 RedisConnectionValidator.doTest();
-            }, 5, 60, TimeUnit.SECONDS.SECONDS);
+            }, 5, 60 * 5, TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("Redis connection validator thread has failed", e);
         }

@@ -87,8 +87,7 @@
         "studyExport": "{{$conf.Data.schedules.studyExport}}",
         "fileUploadCleanup": "{{$conf.Data.schedules.fileUploadCleanup}}",
         "fileUploadNotification": "{{$conf.Data.schedules.fileUploadNotification}}",
-        "tempUserCleanup": "{{$conf.Data.schedules.tempUserCleanup}}",
-        "customExport": "{{$conf.Data.schedules.customExport}}"
+        "tempUserCleanup": "{{$conf.Data.schedules.tempUserCleanup}}"
     },
     "preferredSourceIPHeader":"X-AppEngine-User-IP",
     "nginx": {

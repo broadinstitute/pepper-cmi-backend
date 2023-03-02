@@ -126,8 +126,7 @@
         "studyExport": "0 0 9 ? * * *",
         "fileUploadCleanup": "0 0 5 ? * * *",
         "fileUploadNotification": "*/10 * * * * *",
-        "tempUserCleanup": "0 30 5 ? * * *",
-        "customExport": "0 10 5 ? * * *"
+        "tempUserCleanup": "0 30 5 ? * * *"
     },
     "housekeepingMaxConnections": 50,
     "sendgrid": {

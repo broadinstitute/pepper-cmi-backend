@@ -44,7 +44,6 @@ import org.broadinstitute.ddp.client.GoogleBucketClient;
 import org.broadinstitute.ddp.client.SendGridClient;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.RouteConstants;
-import org.broadinstitute.ddp.customexport.housekeeping.schedule.CustomExportJob;
 import org.broadinstitute.ddp.db.DBUtils;
 import org.broadinstitute.ddp.db.DaoException;
 import org.broadinstitute.ddp.db.TransactionWrapper;
@@ -495,7 +494,6 @@ public class Housekeeping {
                     FileUploadNotificationJob.register(scheduler, cfg);
                     TemporaryUserCleanupJob.register(scheduler, cfg);
                     StudyDataExportJob.register(scheduler, cfg);
-                    CustomExportJob.register(scheduler, cfg);
                 }
                 // Setup jobs needed for housekeeping-tasks if that's enabled.
                 if (cfg.getBoolean(ConfigFile.PUBSUB_ENABLE_HKEEP_TASKS)) {
