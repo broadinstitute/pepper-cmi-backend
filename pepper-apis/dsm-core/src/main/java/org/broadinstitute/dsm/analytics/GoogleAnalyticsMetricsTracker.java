@@ -17,6 +17,7 @@ public class GoogleAnalyticsMetricsTracker {
     private static volatile GoogleAnalyticsMetricsTracker instance;
     private static Object lockGA = new Object();
     private static Config CONFIG;
+    private boolean isFlushing;
 
     private GoogleAnalyticsMetricsTracker() {
         initStudyMetricTracker();
@@ -80,8 +81,12 @@ public class GoogleAnalyticsMetricsTracker {
     public void flushOutMetrics() {
         //lookup all Metrics Trackers and flush out any pending events
         logger.info("Flushing out all pending GA events");
-        googleAnalyticsTrackers.flush();
-        googleAnalyticsTrackers.resetStats();
+        if (!isFlushing) {
+            isFlushing = true;
+            googleAnalyticsTrackers.flush();
+            googleAnalyticsTrackers.resetStats();
+            isFlushing = false;
+        }
     }
 
     public String getAnalyticsToken(@NonNull Config config) {

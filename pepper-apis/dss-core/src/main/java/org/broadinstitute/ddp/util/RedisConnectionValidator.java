@@ -25,7 +25,7 @@ public class RedisConnectionValidator {
 
             String valRead = jedis.hget(testHash, "hello");
             if (valToWrite.equals(valRead)) {
-                log.info("Redis is fine");
+                log.info("Redis is fine", new Exception("testing"));
             }
         } catch (RuntimeException e) {
             log.error("There was a problem reading/writing to Redis", e);

@@ -432,6 +432,8 @@ public class DSMServer {
         get(RoutePath.GAE.STOP_ENDPOINT, (request, response) -> {
             logger.info("Received GAE stop request [{}]", RoutePath.GAE.STOP_ENDPOINT);
             //flush out any pending GA events
+
+            // todo arz fixme don't flush
             GoogleAnalyticsMetricsTracker.getInstance().flushOutMetrics();
 
             response.status(HttpStatus.SC_OK);
