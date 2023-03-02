@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -661,10 +662,11 @@ public class DataDonationPlatform {
         awaitInitialization();
 
         try {
-            log.info("Starting redis thread");
+            int initialDelay = new Random().nextInt(55) + 5; // add jitter so that different backends don't hammer redis at once
+            log.info("Starting redis thread with initial delay of " + initialDelay + "s");
             Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
                 RedisConnectionValidator.doTest();
-            }, 5, 60 * 5, TimeUnit.SECONDS); // todo arz add jitter with multiple backends
+            }, initialDelay, 60 * 5, TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("Redis connection validator thread has failed", e);
         }
@@ -696,7 +698,8 @@ public class DataDonationPlatform {
         get(RouteConstants.GAE.STOP_ENDPOINT, (request, response) -> {
             log.info("Received GAE stop request [{}]", RouteConstants.GAE.STOP_ENDPOINT);
             //flush out any pending GA events
-            //GoogleAnalyticsMetricsTracker.getInstance().flushOutMetrics();
+            // todo arz fixme this seems like it might be causing shutdown delays--probably not worth the risk
+            // GoogleAnalyticsMetricsTracker.getInstance().flushOutMetrics();
 
             response.status(HttpStatus.SC_OK);
             return "";
