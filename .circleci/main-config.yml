@@ -170,7 +170,7 @@ commands:
             ./api-build.sh v1 ${VAULT_PATH} . ${ENVIRONMENT} << parameters.application >> --gae-config
           environment: # needed because api-build.sh scripts want to start new docker containers
             USE_DOCKER: false
-
+# todo arz update docker image names to avoid shared instance conflicts
   create-test-dbs:
     description: Create databases that will be used to run all the tests
     parameters:
