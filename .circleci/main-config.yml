@@ -702,7 +702,7 @@ commands:
           name: Download ddp-cache-md5 artifact
           command: |
             ddp_cache_md5='<<parameters.ddp_cache_md5_file>>'
-            latest_artifact_url="https://circleci.com/api/v1.1/project/github/broadinstitute/ddp-study-server/latest/artifacts?circle-token=$CIRCLE_TOKEN"
+            latest_artifact_url="https://circleci.com/api/v1.1/project/github/broadinstitute/pepper-cmi-backend/latest/artifacts?circle-token=$CIRCLE_TOKEN"
             md5_artifact_url=$(curl -sL "$latest_artifact_url" | jq -r '.[] | select(.node_index == 0) | select(.path == "ddp-cache-md5.txt") | .url')
             if [[ -n "$md5_artifact_url" ]]; then
               echo "Downloading artifact file [$md5_artifact_url] to file [$ddp_cache_md5]"
