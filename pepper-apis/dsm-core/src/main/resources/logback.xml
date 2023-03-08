@@ -10,6 +10,5 @@
     <!-- todo arz restore slack -->
     <root level="info">
         <appender-ref ref="STDOUT" />
-        <appender-ref ref="SLACK" />
     </root>
 </configuration>
