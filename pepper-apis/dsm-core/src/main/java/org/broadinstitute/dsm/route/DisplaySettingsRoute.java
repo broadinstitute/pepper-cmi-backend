@@ -54,29 +54,35 @@ public class DisplaySettingsRoute extends RequestHandler {
             if (patchUtil.getColumnNameMap() == null) {
                 throw new RuntimeException("ColumnNameMap is null!");
             }
+            logger.info("getting params");
             QueryParamsMap queryParams = request.queryMap();
             String realm = request.params(RequestParameter.REALM);
             if (StringUtils.isBlank(realm)) {
                 logger.error("Realm is empty");
             }
+            logger.info("getting ddp group " + realm);
             String ddpGroupId = DDPInstance.getDDPGroupId(realm);
             if (StringUtils.isBlank(ddpGroupId)) {
                 logger.error("GroupId is empty");
             }
+            logger.info("getting user id");
             String userIdRequest = UserUtil.getUserId(request);
             if (!userId.equals(userIdRequest)) {
                 throw new RuntimeException("User id was not equal. User Id in token " + userId + " user Id in request " + userIdRequest);
             }
+            logger.info("checking user access");
             if (UserUtil.checkUserAccess(realm, userId, "mr_view", userIdRequest)
                     || UserUtil.checkUserAccess(realm, userId, "pt_list_view", userIdRequest)) {
                 String parent = queryParams.get("parent").value();
                 if (StringUtils.isBlank(parent)) {
                     logger.error("Parent is empty");
                 }
+                logger.info("getting instance");
                 DDPInstance instance = DDPInstance.getDDPInstanceWithRole(realm, DBConstants.MEDICAL_RECORD_ACTIVATED);
                 if (instance == null) {
                     logger.error("Instance was not found");
                 }
+                logger.info("figuring out settings");
                 if (StringUtils.isNotBlank(realm) && instance != null && StringUtils.isNotBlank(userIdRequest)
                         && StringUtils.isNotBlank(parent) && StringUtils.isNotBlank(ddpGroupId)) {
                     Map<String, Object> displaySettings = new HashMap<>();
@@ -143,17 +149,20 @@ public class DisplaySettingsRoute extends RequestHandler {
                         displaySettings.put("hasSequencingOrders", true);
                     }
 
+                    logger.info("returning settings");
                     return displaySettings;
                 }
             } else {
+                logger.info("no rights for the user");
                 logger.error(UserErrorMessages.NO_RIGHTS);
                 response.status(500);
                 return new Result(500, UserErrorMessages.NO_RIGHTS);
             }
+            logger.info("oopsies");
             logger.error(UserErrorMessages.CONTACT_DEVELOPER);
             return new Result(500, UserErrorMessages.CONTACT_DEVELOPER);
         } catch (Exception e) {
-            logger.error("Trouble running display settings route", e);
+            logger.info("Trouble running display settings route", e);
             return new Result(500, UserErrorMessages.CONTACT_DEVELOPER);
         }
     }
