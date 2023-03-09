@@ -49,106 +49,112 @@ public class DisplaySettingsRoute extends RequestHandler {
 
     @Override
     public Object processRequest(Request request, Response response, String userId) throws Exception {
-        if (patchUtil.getColumnNameMap() == null) {
-            throw new RuntimeException("ColumnNameMap is null!");
-        }
-        QueryParamsMap queryParams = request.queryMap();
-        String realm = request.params(RequestParameter.REALM);
-        if (StringUtils.isBlank(realm)) {
-            logger.error("Realm is empty");
-        }
-        String ddpGroupId = DDPInstance.getDDPGroupId(realm);
-        if (StringUtils.isBlank(ddpGroupId)) {
-            logger.error("GroupId is empty");
-        }
-        String userIdRequest = UserUtil.getUserId(request);
-        if (!userId.equals(userIdRequest)) {
-            throw new RuntimeException("User id was not equal. User Id in token " + userId + " user Id in request " + userIdRequest);
-        }
-        if (UserUtil.checkUserAccess(realm, userId, "mr_view", userIdRequest)
-                || UserUtil.checkUserAccess(realm, userId, "pt_list_view", userIdRequest)) {
-            String parent = queryParams.get("parent").value();
-            if (StringUtils.isBlank(parent)) {
-                logger.error("Parent is empty");
+        logger.info("handling display settings request");
+        try {
+            if (patchUtil.getColumnNameMap() == null) {
+                throw new RuntimeException("ColumnNameMap is null!");
             }
-            DDPInstance instance = DDPInstance.getDDPInstanceWithRole(realm, DBConstants.MEDICAL_RECORD_ACTIVATED);
-            if (instance == null) {
-                logger.error("Instance was not found");
+            QueryParamsMap queryParams = request.queryMap();
+            String realm = request.params(RequestParameter.REALM);
+            if (StringUtils.isBlank(realm)) {
+                logger.error("Realm is empty");
             }
-            if (StringUtils.isNotBlank(realm) && instance != null && StringUtils.isNotBlank(userIdRequest)
-                    && StringUtils.isNotBlank(parent) && StringUtils.isNotBlank(ddpGroupId)) {
-                Map<String, Object> displaySettings = new HashMap<>();
-                InstanceSettings instanceSettings = new InstanceSettings();
-                displaySettings.put("assignees", Assignee.getAssignees(realm));
-                displaySettings.put("fieldSettings", FieldSettings.getFieldSettings(realm));
-                displaySettings.put("drugs", Drug.getDrugList());
-                displaySettings.put("cancers", Cancer.getCancers());
-                displaySettings.put("activityDefinitions", new ActivityDefinitionsRetrieverFactory(instance).spawn().retrieve());
-                displaySettings.put("filters", ViewFilter.getAllFilters(userIdRequest, patchUtil.getColumnNameMap(), parent, ddpGroupId,
-                        instance.getDdpInstanceId()));
-                displaySettings.put("abstractionFields", AbstractionUtil.getFormControls(realm));
-                InstanceSettingsDto instanceSettingsDto = instanceSettings.getInstanceSettings(realm);
-                displaySettings.putAll(instanceSettings.getInstanceSettingsAsMap(instanceSettingsDto));
-                if (!instance.isHasRole()) {
-                    displaySettings.put("hideMRTissueWorkflow", true);
+            String ddpGroupId = DDPInstance.getDDPGroupId(realm);
+            if (StringUtils.isBlank(ddpGroupId)) {
+                logger.error("GroupId is empty");
+            }
+            String userIdRequest = UserUtil.getUserId(request);
+            if (!userId.equals(userIdRequest)) {
+                throw new RuntimeException("User id was not equal. User Id in token " + userId + " user Id in request " + userIdRequest);
+            }
+            if (UserUtil.checkUserAccess(realm, userId, "mr_view", userIdRequest)
+                    || UserUtil.checkUserAccess(realm, userId, "pt_list_view", userIdRequest)) {
+                String parent = queryParams.get("parent").value();
+                if (StringUtils.isBlank(parent)) {
+                    logger.error("Parent is empty");
                 }
-                if (StringUtils.isNotBlank(instance.getUsersIndexES())) {
-                    displaySettings.put("hasProxyData", true);
+                DDPInstance instance = DDPInstance.getDDPInstanceWithRole(realm, DBConstants.MEDICAL_RECORD_ACTIVATED);
+                if (instance == null) {
+                    logger.error("Instance was not found");
                 }
-                if (StringUtils.isNotBlank(instance.getParticipantIndexES())) {
-                    List<PreferredLanguage> preferredLanguages = DDPRequestUtil.getPreferredLanguages(instance);
-                    if (preferredLanguages != null) {
-                        displaySettings.put("preferredLanguages", preferredLanguages);
+                if (StringUtils.isNotBlank(realm) && instance != null && StringUtils.isNotBlank(userIdRequest)
+                        && StringUtils.isNotBlank(parent) && StringUtils.isNotBlank(ddpGroupId)) {
+                    Map<String, Object> displaySettings = new HashMap<>();
+                    InstanceSettings instanceSettings = new InstanceSettings();
+                    displaySettings.put("assignees", Assignee.getAssignees(realm));
+                    displaySettings.put("fieldSettings", FieldSettings.getFieldSettings(realm));
+                    displaySettings.put("drugs", Drug.getDrugList());
+                    displaySettings.put("cancers", Cancer.getCancers());
+                    displaySettings.put("activityDefinitions", new ActivityDefinitionsRetrieverFactory(instance).spawn().retrieve());
+                    displaySettings.put("filters", ViewFilter.getAllFilters(userIdRequest, patchUtil.getColumnNameMap(), parent, ddpGroupId,
+                            instance.getDdpInstanceId()));
+                    displaySettings.put("abstractionFields", AbstractionUtil.getFormControls(realm));
+                    InstanceSettingsDto instanceSettingsDto = instanceSettings.getInstanceSettings(realm);
+                    displaySettings.putAll(instanceSettings.getInstanceSettingsAsMap(instanceSettingsDto));
+                    if (!instance.isHasRole()) {
+                        displaySettings.put("hideMRTissueWorkflow", true);
                     }
-                }
-                HashSet<String> roles = new DDPInstanceDao().getInstanceRoles(instance.getName());
-                if (roles.contains(DBConstants.KIT_REQUEST_ACTIVATED)) { //only needed if study is shipping samples per DSM
-                    Map<Integer, KitRequestSettings> kitRequestSettingsMap =
-                            KitRequestSettings.getKitRequestSettings(instance.getDdpInstanceId());
-                    if (kitRequestSettingsMap != null) {
-                        List<KitType> kits = new ArrayList<>();
-                        List<KitType> kitTypes = KitType.getKitTypes(realm, null);
-                        if (kitTypes != null && !kitTypes.isEmpty()) {
-                            kitTypes.forEach(kitType -> {
-                                KitRequestSettings kitRequestSettings = kitRequestSettingsMap.get(kitType.getKitId());
-                                //kit has sub kits add them to displaySettings
-                                if (kitRequestSettings != null && kitRequestSettings.getHasSubKits() != 0) {
-                                    List<KitSubKits> subKits = kitRequestSettings.getSubKits();
-                                    if (subKits != null && !subKits.isEmpty()) {
-                                        subKits.forEach(subKit -> {
-                                            kits.add(new KitType(subKit.getKitTypeId(), subKit.getKitName(), subKit.getKitName(),
-                                                    kitType.isManualSentTrack(), kitType.isExternalShipper(), kitType.getUploadReasons()));
-                                        });
+                    if (StringUtils.isNotBlank(instance.getUsersIndexES())) {
+                        displaySettings.put("hasProxyData", true);
+                    }
+                    if (StringUtils.isNotBlank(instance.getParticipantIndexES())) {
+                        List<PreferredLanguage> preferredLanguages = DDPRequestUtil.getPreferredLanguages(instance);
+                        if (preferredLanguages != null) {
+                            displaySettings.put("preferredLanguages", preferredLanguages);
+                        }
+                    }
+                    HashSet<String> roles = new DDPInstanceDao().getInstanceRoles(instance.getName());
+                    if (roles.contains(DBConstants.KIT_REQUEST_ACTIVATED)) { //only needed if study is shipping samples per DSM
+                        Map<Integer, KitRequestSettings> kitRequestSettingsMap =
+                                KitRequestSettings.getKitRequestSettings(instance.getDdpInstanceId());
+                        if (kitRequestSettingsMap != null) {
+                            List<KitType> kits = new ArrayList<>();
+                            List<KitType> kitTypes = KitType.getKitTypes(realm, null);
+                            if (kitTypes != null && !kitTypes.isEmpty()) {
+                                kitTypes.forEach(kitType -> {
+                                    KitRequestSettings kitRequestSettings = kitRequestSettingsMap.get(kitType.getKitId());
+                                    //kit has sub kits add them to displaySettings
+                                    if (kitRequestSettings != null && kitRequestSettings.getHasSubKits() != 0) {
+                                        List<KitSubKits> subKits = kitRequestSettings.getSubKits();
+                                        if (subKits != null && !subKits.isEmpty()) {
+                                            subKits.forEach(subKit -> {
+                                                kits.add(new KitType(subKit.getKitTypeId(), subKit.getKitName(), subKit.getKitName(),
+                                                        kitType.isManualSentTrack(), kitType.isExternalShipper(), kitType.getUploadReasons()));
+                                            });
+                                        }
+                                    } else {
+                                        //kit doesn't have subkits add kitType
+                                        kits.add(kitType);
                                     }
-                                } else {
-                                    //kit doesn't have subkits add kitType
-                                    kits.add(kitType);
-                                }
-                            });
-                        }
-                        if (kits != null && !kits.isEmpty()) {
-                            displaySettings.put("kitTypes", kits);
+                                });
+                            }
+                            if (kits != null && !kits.isEmpty()) {
+                                displaySettings.put("kitTypes", kits);
+                            }
                         }
                     }
-                }
-                if (roles.contains(DBConstants.ADD_FAMILY_MEMBER)) {
-                    displaySettings.put("addFamilyMember", true);
-                }
-                if (roles.contains(DBConstants.SHOW_GROUP_FIELDS)) {
-                    displaySettings.put("showGroupFields", true);
-                }
-                if (roles.contains(DBConstants.HAS_CLINICAL_KIT)) {
-                    displaySettings.put("hasSequencingOrders", true);
-                }
+                    if (roles.contains(DBConstants.ADD_FAMILY_MEMBER)) {
+                        displaySettings.put("addFamilyMember", true);
+                    }
+                    if (roles.contains(DBConstants.SHOW_GROUP_FIELDS)) {
+                        displaySettings.put("showGroupFields", true);
+                    }
+                    if (roles.contains(DBConstants.HAS_CLINICAL_KIT)) {
+                        displaySettings.put("hasSequencingOrders", true);
+                    }
 
-                return displaySettings;
+                    return displaySettings;
+                }
+            } else {
+                logger.error(UserErrorMessages.NO_RIGHTS);
+                response.status(500);
+                return new Result(500, UserErrorMessages.NO_RIGHTS);
             }
-        } else {
-            logger.warn(UserErrorMessages.NO_RIGHTS);
-            response.status(500);
-            return new Result(500, UserErrorMessages.NO_RIGHTS);
+            logger.error(UserErrorMessages.CONTACT_DEVELOPER);
+            return new Result(500, UserErrorMessages.CONTACT_DEVELOPER);
+        } catch (Exception e) {
+            logger.error("Trouble running display settings route", e);
+            return new Result(500, UserErrorMessages.CONTACT_DEVELOPER);
         }
-        logger.warn(UserErrorMessages.CONTACT_DEVELOPER);
-        return new Result(500, UserErrorMessages.CONTACT_DEVELOPER);
     }
 }
