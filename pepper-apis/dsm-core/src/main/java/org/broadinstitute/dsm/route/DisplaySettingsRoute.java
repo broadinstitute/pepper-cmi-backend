@@ -91,11 +91,17 @@ public class DisplaySettingsRoute extends RequestHandler {
                     displaySettings.put("fieldSettings", FieldSettings.getFieldSettings(realm));
                     displaySettings.put("drugs", Drug.getDrugList());
                     displaySettings.put("cancers", Cancer.getCancers());
+                    logger.info("getting activity definitions");
                     displaySettings.put("activityDefinitions", new ActivityDefinitionsRetrieverFactory(instance).spawn().retrieve());
+                    logger.info("getting filters");
                     displaySettings.put("filters", ViewFilter.getAllFilters(userIdRequest, patchUtil.getColumnNameMap(), parent, ddpGroupId,
                             instance.getDdpInstanceId()));
+
+                    logger.info("getting abstraction fields");
                     displaySettings.put("abstractionFields", AbstractionUtil.getFormControls(realm));
+                    logger.info("getting instance settings");
                     InstanceSettingsDto instanceSettingsDto = instanceSettings.getInstanceSettings(realm);
+                    logger.info("getting instance settings as map");
                     displaySettings.putAll(instanceSettings.getInstanceSettingsAsMap(instanceSettingsDto));
                     if (!instance.isHasRole()) {
                         displaySettings.put("hideMRTissueWorkflow", true);
@@ -103,21 +109,27 @@ public class DisplaySettingsRoute extends RequestHandler {
                     if (StringUtils.isNotBlank(instance.getUsersIndexES())) {
                         displaySettings.put("hasProxyData", true);
                     }
+                    logger.info("getting ptp index es");
                     if (StringUtils.isNotBlank(instance.getParticipantIndexES())) {
+                        logger.info("getting languages");
                         List<PreferredLanguage> preferredLanguages = DDPRequestUtil.getPreferredLanguages(instance);
                         if (preferredLanguages != null) {
                             displaySettings.put("preferredLanguages", preferredLanguages);
                         }
                     }
+                    logger.info("getting instance roles");
                     HashSet<String> roles = new DDPInstanceDao().getInstanceRoles(instance.getName());
                     if (roles.contains(DBConstants.KIT_REQUEST_ACTIVATED)) { //only needed if study is shipping samples per DSM
+                        logger.info("getting kit req settings map");
                         Map<Integer, KitRequestSettings> kitRequestSettingsMap =
                                 KitRequestSettings.getKitRequestSettings(instance.getDdpInstanceId());
                         if (kitRequestSettingsMap != null) {
                             List<KitType> kits = new ArrayList<>();
+                            logger.info("getting kit types");
                             List<KitType> kitTypes = KitType.getKitTypes(realm, null);
                             if (kitTypes != null && !kitTypes.isEmpty()) {
                                 kitTypes.forEach(kitType -> {
+                                    logger.info("getting kit request settings");
                                     KitRequestSettings kitRequestSettings = kitRequestSettingsMap.get(kitType.getKitId());
                                     //kit has sub kits add them to displaySettings
                                     if (kitRequestSettings != null && kitRequestSettings.getHasSubKits() != 0) {
