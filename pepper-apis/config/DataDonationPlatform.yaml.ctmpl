@@ -20,6 +20,7 @@ basic_scaling:
 
 vpc_access_connector:
   name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-managed-connect"
+  egress_setting: all-traffic
 
 network: # todo arz fixme caching disabled tcell
   instance_tag: study-server # necessary for firewall rules so that DSM will accept https requests from pepper
