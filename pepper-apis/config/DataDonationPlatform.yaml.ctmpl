@@ -19,7 +19,7 @@ basic_scaling:
 {{end}}
 
 vpc_access_connector:
-  name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-managed-connect"
+  name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-connector"
   egress_setting: all-traffic
 
 network: # todo arz fixme caching disabled tcell

@@ -5,7 +5,7 @@ runtime: java11
 instance_class: B8
 
 vpc_access_connector:
-  name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-managed-connect"
+  name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-connector"
   egress_setting: all-traffic
 
 manual_scaling:
