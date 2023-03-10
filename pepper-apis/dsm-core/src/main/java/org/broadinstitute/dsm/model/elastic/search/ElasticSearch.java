@@ -169,7 +169,9 @@ public class ElasticSearch implements ElasticSearchable {
             searchSourceBuilder.size(scrollSize);
             searchSourceBuilder.from(from);
             searchRequest.source(searchSourceBuilder);
+            logger.info("Making es search request");
             response = ElasticSearchUtil.getClientInstance().search(searchRequest, RequestOptions.DEFAULT);
+            logger.info("Got es search request result");
         } catch (Exception e) {
             throw new RuntimeException("Couldn't get participants from ES for instance " + esParticipantsIndex, e);
         }
@@ -407,7 +409,7 @@ public class ElasticSearch implements ElasticSearchable {
         Map<String, Map<String, Object>> esData = new HashMap<>();
         String index = ddpInstance.getActivityDefinitionIndexES();
         if (StringUtils.isNotBlank(index)) {
-            logger.info("Collecting activity definitions from ES");
+            logger.info("Collecting activity definitions from ES at " + index);
             try {
                 int scrollSize = 1000;
 

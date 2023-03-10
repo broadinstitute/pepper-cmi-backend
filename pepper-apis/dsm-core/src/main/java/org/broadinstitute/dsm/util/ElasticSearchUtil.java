@@ -140,7 +140,9 @@ public class ElasticSearchUtil {
     public static synchronized void initClient() {
         if (client == null) {
             try {
-                client = getClientForElasticsearchCloud(DSMConfig.getSqlFromConfig(ApplicationConfigConstants.ES_URL),
+                String esUrl = DSMConfig.getSqlFromConfig(ApplicationConfigConstants.ES_URL);
+                logger.info("Will use ES url " + esUrl);
+                client = getClientForElasticsearchCloud(esUrl,
                         DSMConfig.getSqlFromConfig(ApplicationConfigConstants.ES_USERNAME),
                         DSMConfig.getSqlFromConfig(ApplicationConfigConstants.ES_PASSWORD));
             } catch (MalformedURLException e) {
