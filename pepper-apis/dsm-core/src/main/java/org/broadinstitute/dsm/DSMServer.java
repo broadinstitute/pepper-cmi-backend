@@ -695,47 +695,9 @@ public class DSMServer {
 
     private void setupPubSub(@NonNull Config cfg, NotificationUtil notificationUtil) {
         String projectId = cfg.getString(GCP_PATH_TO_PUBSUB_PROJECT_ID);
-        String subscriptionId = cfg.getString(GCP_PATH_TO_PUBSUB_SUB);
         String dsmToDssSubscriptionId = cfg.getString(GCP_PATH_TO_DSS_TO_DSM_SUB);
         String dsmTasksSubscriptionId = cfg.getString(GCP_PATH_TO_DSM_TASKS_SUB);
         String mercuryDsmSubscriptionId = cfg.getString(GCP_PATH_TO_MERCURY_TO_DSM_SUB);
-
-        logger.info("Setting up pubsub for {}/{}", projectId, subscriptionId);
-
-        try {
-            // Instantiate an asynchronous message receiver.
-            MessageReceiver receiver = (PubsubMessage message, AckReplyConsumer consumer) -> {
-                // Handle incoming message, then ack the received message.
-                try {
-                    TransactionWrapper.inTransaction(conn -> {
-                        PubSubLookUp.processCovidTestResults(conn, message, notificationUtil);
-                        logger.info("Processing the message finished");
-                        consumer.ack();
-                        return null;
-                    });
-
-                } catch (Exception ex) {
-                    logger.info("about to nack the message", ex);
-                    consumer.nack();
-                    ex.printStackTrace();
-                }
-            };
-
-            Subscriber subscriber = null;
-            ProjectSubscriptionName resultSubName = ProjectSubscriptionName.of(projectId, subscriptionId);
-            ExecutorProvider resultsSubExecProvider = InstantiatingExecutorProvider.newBuilder().setExecutorThreadCount(1).build();
-            subscriber = Subscriber.newBuilder(resultSubName, receiver).setParallelPullCount(1).setExecutorProvider(resultsSubExecProvider)
-                    .setMaxAckExtensionPeriod(org.threeten.bp.Duration.ofSeconds(120)).build();
-            try {
-                subscriber.startAsync().awaitRunning(1L, TimeUnit.MINUTES);
-                logger.info("Started pubsub subscription receiver for {}", subscriptionId);
-            } catch (TimeoutException e) {
-                throw new RuntimeException("Timed out while starting pubsub subscription " + subscriptionId, e);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get results from pubsub ", e);
-        }
-
         logger.info("Setting up pubsub for {}/{}", projectId, dsmToDssSubscriptionId);
 
         try {
@@ -935,6 +897,8 @@ public class DSMServer {
         EditParticipantMessageReceiverRoute editParticipantMessageReceiverRoute = new EditParticipantMessageReceiverRoute();
         get(UI_ROOT + RoutePath.EDIT_PARTICIPANT_MESSAGE, editParticipantMessageReceiverRoute, new JsonTransformer());
 
+        // todo arz fixme must connect to shared GP ddp project pubsub
+        // so that GP goes to one place (order and response for PE-CGS)
         String mercuryTopicId = config.getString(GCP_PATH_TO_DSM_TO_MERCURY_TOPIC);
         if (!config.getBoolean("ui.production")) {
             PostMercuryOrderDummyRoute postMercuryOrderDummyRoute = new PostMercuryOrderDummyRoute(projectId, mercuryTopicId);
