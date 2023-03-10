@@ -423,7 +423,9 @@ public class ElasticSearch implements ElasticSearchable {
                     searchSourceBuilder.from(i * scrollSize);
                     searchRequest.source(searchSourceBuilder);
 
+                    logger.info("Sending ES search request");
                     response = ElasticSearchUtil.getClientInstance().search(searchRequest, RequestOptions.DEFAULT);
+                    logger.info("Got search request result");
                     addingActivityDefinitionHits(response, esData);
                     i++;
                 }
@@ -436,6 +438,7 @@ public class ElasticSearch implements ElasticSearchable {
     }
 
     public static void addingActivityDefinitionHits(@NonNull SearchResponse response, Map<String, Map<String, Object>> esData) {
+        logger.info("Processing " + response.getHits().getTotalHits());
         for (SearchHit hit : response.getHits()) {
             Map<String, Object> sourceMap = hit.getSourceAsMap();
             String activityCode = (String) sourceMap.get(ACTIVITY_CODE);
