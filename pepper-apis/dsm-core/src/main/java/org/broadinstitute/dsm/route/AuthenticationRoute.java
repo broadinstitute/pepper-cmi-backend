@@ -83,6 +83,7 @@ public class AuthenticationRoute implements Route {
             if (StringUtils.isNotBlank(auth0Token)) {
                 // checking if Auth0 knows that token
                 try {
+                    logger.info("looking up auth0 data for " + auth0Domain);
                     Auth0Util.Auth0UserInfo auth0UserInfo = auth0Util.getAuth0UserInfo(auth0Token, auth0Domain);
                     if (auth0UserInfo != null) {
                         String email = auth0UserInfo.getEmail();

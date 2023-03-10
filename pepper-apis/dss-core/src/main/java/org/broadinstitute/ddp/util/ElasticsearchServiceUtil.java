@@ -54,7 +54,9 @@ public final class ElasticsearchServiceUtil {
             if (StringUtils.isEmpty(umbrella) || StringUtils.isEmpty(studyGuid)) {
                 throw new IllegalStateException("Could not create ES index for study with id: " + studyDto.getId());
             }
-            indices.put(elasticSearchIndexType, String.join(".", type, umbrella, studyGuid));
+            // todo arz fixme set instance id prefix dynamically from db
+            String instanceId = "cmi-pepper-dev.testing";
+            indices.put(elasticSearchIndexType, String.join(".", type, instanceId,umbrella, studyGuid));
         }
 
         return indices;
