@@ -227,8 +227,11 @@ public class Housekeeping {
         }
         TransactionWrapper.useTxn(TransactionWrapper.DB.APIS, LanguageStore::init);
 
+        log.info("Starting scheduler");
         setupScheduler(cfg);
+        log.info("Starting task receiver");
         setupTaskReceiver(cfg, pubSubProject);
+        log.info("Starting file scanner receiver");
         setupFileScanResultReceiver(cfg, pubSubProject);
 
         final PubSubConnectionManager pubsubConnectionManager = new PubSubConnectionManager(usePubSubEmulator);
@@ -242,11 +245,13 @@ public class Housekeeping {
                         DEFAULT_SUBSCRIBER_AWAIT_RUNNING_TIMEOUT_SEC),
                 new PubSubTaskProcessorFactoryImpl());
         try {
+            log.info("Starting pubsub connection service");
             pubSubTaskConnectionService.create();
         } catch (PubSubTaskException e) {
             log.error("Failed to init PubSubTask API", e);
         }
 
+        log.info("Starting more message receivers");
         TransactionWrapper.useTxn(TransactionWrapper.DB.APIS, handle -> {
             JdbiMessageDestination messageDestinationDao = handle.attach(JdbiMessageDestination.class);
             for (String topicName : messageDestinationDao.getAllTopics()) {
@@ -263,9 +268,11 @@ public class Housekeeping {
             }
         });
 
+        log.info("Waiting for startup monitor");
         synchronized (startupMonitor) {
             startupMonitor.notify();
         }
+        log.info("startup monitor complete");
 
         PexInterpreter pexInterpreter = new TreeWalkInterpreter();
         PubSubMessageBuilder messageBuilder = new PubSubMessageBuilder(cfg);
@@ -277,11 +284,13 @@ public class Housekeeping {
         String envPort = System.getenv(ENV_PORT);
         if (envPort != null) {
             // We're likely in an GAE environment, so respond to the start hook before starting main event loop.
+            log.info("adding startup hook listener");
             respondToGAEStartHook(envPort);
         }
 
         //loop to pickup pending events on main DB API and create messages to send over to Housekeeping
         while (!stop) {
+            log.info("starting event loop");
             try {
                 // in one transaction, query the list of events to consider dispatching
                 final List<QueuedEventDto> pendingEvents = new ArrayList<>();
