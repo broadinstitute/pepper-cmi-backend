@@ -56,7 +56,7 @@ public final class ElasticsearchServiceUtil {
             }
             // todo arz fixme set instance id prefix dynamically from db
             String instanceId = "cmi-pepper-dev.testing";
-            indices.put(elasticSearchIndexType, String.join(".", type, instanceId,umbrella, studyGuid));
+            indices.put(elasticSearchIndexType, String.join(".", type, instanceId, umbrella, studyGuid));
         }
 
         return indices;
