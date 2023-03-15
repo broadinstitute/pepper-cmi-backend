@@ -1,14 +1,14 @@
 {
   "indices": [
     {
-      "names": ["activity_definition.cmi.*"],
+      "names": ["activity_definition.cmi-isolated.*"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": ["*"]
       }
     },
     {
-      "names": ["participants.cmi.angio"],
+      "names": ["participants.cmi-isolated.angio"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": [
@@ -81,7 +81,7 @@
       }
     },
     {
-      "names": ["participants.cmi.cmi-brain"],
+      "names": ["participants.cmi-isolated.cmi-brain"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": [
@@ -130,7 +130,7 @@
       }
     },
     {
-      "names": ["participants.cmi.cmi-mbc"],
+      "names": ["participants.cmi-isolated.cmi-mbc"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": [
@@ -216,7 +216,7 @@
       }
     },
     {
-      "names": ["participants.cmi.cmi-osteo"],
+      "names": ["participants.cmi-isolated.cmi-osteo"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": [

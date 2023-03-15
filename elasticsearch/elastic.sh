@@ -10,17 +10,17 @@ BASE_URL=""
 CREDENTIALS=""
 
 print_usage() {
-  echo 'usage: elastic.sh <version> <environment> <command> <args>...'
+  echo 'usage: elastic.sh <environment> <command> <args>...'
   echo '       elastic.sh [-h, --help]'
 }
 
 print_help() {
   cat << 'EOM'
 USAGE:
-  elastic.sh [OPTIONS] <VER> <ENV> <COMMAND> <ARGS>...
+  # todo arz remove version, map to different vault paths
 
-VER:
-  the version, i.e. v1
+  # todo arz what are the space concepts in kibana?
+  elastic.sh [OPTIONS] <ENV> <COMMAND> <ARGS>...
 
 ENV:
   the environment, i.e. local/dev/test/staging/prod
@@ -53,9 +53,8 @@ EOM
 }
 
 read_vault_value() {
-  local ver="$1"
-  local env="$2"
-  local name="$3"
+  local env="$1"
+  local name="$2"
   vault read --field "$name" "secret/$env/elasticsearch"
 }
 
@@ -63,9 +62,9 @@ set_api_credentials() {
   if [[ "$ENVIRONMENT" == 'local' ]]; then
     BASE_URL='http://localhost:9200'
   else
-    BASE_URL="$(read_vault_value "$VERSION" "$ENVIRONMENT" 'endpoint')"
-    local username="$(read_vault_value "$VERSION" "$ENVIRONMENT" 'rootUsername')"
-    local password="$(read_vault_value "$VERSION" "$ENVIRONMENT" 'rootPassword')"
+    BASE_URL="$(read_vault_value "$ENVIRONMENT" 'endpoint')"
+    local username="$(read_vault_value  "$ENVIRONMENT" 'rootUsername')"
+    local password="$(read_vault_value "$ENVIRONMENT" 'rootPassword')"
     CREDENTIALS="$(echo -n "$username:$password" | base64)"
   fi
 }
@@ -180,34 +179,33 @@ main() {
     exit 0
   fi
 
-  VERSION="$1"
-  ENVIRONMENT="$2"
+  ENVIRONMENT="$1"
   set_api_credentials
 
-  case "$3" in
+  case "$2" in
     create-index)
-      create_index "$4"
+      create_index "$3"
       ;;
     create-script)
-      create_script "$4"
+      create_script "$3"
       ;;
     create-ingest-pipeline)
-      create_ingest_pipeline "$4"
+      create_ingest_pipeline "$3"
       ;;
     upload-template)
-      upload_template "$4"
+      upload_template "$3"
       ;;
     update_mapping)
       update_mapping
       ;;
     upload-user)
-      upload_user "$4" "$5"
+      upload_user "$3" "$4"
       ;;
     upload-role)
-      upload_role "$4"
+      upload_role "$3"
       ;;
     *)
-      echo "unknown command: '$3'"
+      echo "unknown command: '$2'"
       ;;
   esac
 }

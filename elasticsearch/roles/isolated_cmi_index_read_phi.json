@@ -1,28 +1,28 @@
 {
   "indices": [
     {
-      "names": ["activity_definition.cmi.*"],
+      "names": ["activity_definition.cmi-isolated.*"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": ["*"]
       }
     },
     {
-      "names": ["participants_structured.cmi.*"],
+      "names": ["participants_structured.cmi-isolated.*"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": ["*"]
       }
     },
     {
-      "names": ["participants.cmi.*"],
+      "names": ["participants.cmi-isolated.*"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": ["*"]
       }
     },
     {
-      "names": ["users.cmi.*"],
+      "names": ["users.cmi-isolated.*"],
       "privileges": ["read", "view_index_metadata"],
       "field_security": {
         "grant": ["*"]

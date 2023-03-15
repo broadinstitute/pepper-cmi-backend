@@ -55,7 +55,11 @@ public final class ElasticsearchServiceUtil {
                 throw new IllegalStateException("Could not create ES index for study with id: " + studyDto.getId());
             }
             // todo arz fixme set instance id prefix dynamically from db
-            String instanceId = "cmi-pepper-dev.testing";
+            String instanceId = "cmi-isolated"; // todo maybe config file value?
+
+            // make sure that current cmi.* doesn't pick up new indexes
+            // new naming pattern for isolated indexes
+            // new roles that match the new index name patterns
             indices.put(elasticSearchIndexType, String.join(".", type, instanceId, umbrella, studyGuid));
         }
 
