@@ -847,9 +847,6 @@ jobs:
       name: test-executor
     working_directory: *pepper_apis_path
     parameters:
-      skip_tests:
-        type: boolean
-        default: false
       allow_skip_job:
         type: boolean
         default: false
@@ -877,7 +874,7 @@ jobs:
             - run-maven-with-pepper-options:
                 module: dss-core
                 phase: test
-                skip_tests: << parameters.skip_tests >>
+                skip_tests: << pipeline.parameters.skip_tests >>
                 skip_checkstyle: true
                 additional_options: '-DPUBSUB_EMULATOR_HOST=localhost:8442 -Dtest=ServerInSameProcessIntegrationTestSuite -DforkMode=never'
                 restore_m2_cache: false
@@ -890,9 +887,6 @@ jobs:
     working_directory: *pepper_apis_path
     parallelism: <<parameters.parallelism>>
     parameters:
-      skip_tests:
-        type: boolean
-        default: false
       parallelism:
         type: integer
         default: 2
@@ -926,7 +920,7 @@ jobs:
             - restore-ddp-cache
             - run-maven-with-pepper-options: # Running the tests. Only those assigned to this parallel job!
                 phase: test
-                skip_tests: << parameters.skip_tests >>
+                skip_tests: << pipeline.parameters.skip_tests >>
                 module: dss-core
                 additional_options: '-PCircleciParallelBuild -Dsurefire.excludesFile=$IGNORE_CLASS_LIST_PATH -DcachingDisabled=true'
                 save_m2_cache: true
@@ -1119,16 +1113,12 @@ workflows:
 
   # Triggered from a local script to test PR changes
   combined-build-test-workflow:
-    parameters:
-      skip_tests:
-        type: boolean
-        default: false
     when:
       equal: ["build-test", << pipeline.parameters.action >>]
     jobs:
       - dss-parallel-compile-and-test-job:
           parallelism: << pipeline.parameters.test_parallelism >> # the caller of this workflow will tell us the parallelism
-          skip_tests: << pipelines.parameters.skip_tests >>
+          skip_tests: << pipeline.parameters.skip_tests >>
       - dsm-compile-and-run-tests-job
       - build-api-docs-job
 
@@ -1150,7 +1140,6 @@ workflows:
     jobs:
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
-          skip_tests: << pipeline.parameters.skip_tests >>
       - dss-deploy-jar-from-workspace-job:
           requires:
             - dss-parallel-compile-and-test-job
@@ -1176,7 +1165,6 @@ workflows:
     jobs:
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
-          skip_tests: << pipeline.parameters.skip_tests >>
       - dss-store-jar-job:
           requires:
             - dss-parallel-compile-and-test-job
