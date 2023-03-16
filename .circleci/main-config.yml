@@ -402,7 +402,7 @@ commands:
           command: |
             set -u
             pwd
-            gcloud app deploy --version="${SHORT_GIT_SHA}" --project "${ENVIRONMENT}" <<parameters.deploy_dir>>/<<parameters.jar_base_name>>.yaml
+            gcloud app deploy --version="${SHORT_GIT_SHA}" --stop-previous-version --project "${ENVIRONMENT}" <<parameters.deploy_dir>>/<<parameters.jar_base_name>>.yaml
       - update-deployment-sheet:
           jar_base_name: <<parameters.jar_base_name>>
       - delete-old-service-versions:

@@ -194,6 +194,7 @@ public class Housekeeping {
     }
 
     public static void main(String[] args) {
+        log.info("Starting up housekeeping");
         start(args, null);
     }
 
@@ -211,6 +212,7 @@ public class Housekeeping {
         Config sqlConfig = ConfigFactory.load(ConfigFile.SQL_CONFIG_FILE);
         DBUtils.loadDaoSqlCommands(sqlConfig);
 
+        log.info("Starting transaction wrappers");
         if (!TransactionWrapper.isInitialized()) {
             TransactionWrapper.init(new TransactionWrapper.DbConfiguration(TransactionWrapper.DB.HOUSEKEEPING,
                             maxConnections, housekeepingDbUrl),
@@ -218,6 +220,7 @@ public class Housekeeping {
                             maxConnections, apisDbUrl));
         }
 
+        log.info("connection pools started");
         if (doLiquibase) {
             log.info("Running Pepper liquibase migrations against " + apisDbUrl);
             LiquibaseUtil.runLiquibase(apisDbUrl, TransactionWrapper.DB.APIS);
