@@ -1114,6 +1114,10 @@ parameters:
     type: boolean
     default: false
 
+  skip_tests:
+    type: boolean
+    default: false
+
 
 workflows:
   version: 2
