@@ -132,8 +132,14 @@ public class PubSubConnectionManager {
     public Topic createTopicIfNotExists(ProjectTopicName topicName) {
         Topic topic = null;
         try {
-            topic = adminClient.createTopic(topicName);
-            log.info("Created topic {} for project {}", topicName.getTopic(), topicName.getProject());
+            topic = adminClient.getTopic(topicName);
+
+            if (topic == null) {
+                topic = adminClient.createTopic(topicName);
+                log.info("Created topic {} for project {}", topicName.getTopic(), topicName.getProject());
+            } else {
+                log.info("Topic {} already exists in project {} ", topicName.getTopic(), topicName.getProject());
+            }
         } catch (ApiException e) {
             if (e.getStatusCode().getCode() != StatusCode.Code.ALREADY_EXISTS) {
                 throw new RuntimeException(String.format("Error creating topic %s in project %s.  Status code: %s.  "

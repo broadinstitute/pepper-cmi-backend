@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.google.api.gax.core.ExecutorProvider;
 import com.google.api.gax.core.InstantiatingExecutorProvider;
+import com.google.api.gax.rpc.NotFoundException;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.pubsub.v1.ProjectSubscriptionName;
@@ -106,10 +107,15 @@ public class PubSubTaskConnectionService {
             pubSubTaskSubscriber.addListener(
                     new Subscriber.Listener() {
                         public void failed(Subscriber.State from, Throwable failure) {
-                            log.error(errorMsg("Unrecoverable failure happened during subscribing to subscription "
-                                    + projectSubscriptionName), failure);
-                            if (!executorProvider.getExecutor().isShutdown()) {
-                                createPubSubTaskSubscriber(executorProvider, callbackExecutor);
+                            if (!(failure instanceof NotFoundException)) {
+                                log.error(errorMsg("Failure happened during subscribing to subscription "
+                                        + projectSubscriptionName), failure);
+                                if (!executorProvider.getExecutor().isShutdown()) {
+                                    createPubSubTaskSubscriber(executorProvider, callbackExecutor);
+                                }
+                            } else {
+                                log.error("Unrecoverable failure happened while subscribing to " + projectSubscriptionName + ".  "
+                                + "No attempt will be made to re-subscribe.", failure);
                             }
                         }
                     },

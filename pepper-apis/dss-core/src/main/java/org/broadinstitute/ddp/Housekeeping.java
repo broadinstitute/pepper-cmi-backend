@@ -26,6 +26,7 @@ import com.google.api.core.ApiService;
 import com.google.api.gax.core.ExecutorProvider;
 import com.google.api.gax.core.InstantiatingExecutorProvider;
 import com.google.api.gax.rpc.ApiException;
+import com.google.api.gax.rpc.NotFoundException;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.pubsub.v1.MessageReceiver;
 import com.google.cloud.pubsub.v1.Publisher;
@@ -200,6 +201,14 @@ public class Housekeeping {
 
     public static void start(String[] args, SendGridSupplier sendGridSupplier) {
         LogbackConfigurationPrinter.printLoggingConfiguration();
+
+        String envPort = System.getenv(ENV_PORT);
+        if (envPort != null) {
+            // We're likely in an GAE environment, so respond to the start hook before starting main event loop.
+            log.info("adding startup hook listener");
+            respondToGAEStartHook(envPort);
+        }
+
         Config cfg = ConfigManager.getInstance().getConfig();
         boolean doLiquibase = cfg.getBoolean(ConfigFile.DO_LIQUIBASE);
         int maxConnections = cfg.getInt(ConfigFile.HOUSEKEEPING_NUM_POOLED_CONNECTIONS);
@@ -221,6 +230,7 @@ public class Housekeeping {
         }
 
         log.info("connection pools started");
+        // todo arz fixme liquobase startup takes forever and stuff breaks.  need to enable doLiquibase in vault.
         if (doLiquibase) {
             log.info("Running Pepper liquibase migrations against " + apisDbUrl);
             LiquibaseUtil.runLiquibase(apisDbUrl, TransactionWrapper.DB.APIS);
@@ -261,6 +271,7 @@ public class Housekeeping {
                 log.info("Initializing subscription for topic {}", topicName);
                 ProjectTopicName projectTopicName = ProjectTopicName.of(pubSubProject, topicName);
                 pubsubConnectionManager.createTopicIfNotExists(projectTopicName);
+                // todo arz create PARTICIPANT_NOTIFICATION topic in GCP
                 // todo arz investigate topic naming vs. subscription naming
                 ProjectSubscriptionName projectSubscriptionName = ProjectSubscriptionName.of(
                         projectTopicName.getProject(), topicName);
@@ -270,6 +281,7 @@ public class Housekeeping {
                 setupMessageReceiver(pubsubConnectionManager, projectSubscriptionName, cfg, sendGridSupplier);
             }
         });
+        log.info(("Completed more message receivers"));
 
         log.info("Waiting for startup monitor");
         synchronized (startupMonitor) {
@@ -283,13 +295,6 @@ public class Housekeeping {
 
         heartbeatMonitor = new StackdriverMetricsTracker(StackdriverCustomMetric.HOUSEKEEPING_CYCLES,
                 PointsReducerFactory.buildMaxPointReducer());
-
-        String envPort = System.getenv(ENV_PORT);
-        if (envPort != null) {
-            // We're likely in an GAE environment, so respond to the start hook before starting main event loop.
-            log.info("adding startup hook listener");
-            respondToGAEStartHook(envPort);
-        }
 
         //loop to pickup pending events on main DB API and create messages to send over to Housekeeping
         while (!stop) {
@@ -604,11 +609,16 @@ public class Housekeeping {
         newSubscriber.addListener(new ApiService.Listener() {
             @Override
             public void failed(ApiService.State from, Throwable failure) {
-                log.error("Subscriber to subscription {} encountered unrecoverable failure from {}"
-                        + ", rebuilding subscriber", subscription, from, failure);
-                if (!executorProvider.getExecutor().isShutdown()) {
-                    startNewSubscriberWithRecovery(subscription, builder, executorProvider, callbackExecutor, consumer);
+                if (!(failure instanceof NotFoundException)) {
+                    log.error("Subscriber to subscription {} encountered failure from {}"
+                            + ", rebuilding subscriber", subscription, from, failure);
+                    if (!executorProvider.getExecutor().isShutdown()) {
+                        startNewSubscriberWithRecovery(subscription, builder, executorProvider, callbackExecutor, consumer);
+                    }
+                } else {
+                    log.error("Subscription to " + subscription + " failed due to unrecoverable error.  Shutting down subscriber.", failure);
                 }
+
             }
         }, callbackExecutor);
 
