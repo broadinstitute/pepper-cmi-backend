@@ -1119,6 +1119,10 @@ workflows:
 
   # Triggered from a local script to test PR changes
   combined-build-test-workflow:
+    parameters:
+      skip_tests:
+        type: boolean
+        default: false
     when:
       equal: ["build-test", << pipeline.parameters.action >>]
     jobs:
