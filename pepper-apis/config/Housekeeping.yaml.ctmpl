@@ -13,7 +13,7 @@ manual_scaling:
 # todo arz give housekeeping and backends different app names for tcell
 
 {{if and (or (eq $environment "pepper-cmi-prod") (eq $environment "pepper-cmi-staging") (eq $environment "pepper-cmi-dev") (eq $environment "pepper-cmi-test")) (eq $gae "true") }}
-entrypoint: java -javaagent:tcell/tcellagent.jar -Xmx1340m -jar Housekeeping.jar # -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_enable_heap_sampling=true,-cprof_service=housekeeping,-cprof_cpu_use_per_thread_timers=true,-logtostderr
+entrypoint: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=9900 -javaagent:tcell/tcellagent.jar -Xmx1340m -jar Housekeeping.jar # -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_enable_heap_sampling=true,-cprof_service=housekeeping,-cprof_cpu_use_per_thread_timers=true,-logtostderr
 {{else}}
 entrypoint: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=9900 -javaagent:tcell/tcellagent.jar -Xmx1640m -jar Housekeeping.jar
 {{end}}
