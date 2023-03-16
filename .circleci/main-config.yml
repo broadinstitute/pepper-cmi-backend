@@ -921,9 +921,13 @@ jobs:
                 skip_checkstyle: true
                 skip_tests: true
                 additional_options: -am
-            - create-test-dbs
-            - start-ddp-test-server # starts DDP server. And execute Liquibase DB population
-            - compute-parallel-test-split
+            - when:
+                condition:
+                  - not: << parameters.skip_tests >>
+                steps:
+                  - create-test-dbs
+                  - start-ddp-test-server # starts DDP server. And execute Liquibase DB population
+                  - compute-parallel-test-split
             - restore-ddp-cache
             - run-maven-with-pepper-options: # Running the tests. Only those assigned to this parallel job!
                 phase: test
