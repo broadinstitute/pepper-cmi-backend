@@ -206,6 +206,7 @@ commands:
             echo "pipeline.git.branch << pipeline.git.branch >>"
             echo "pipeline.git.revision << pipeline.git.revision >>"
             echo "pipeline.git.base_revision << pipeline.git.base_revision >>"
+            echo "pipeline.parameters.skip_tests << pipeline.parameters.skip_tests >> "
 
   store-jar:
     description: Store jar generated for Java module in a Google bucket.
@@ -884,11 +885,6 @@ jobs:
             - save-ddp-cache
 
   dss-parallel-compile-and-test-job:
-    description: Job that runs DSS tests that CAN be done in parallel
-    executor:
-      name: test-executor
-    working_directory: *pepper_apis_path
-    parallelism: <<parameters.parallelism>>
     parameters:
       parallelism:
         type: integer
@@ -899,6 +895,11 @@ jobs:
       pepper_apis_path:
         type: string
         default: *pepper_apis_path
+    description: Job that runs DSS tests that CAN be done in parallel
+    executor:
+      name: test-executor
+    working_directory: *pepper_apis_path
+    parallelism: <<parameters.parallelism>>
     steps:
       - run: echo "Doing dss-parallel-compile-and-test-job << pipeline.parameters.dss >>"
       - when:
@@ -1146,6 +1147,7 @@ workflows:
     jobs:
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
+          skip_tests: << pipeline.parameters.skip_tests >>
       - dss-deploy-jar-from-workspace-job:
           requires:
             - dss-parallel-compile-and-test-job
