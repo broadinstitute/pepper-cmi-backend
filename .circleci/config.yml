@@ -20,6 +20,7 @@ parameters:
   action:
     type: enum
     enum: [ "build-test", "build-test-deploy", "build-test-store", "retrieve-deploy", "nothing" ]
+    # todo arz pass in the pipeline skiptests param when sending along these actions and cascade those down into sub jobs
     default: "nothing"
 
 workflows:
@@ -31,7 +32,7 @@ workflows:
     jobs:
       - continuation/continue:
           configuration_path: .circleci/main-config.yml
-          parameters: '{"action":"build-test-deploy","dss": true,"api-docs": false}'
+          parameters: '{"action":"build-test-deploy","dss": true,"api-docs": false, "skip_tests": << pipeline.parameters.skip_tests >> }'
 
   build-test-workflow:
     description: |
