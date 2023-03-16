@@ -81,7 +81,7 @@ workflows:
       # Only DSS projects and API docs affected!
       - continuation/continue:
           configuration_path: .circleci/main-config.yml
-          parameters: '{"action":"build-test-store","dss": true,"api-docs": true}'
+          parameters: '{"action":"build-test-store","dss": true,"api-docs": true, "skip_tests": << pipeline.parameters.skip_tests >>}'
           filters:
             branches:
               only:
@@ -109,7 +109,7 @@ workflows:
       # Only DSM affected!
       - continuation/continue:
           configuration_path: .circleci/main-config.yml
-          parameters: '{"action":"build-test-store","dsm": true}'
+          parameters: '{"action":"build-test-store","dsm": true, "skip_tests": << pipeline.parameters.skip_tests >>}'
           filters:
             branches:
               only:
