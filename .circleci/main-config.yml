@@ -1124,7 +1124,7 @@ workflows:
     jobs:
       - dss-parallel-compile-and-test-job:
           parallelism: << pipeline.parameters.test_parallelism >> # the caller of this workflow will tell us the parallelism
-          skip_tests: true # << pipeline.parameters.skip_tests >>
+          skip_tests: << pipeline.parameters.skip_tests >>
       - dsm-compile-and-run-tests-job
       - build-api-docs-job
 
@@ -1146,7 +1146,6 @@ workflows:
     jobs:
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
-          skip_tests: << pipeline.parameters.skip_tests >>
       - dss-deploy-jar-from-workspace-job:
           requires:
             - dss-parallel-compile-and-test-job
