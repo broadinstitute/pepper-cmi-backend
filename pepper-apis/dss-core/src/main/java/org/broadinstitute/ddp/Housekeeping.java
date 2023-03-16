@@ -616,7 +616,8 @@ public class Housekeeping {
                         startNewSubscriberWithRecovery(subscription, builder, executorProvider, callbackExecutor, consumer);
                     }
                 } else {
-                    log.error("Subscription to " + subscription + " failed due to unrecoverable error.  Shutting down subscriber.", failure);
+                    log.error("Subscription to " + subscription + " failed due to unrecoverable error.  Shutting down subscriber.",
+                            failure);
                 }
 
             }

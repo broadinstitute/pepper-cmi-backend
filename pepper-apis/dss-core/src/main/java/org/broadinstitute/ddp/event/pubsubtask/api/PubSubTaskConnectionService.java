@@ -115,7 +115,7 @@ public class PubSubTaskConnectionService {
                                 }
                             } else {
                                 log.error("Unrecoverable failure happened while subscribing to " + projectSubscriptionName + ".  "
-                                + "No attempt will be made to re-subscribe.", failure);
+                                        + "No attempt will be made to re-subscribe.", failure);
                             }
                         }
                     },
