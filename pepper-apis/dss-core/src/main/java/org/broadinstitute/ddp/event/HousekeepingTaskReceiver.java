@@ -4,6 +4,7 @@ import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.MessageReceiver;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PubsubMessage;
 import lombok.AllArgsConstructor;
@@ -190,7 +191,9 @@ public class HousekeepingTaskReceiver implements MessageReceiver {
 
     @Getter
     public static class ExportPayload {
+        @SerializedName("index")
         private String index;
+        @SerializedName("study")
         private String study;
     }
 }

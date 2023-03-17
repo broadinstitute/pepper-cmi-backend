@@ -532,6 +532,7 @@ public class Housekeeping {
         boolean enableHKeepTasks = cfg.getBoolean(ConfigFile.PUBSUB_ENABLE_HKEEP_TASKS);
         if (enableHKeepTasks) {
             var subName = ProjectSubscriptionName.of(projectId, cfg.getString(ConfigFile.PUBSUB_HKEEP_TASKS_SUB));
+            log.info("Setting up housekeeping subscription " + subName);
             var receiver = new HousekeepingTaskReceiver(subName, scheduler);
             taskSubscriber = Subscriber.newBuilder(subName, receiver)
                     .setParallelPullCount(1)

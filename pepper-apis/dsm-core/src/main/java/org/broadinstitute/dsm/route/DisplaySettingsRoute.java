@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.dsm.db.Assignee;
@@ -162,6 +163,11 @@ public class DisplaySettingsRoute extends RequestHandler {
                     }
 
                     logger.info("returning settings");
+                    try {
+                        logger.info(new Gson().toJson(displaySettings));
+                    } catch (Exception e) {
+                        logger.error("Could not convert settings to json", e);
+                    }
                     return displaySettings;
                 }
             } else {
