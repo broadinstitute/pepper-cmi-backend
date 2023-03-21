@@ -121,7 +121,7 @@ public class GetPdfRoute implements Route {
                 String msg = String.format("Failed to fetch %s pdf for study %s and participant %s",
                         configName, studyGuid, participantGuidOrAltPid);
                 ApiError err = new ApiError(ErrorCodes.SERVER_ERROR, msg);
-                log.error(err.getMessage());
+                log.error(msg, e);
                 throw ResponseUtil.haltError(response, HttpStatus.SC_INTERNAL_SERVER_ERROR, err);
             }
         });
