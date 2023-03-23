@@ -36,7 +36,7 @@ user_notification_template user_template,
 notification_template t,
 umbrella_study s
 where
-s.study_name = 'cmi-brain'
+s.guid = 'cmi-brain'
 and
 s.umbrella_study_id = c.umbrella_study_id
 and
@@ -69,7 +69,8 @@ public class SendgridLegacyTemplateMigrator {
 
         log.info("Using source API key " + sourceSendgridApiKey);
         var migrator = new SendgridLegacyTemplateMigrator();
-        migrator.addVariableMapping(NotificationTemplateVariables.DDP_BASE_WEB_URL, NotificationTemplateVariables.BASE_WEB_URL);
+        migrator.addVariableMapping(NotificationTemplateVariables.DDP_BASE_WEB_URL,
+                NotificationTemplateVariables.BASE_WEB_URL);
         migrator.addVariableMapping(NotificationTemplateVariables.DDP_ACTIVITY_INSTANCE_GUID,
                 NotificationTemplateVariables.ACTIVITY_INSTANCE_GUID);
         migrator.addVariableMapping(NotificationTemplateVariables.DDP_PARTICIPANT_FIRST_NAME,
@@ -318,7 +319,8 @@ public class SendgridLegacyTemplateMigrator {
         private String sourceTemplateId;
 
         public String generateUpdateSql(String newTemplateId) {
-            return "update notification_template t set template_key = '" + newTemplateId + "' where t.notification_template_id = "
+            return "update notification_template t set is_dynamic = true, template_key = '"
+                    + newTemplateId + "' where t.notification_template_id = "
                     + templatePrimaryKey + ";";
         }
 
