@@ -19,10 +19,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.auth0.client.mgmt.ManagementAPI;
+import com.auth0.client.mgmt.filter.ClientFilter;
 import com.auth0.client.mgmt.filter.ConnectionFilter;
 import com.auth0.exception.APIException;
 import com.auth0.json.mgmt.Connection;
 import com.auth0.json.mgmt.ConnectionsPage;
+import com.auth0.json.mgmt.client.Client;
+import com.auth0.json.mgmt.client.ClientsPage;
 import com.auth0.json.mgmt.tickets.PasswordChangeTicket;
 import com.auth0.json.mgmt.users.User;
 import com.auth0.jwt.JWT;
@@ -241,6 +244,36 @@ public class Auth0ManagementClient {
             currentTotal = apiResult.getBody().size();
         }
         return ApiResult.ok(HttpStatus.SC_OK, connections);
+    }
+
+    public List<Client> listClients() {
+        int pageNum = 0;
+        String msg = String.format("Hit rate limit while listing clients for tenant '%s', retrying", baseUrl);
+        Integer currentTotal = MAX_RESULTS_PER_PAGE;
+        List<Client> clients = new ArrayList<>();
+        while (currentTotal == MAX_RESULTS_PER_PAGE) {
+            //keep make API calls with 1 page at a time until current iteration results size is maxPerPage (else no more results)
+            var filter = new ClientFilter().withPage(pageNum, MAX_RESULTS_PER_PAGE);
+            ApiResult<List<Client>, APIException> apiResult = withRetries(msg, () -> {
+                try {
+                    mgmtApi.setApiToken(getToken());
+                    ClientsPage page = mgmtApi.clients().list(filter).execute();
+                    return ApiResult.ok(HttpStatus.SC_OK, page.getItems());
+                } catch (APIException e) {
+                    return ApiResult.err(e.getStatusCode(), e);
+                } catch (Exception e) {
+                    return ApiResult.thrown(e);
+                }
+            });
+            if (apiResult.hasFailure()) {
+                throw new DDPException("Could not get clients:" + apiResult.getError());
+            }
+            pageNum++;
+            clients.addAll(apiResult.getBody());
+            currentTotal = apiResult.getBody().size();
+        }
+
+        return clients;
     }
 
     /**

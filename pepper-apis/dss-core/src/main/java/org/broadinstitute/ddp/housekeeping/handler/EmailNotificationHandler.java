@@ -131,8 +131,8 @@ public class EmailNotificationHandler implements HousekeepingMessageHandler<Noti
 
         var versionResult = sendGrid.getTemplateActiveVersionId(templateId);
         if (versionResult.hasThrown() || versionResult.getStatusCode() != 200) {
-            String msg = String.format("[%s] error looking up version of template '%s': %s",
-                    versionResult.getStatusCode(), templateId, versionResult.getError());
+            String msg = String.format("[%s] error looking up version of template '%s': %s with key %s",
+                    versionResult.getStatusCode(), templateId, versionResult.getError(), message.getApiKey());
             if (versionResult.hasThrown()) {
                 throw new MessageHandlingException(msg, versionResult.getThrown(), true);
             } else {

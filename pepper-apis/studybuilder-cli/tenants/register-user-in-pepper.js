@@ -228,9 +228,14 @@ function (user, context, callback) {
             } else {
                 console.log(context);
             }
-            
+
+            var pepperUrl = configuration.pepperBaseUrl;
+            if (context.clientMetadata.backendUrl) {
+                pepperUrl = context.clientMetadata.backendUrl;
+            }
+
             request.post({
-                url: configuration.pepperBaseUrl + '/pepper/v1/register',
+                url: pepperUrl + '/pepper/v1/register',
                 json: pepper_params,
                 timeout: 15000
             }, function(err, response, body) {
