@@ -796,7 +796,7 @@ public class Housekeeping {
                                         if (keyParts.length == 3 && keyParts[0].equals("SG")) {
                                             log.info("creating EmailNotificationHandler using SendGrid key id {}", keyParts[1]);
                                         } else {
-                                            log.warn("SendGrid API key is in an unexpected format.");
+                                            log.warn("SendGrid API key is in an unexpected format: " + sendGridKey);
                                         }
 
                                         new EmailNotificationHandler(sendGridProvider.get(sendGridKey),

@@ -183,7 +183,8 @@ public class UserRegistrationRoute extends ValidatedJsonInputRoute<UserRegistrat
                 publishRegisteredPubSubMessage(studyGuid, pair.getParticipantUser().getGuid());
                 ddpUserGuid.set(operatorUser.getGuid());
             } else {
-                log.info("Attempting to register existing user {} with client {} and study {}", auth0UserId, auth0ClientId, studyGuid);
+                log.info("Attempting to register existing user {} guid {} with client {} and study {}",
+                        auth0UserId, ddpUserGuid, auth0ClientId, studyGuid);
                 ddpUserGuid.set(handleExistingUser(response, payload, handle, study, operatorUser, mgmtClient));
             }
 
@@ -324,7 +325,9 @@ public class UserRegistrationRoute extends ValidatedJsonInputRoute<UserRegistrat
                                       Auth0ManagementClient mgmtClient) {
         String tempUserGuid = payload.getTempUserGuid();
         if (tempUserGuid != null) {
-            String msg = String.format("Using existing user to upgrade temporary user with guid '%s' is not supported", tempUserGuid);
+            String msg = String.format("Using existing user %s to upgrade temporary user with guid "
+                    + "'%s' via client %s is not supported", payload.getAuth0UserId(), payload.getAuth0ClientId(),
+                    tempUserGuid);
             log.warn(msg);
             throw ResponseUtil.haltError(response, HttpStatus.SC_UNPROCESSABLE_ENTITY, new ApiError(ErrorCodes.NOT_SUPPORTED, msg));
         }
