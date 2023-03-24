@@ -326,8 +326,8 @@ public class UserRegistrationRoute extends ValidatedJsonInputRoute<UserRegistrat
         String tempUserGuid = payload.getTempUserGuid();
         if (tempUserGuid != null) {
             String msg = String.format("Using existing user %s to upgrade temporary user with guid "
-                    + "'%s' via client %s is not supported", payload.getAuth0UserId(), payload.getAuth0ClientId(),
-                    tempUserGuid);
+                    + "'%s' via client %s is not supported", payload.getAuth0UserId(), tempUserGuid,
+                    payload.getAuth0ClientId());
             log.warn(msg);
             throw ResponseUtil.haltError(response, HttpStatus.SC_UNPROCESSABLE_ENTITY, new ApiError(ErrorCodes.NOT_SUPPORTED, msg));
         }
