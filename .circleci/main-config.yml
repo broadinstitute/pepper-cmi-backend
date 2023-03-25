@@ -38,7 +38,7 @@ references:
                           housekeepingdb
   studyserver_test_db: &studyserver_test_db
                          studyservicedb
-  test_parallellism: &test_parallelism 15
+  test_parallellism: &test_parallelism 1
   ddp_server_port: &ddp_server_port 5557
   ddp_cache_dir: &ddp_cache_dir #caching test artifacts like Auth0 users
                    /home/circleci/.ddp-cache
@@ -613,6 +613,7 @@ commands:
                     $CONFIG_FILE_OPTION  \
                     -Dmaven.repo.local=<< parameters.m2_repo >> <<parameters.additional_options>> \
                     $MODULES_OPTION || true # todo arz fixme write out test results cleanly, avoid exit code 134
+# maybe update docker container to more recent version of maven and JDK
           background: <<parameters.background>>
       - when:
           condition: << parameters.save_m2_cache >>
