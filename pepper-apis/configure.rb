@@ -7,10 +7,7 @@ $use_docker = ENV.fetch("USE_DOCKER", "true") == "true"
 
 $gae = ENV.fetch("GAE", "false")
 
-$version = ENV.fetch("VERSION") { |_|
-  puts "VERSION not set"
-  exit 1
-}
+$version = 'v1'
 
 $env = ENV.fetch("ENVIRONMENT") { |_|
   puts "ENVIRONMENT var not set"
@@ -36,7 +33,7 @@ $docsProxiedHost=ENV["DOCS_PROXIED_HOST"] || "documentation"
 puts "nginx will proxy docs to #{$docsProxiedHost}"
 
 $noSyslog = ENV.fetch("NO_SYSLOG", false)
-$image = $version + "_" + $env
+$image = $version + "v1_" + $env
 $manifest = ENV.fetch("MANIFEST", "manifest.rb")
 
 $debug_flag = ENV.fetch("DEBUG", true)
