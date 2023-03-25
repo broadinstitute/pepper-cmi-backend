@@ -58,7 +58,7 @@ executors:
           MYSQL_DATABASE: test_db
           MYSQL_USER: user
           MYSQL_PASSWORD: passw0rd
-    resource_class: large #default medium not big enough for tests
+    resource_class: medium+ #default medium not big enough for tests
 
   build-deploy-executor:
     docker: # todo: create new image endpoint, add this in admin tab for faster starts
@@ -131,12 +131,8 @@ commands:
               ENVIRONMENT=pepper-cmi-dev
             ;;
             ?(*_)test)
-              VAULT_PATH=pepper-cmi/dev
-              ENVIRONMENT=pepper-cmi-dev
-            ;;
-            ?(*_)staging)
-              VAULT_PATH=pepper-cmi/dev
-              ENVIRONMENT=pepper-cmi-dev
+              VAULT_PATH=pepper-cmi/dev/test
+              ENVIRONMENT=pepper-cmi-dev/test
             ;;
             ?(*_)production)
               VAULT_PATH=pepper-cmi/prod
@@ -206,7 +202,6 @@ commands:
             echo "pipeline.git.branch << pipeline.git.branch >>"
             echo "pipeline.git.revision << pipeline.git.revision >>"
             echo "pipeline.git.base_revision << pipeline.git.base_revision >>"
-            echo "pipeline.parameters.skip_tests << pipeline.parameters.skip_tests >> "
 
   store-jar:
     description: Store jar generated for Java module in a Google bucket.
@@ -617,7 +612,7 @@ commands:
                     -Ditext.license=output-config/itextkey.xml \
                     $CONFIG_FILE_OPTION  \
                     -Dmaven.repo.local=<< parameters.m2_repo >> <<parameters.additional_options>> \
-                    $MODULES_OPTION || true # todo arz write out test results cleanly
+                    $MODULES_OPTION
           background: <<parameters.background>>
       - when:
           condition: << parameters.save_m2_cache >>
@@ -700,19 +695,27 @@ commands:
         default: *ddp_cache_md5_file
     steps:
       - run:
+          name: Check CircleToken API Credentials
+          command: |
+            token_status_code=$(curl -s -o /dev/null -w "%{http_code}" "https://circleci.com/api/v2/me" --header "Circle-Token:$CIRCLE_TOKEN")
+            if [[ $token_status_code != "200" ]]; then
+              echo "The CircleCI *personal* API Token is no longer valid.  Please update the value of the environment variable CIRCLE_TOKEN."
+              echo "Stopping build"
+              exit 1
+            fi
+      - run:
           name: Download ddp-cache-md5 artifact
           command: |
             ddp_cache_md5='<<parameters.ddp_cache_md5_file>>'
-            latest_artifact_url="https://circleci.com/api/v1.1/project/github/broadinstitute/pepper-cmi-backend/latest/artifacts?circle-token=$CIRCLE_TOKEN"
-            # todo arz fixme
-            # md5_artifact_url=$(curl -sL "$latest_artifact_url" | jq -r '.[] | select(.node_index == 0) | select(.path == "ddp-cache-md5.txt") | .url')
-            # if [[ -n "$md5_artifact_url" ]]; then
-            #  echo "Downloading artifact file [$md5_artifact_url] to file [$ddp_cache_md5]"
-            #  curl -sL "$md5_artifact_url?circle-token=$CIRCLE_TOKEN" -o "$ddp_cache_md5"
-            # else
+            latest_artifact_url="https://circleci.com/api/v1.1/project/github/broadinstitute/ddp-cmi-backend/latest/artifacts?circle-token=$CIRCLE_TOKEN"
+            md5_artifact_url=$(curl -sL "$latest_artifact_url" | jq -r '.[] | select(.node_index == 0) | select(.path == "ddp-cache-md5.txt") | .url')
+            if [[ -n "$md5_artifact_url" ]]; then
+              echo "Downloading artifact file [$md5_artifact_url] to file [$ddp_cache_md5]"
+              curl -sL "$md5_artifact_url?circle-token=$CIRCLE_TOKEN" -o "$ddp_cache_md5"
+            else
               echo "No artifact file found, creating empty file [$ddp_cache_md5]"
               touch "$ddp_cache_md5"
-            # fi
+            fi
       - restore_cache:
           keys:
             - ddp-cache-{{ checksum "<<parameters.ddp_cache_md5_file>>" }}
@@ -823,7 +826,6 @@ jobs:
                 additional_options: -am
                 restore_m2_cache: true
                 save_m2_cache: false
-            - set-deployment-env
             - render-configs
             - create-test-dbs
             - restore-ddp-cache
@@ -842,15 +844,12 @@ jobs:
                 paths:
                   - repo
 
-  dss-compile-and-run-test-suite-job: # todo arz re-enable me, currently seg faulting on circle
+  dss-compile-and-run-test-suite-job:
     description: Job that runs DSS tests that cannot be done in parallel
     executor:
       name: test-executor
     working_directory: *pepper_apis_path
     parameters:
-      skip_tests:
-        type: boolean
-        default: false
       allow_skip_job:
         type: boolean
         default: false
@@ -871,35 +870,31 @@ jobs:
             - setup-shared-env
             - compile-all-jars:
                 restore_m2_cache: true
-            - set-deployment-env
             - render-configs
             - create-test-dbs
             - restore-ddp-cache
             - run-maven-with-pepper-options:
                 module: dss-core
                 phase: test
-                skip_tests: << parameters.skip_tests >>
+                skip_tests: false
                 skip_checkstyle: true
-                additional_options: '-DPUBSUB_EMULATOR_HOST=localhost:8442 -Dtest=ServerInSameProcessIntegrationTestSuite -DforkMode=never'
+                additional_options: '-Dtest=ServerInSameProcessIntegrationTestSuite'
                 restore_m2_cache: false
             - save-ddp-cache
 
   dss-parallel-compile-and-test-job:
-    parameters:
-      parallelism:
-        type: integer
-        default: 2
-      skip_tests:
-        type: boolean
-        default: false
-      pepper_apis_path:
-        type: string
-        default: *pepper_apis_path
     description: Job that runs DSS tests that CAN be done in parallel
     executor:
       name: test-executor
     working_directory: *pepper_apis_path
     parallelism: <<parameters.parallelism>>
+    parameters:
+      parallelism:
+        type: integer
+        default: 2
+      pepper_apis_path:
+        type: string
+        default: *pepper_apis_path
     steps:
       - run: echo "Doing dss-parallel-compile-and-test-job << pipeline.parameters.dss >>"
       - when:
@@ -912,7 +907,6 @@ jobs:
             - checkout:
                 path: *repo_path
             - setup-shared-env
-            - set-deployment-env
             - render-configs
             - run-maven-with-pepper-options: # Build stuff first so we can setup everything
                 phase: install
@@ -921,14 +915,13 @@ jobs:
                 skip_checkstyle: true
                 skip_tests: true
                 additional_options: -am
-            # todo arz pull out the parallel stuff when not testing
             - create-test-dbs
             - start-ddp-test-server # starts DDP server. And execute Liquibase DB population
             - compute-parallel-test-split
             - restore-ddp-cache
             - run-maven-with-pepper-options: # Running the tests. Only those assigned to this parallel job!
                 phase: test
-                skip_tests: << parameters.skip_tests >>
+                skip_tests: false
                 module: dss-core
                 additional_options: '-PCircleciParallelBuild -Dsurefire.excludesFile=$IGNORE_CLASS_LIST_PATH -DcachingDisabled=true'
                 save_m2_cache: true
@@ -1080,7 +1073,7 @@ jobs:
           name: Deploy docs website
           command: |
             set -u
-            gcloud app deploy --version="${SHORT_GIT_SHA}" --project "${ENVIRONMENT}" deploy/app.yaml
+            gcloud app deploy --version="${SHORT_GIT_SHA}" --stop-previous-version --project "${ENVIRONMENT}" deploy/app.yaml
       - delete-old-service-versions:
           deploy_dir: deploy
 
@@ -1115,10 +1108,6 @@ parameters:
     type: boolean
     default: false
 
-  skip_tests:
-    type: boolean
-    default: false
-
 
 workflows:
   version: 2
@@ -1128,9 +1117,9 @@ workflows:
     when:
       equal: ["build-test", << pipeline.parameters.action >>]
     jobs:
+      - dss-compile-and-run-test-suite-job
       - dss-parallel-compile-and-test-job:
           parallelism: << pipeline.parameters.test_parallelism >> # the caller of this workflow will tell us the parallelism
-          skip_tests: << pipeline.parameters.skip_tests >>
       - dsm-compile-and-run-tests-job
       - build-api-docs-job
 
@@ -1150,12 +1139,13 @@ workflows:
         - equal: ["build-test-deploy", << pipeline.parameters.action >>]
         - << pipeline.parameters.dss >>
     jobs:
+      - dss-compile-and-run-test-suite-job
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
-          skip_tests: << pipeline.parameters.skip_tests >>
       - dss-deploy-jar-from-workspace-job:
           requires:
             - dss-parallel-compile-and-test-job
+            - dss-compile-and-run-test-suite-job
 
   # Run DSM tests
   dsm-build-test-deploy-workflow:
@@ -1176,11 +1166,12 @@ workflows:
         - equal: ["build-test-store", << pipeline.parameters.action >>]
         - << pipeline.parameters.dss >>
     jobs:
+      - dss-compile-and-run-test-suite-job #running tests before we store!
       - dss-parallel-compile-and-test-job:
           parallelism: *test_parallelism
-          skip_tests: << pipeline.parameters.skip_tests >>
       - dss-store-jar-job:
           requires:
+            - dss-compile-and-run-test-suite-job
             - dss-parallel-compile-and-test-job
 
   # Deploy DSS applications from previously built jars in buckets
@@ -1213,6 +1204,5 @@ workflows:
         - << pipeline.parameters.dsm >>
     jobs:
       - deploy-dsm-stored-jar-job
-
 
 

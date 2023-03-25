@@ -7,9 +7,6 @@ orbs:
   continuation: circleci/continuation@0.2.0
 
 parameters:
-  skip_tests:
-    type: boolean
-    default: true
   on_demand:
     type: boolean
     default: false
@@ -20,7 +17,6 @@ parameters:
   action:
     type: enum
     enum: [ "build-test", "build-test-deploy", "build-test-store", "retrieve-deploy", "nothing" ]
-    # todo arz pass in the pipeline skiptests param when sending along these actions and cascade those down into sub jobs
     default: "nothing"
 
 workflows:
@@ -32,7 +28,7 @@ workflows:
     jobs:
       - continuation/continue:
           configuration_path: .circleci/main-config.yml
-          parameters: '{"action":"build-test-deploy","dss": true,"api-docs": false, "skip_tests": true }'
+          parameters: '{"action":"build-test-deploy","dss": true,"api-docs": false}'
 
   build-test-workflow:
     description: |
@@ -75,13 +71,13 @@ workflows:
             branches:
               only:
                 - develop
-                
+
       # Build DSS backend, Housekeeping and API docs, test and store build artifacts
       # Triggered on updates or creation of release candidate and hotfix branches with prefix specified in filter.
       # Only DSS projects and API docs affected!
       - continuation/continue:
           configuration_path: .circleci/main-config.yml
-          parameters: '{"action":"build-test-store","dss": true,"api-docs": true, "skip_tests": true}'
+          parameters: '{"action":"build-test-store","dss": true,"api-docs": true}'
           filters:
             branches:
               only:
@@ -109,7 +105,7 @@ workflows:
       # Only DSM affected!
       - continuation/continue:
           configuration_path: .circleci/main-config.yml
-          parameters: '{"action":"build-test-store","dsm": true, "skip_tests": true}'
+          parameters: '{"action":"build-test-store","dsm": true}'
           filters:
             branches:
               only:
@@ -132,8 +128,3 @@ workflows:
                 - dsm_test
                 - dsm_staging
                 - dsm_production
-
-
-
-
-
