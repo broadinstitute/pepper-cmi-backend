@@ -604,7 +604,7 @@ commands:
             if [[ ! -z '<<parameters.module>>' ]]; then
               MODULES_OPTION='-pl <<parameters.module>>'
             fi
-            mvn <<parameters.phase>> --batch-mode \
+            mvn -X <<parameters.phase>> --batch-mode \
                     -f <<parameters.pom_file>> \
                     $CHECKSTYLE_OPTION \
                     $SKIPTESTS_OPTION \
@@ -686,7 +686,7 @@ commands:
       - run:
           name: Compile and run checkstyle on all jars
           command: |
-            mvn install --batch-mode -DskipTests -Dmaven.repo.local=<< parameters.m2_repo >> -pl dsm-core,dss-core,studybuilder-cli -am
+            mvn -X install --batch-mode -DskipTests -Dmaven.repo.local=<< parameters.m2_repo >> -pl dsm-core,dss-core,studybuilder-cli -am
 
   restore-ddp-cache:
     description: Restore ddp cache

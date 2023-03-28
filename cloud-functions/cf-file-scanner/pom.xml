@@ -18,7 +18,7 @@
     <version.functions-framework>1.0.4</version.functions-framework>
     <version.flogger>0.4</version.flogger>
     <version.google.cloud>24.0.0</version.google.cloud>
-    <version.lombok>1.18.22</version.lombok>
+    <version.lombok>1.18.26</version.lombok>
   </properties>
 
   <dependencyManagement>
