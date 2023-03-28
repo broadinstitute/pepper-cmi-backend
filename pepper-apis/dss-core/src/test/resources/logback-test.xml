@@ -6,7 +6,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.broadinstitute.ddp.logging" level="trace">
+    <logger name="org.broadinstitute" level="trace">
         <appender-ref ref="STDOUT" />
     </logger>
 

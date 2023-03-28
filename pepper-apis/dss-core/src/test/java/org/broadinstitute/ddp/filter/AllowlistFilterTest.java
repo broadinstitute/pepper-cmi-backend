@@ -3,12 +3,6 @@ package org.broadinstitute.ddp.filter;
 import static org.broadinstitute.ddp.filter.AllowListFilter.allowlist;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static spark.Spark.awaitInitialization;
-import static spark.Spark.awaitStop;
-import static spark.Spark.get;
-import static spark.Spark.port;
-import static spark.Spark.stop;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -22,6 +16,7 @@ import org.broadinstitute.ddp.route.RouteTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import spark.Service;
 
 
 public class AllowlistFilterTest {
@@ -32,27 +27,32 @@ public class AllowlistFilterTest {
     public static final String BASEURL = "http://localhost:" + PORT;
 
     public static class TestServer {
+
+        private static Service service;
+
         static void startServer() {
-            port(6666);
+            service = Service.ignite().port(6666);
             String thisIp;
             try {
                 thisIp = InetAddress.getLocalHost().getHostAddress();
             } catch (UnknownHostException e) {
                 throw new RuntimeException(e);
             }
-            allowlist(ALLOWED, List.of(thisIp, "127.0.0.1", "55.444.555.555"));
-            get(ALLOWED, (req, res) -> "Welcome to Fantasy Island!");
+            allowlist(service, ALLOWED, List.of(thisIp, "127.0.0.1", "55.444.555.555"));
+            service.get(ALLOWED, (req, res) -> "Welcome to Fantasy Island!");
 
-            allowlist(NOT_ALLOWED, List.of("55.444.555.555"));
-            get("/notallowed", (req, res) -> "Intruder!");
+            allowlist(service, NOT_ALLOWED, List.of("55.444.555.555"));
+            service.get("/notallowed", (req, res) -> "Intruder!");
 
-            get(DONT_CARE, (req, res) -> "Aloha my friend!");
-            awaitInitialization();
+            service.get(DONT_CARE, (req, res) -> "Aloha my friend!");
+            service.awaitInitialization();
         }
 
         static void stopServer() {
-            stop();
-            awaitStop();
+            if (service != null) {
+                service.stop();
+                service.awaitStop();
+            }
         }
     }
 

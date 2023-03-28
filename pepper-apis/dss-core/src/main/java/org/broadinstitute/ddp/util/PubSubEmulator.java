@@ -26,6 +26,8 @@ import org.zeroturnaround.exec.stream.LogOutputStream;
 public class PubSubEmulator {
     private static final String STARTED_LOG_MESSAGE = "Server started";
 
+    private static final String NOT_INSTALLED = "You do not currently have this command group installed";
+
     private static final int PUBSUB_EMULATOR_TIMEOUT_MS = 10 * 1000;
     public static final String PUBSUB_EMULATOR_HOST = "PUBSUB_EMULATOR_HOST";
 
@@ -75,6 +77,10 @@ public class PubSubEmulator {
                                     if (line.contains("Exception")) {
                                         emulatorStarted.set(false);
                                         log.error("Error starting pubsub emulator: " + line);
+                                    }
+                                    if (line.contains(NOT_INSTALLED)) {
+                                        throw new DDPException("Please install the pubsub emulator. "
+                                                + "Gcloud reports it is not installed: " + line);
                                     }
                                 }
                             });

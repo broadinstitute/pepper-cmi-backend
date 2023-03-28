@@ -84,6 +84,7 @@ public class UpdateUserEmailRouteTest extends IntegrationTestSuite.TestCase {
         public static final String USER_GUID = "aa0fbbc0";
         public static final String NEW_PASSWORD = "Bf1L!h067Bxc";
         // Must be unique or else Auth0 will complain
+        // todo arz mark this user id as updated by a particular instance/environment/circle job
         public static final String NEW_EMAIL = UUID.randomUUID() + "@bbb.com";
         public static final String BLANK_EMAIL_PAYLOAD = "{\"email\": \"   \"}";
     }

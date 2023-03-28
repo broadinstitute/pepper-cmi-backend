@@ -12,6 +12,7 @@ import org.broadinstitute.ddp.util.ResponseUtil;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
+import spark.Service;
 
 @Slf4j
 public class AllowListFilter implements Filter {
@@ -21,6 +22,12 @@ public class AllowListFilter implements Filter {
         AllowListFilter filter = new AllowListFilter(ips);
         before(path, filter::handle);
     }
+
+    public static void allowlist(Service service, String path, Collection<String> ips) {
+        AllowListFilter filter = new AllowListFilter(ips);
+        service.before(path, filter::handle);
+    }
+
 
     /**
      * Creates "before" filter on specified that checks that IP address matches one of those provided

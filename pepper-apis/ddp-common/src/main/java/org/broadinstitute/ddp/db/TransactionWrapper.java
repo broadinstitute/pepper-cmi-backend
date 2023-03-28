@@ -119,6 +119,7 @@ public class TransactionWrapper {
         }
         gTxnWrapper.clear();
         isInitialized = false;
+        log.warn("Reset transaction wrapper ", new Exception("transaction wrapper reset"));
     }
 
     /**

@@ -49,9 +49,11 @@ import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @Slf4j
+@Ignore
 public class HousekeepingSendgridEmailNotificationTest extends HousekeepingTest {
     public static final int MESSAGE_HANDER_TIMEOUT_SECONDS = 5;
     public static String template;

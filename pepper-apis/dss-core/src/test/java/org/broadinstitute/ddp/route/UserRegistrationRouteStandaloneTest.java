@@ -873,7 +873,8 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
                 .statusCode(422)
                 .contentType(ContentType.JSON)
                 .body("code", equalTo(ErrorCodes.NOT_SUPPORTED))
-                .body("message", containsString("existing user to upgrade temporary user"));
+                .body("message", containsString("to upgrade temporary user"))
+                .body("message", containsString("Using existing user"));
     }
 
     @Test
@@ -885,7 +886,8 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
                 .statusCode(422)
                 .contentType(ContentType.JSON)
                 .body("code", equalTo(ErrorCodes.NOT_SUPPORTED))
-                .body("message", containsString("existing user to upgrade temporary user"));
+                .body("message", containsString("to upgrade temporary user"))
+                .body("message", containsString("Using existing user"));
     }
 
     private GovernancePolicy createGovernancePolicy(long studyId) {

@@ -40,7 +40,7 @@ public class PooledPasswordRotationTest extends TxnAwareBaseTest  {
      * new password.
      */
     private void changePassword(Handle handle, String newPassword) {
-        handle.execute("set password = password(?)", newPassword);
+        handle.execute("set password = ?", newPassword);
         handle.execute("flush privileges");
     }
 
