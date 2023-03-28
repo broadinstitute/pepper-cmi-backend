@@ -151,6 +151,7 @@ public class MySqlTestContainerUtil {
     public static String getFullJdbcTestUrl(MySQLContainer testDb) {
         return testDb.getJdbcUrl()  + "?user=" + TESTING_ROOT_USERNAME
                 + "&password=" + TESTING_ROOT_PASSWORD
+                + "&allowPublicKeyRetrieval=true"
                 + "&characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC"
                 + "&useSSL=false&sessionVariables=innodb_strict_mode=on,transaction_isolation='READ-COMMITTED',"
                 + "sql_mode='TRADITIONAL'";
