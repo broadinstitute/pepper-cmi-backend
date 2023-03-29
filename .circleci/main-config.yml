@@ -9,7 +9,7 @@ references:
   tcell_config_file: &tcell_config_file
                        tcell_agent.config
   ci_support_image: &ci_support_image
-                      broadinstitute/study-server-build:2023-03-28A
+                      broadinstitute/study-server-build:2023-03-28C
   root_path: &root_path
                /home/circleci
   repo_path: &repo_path
@@ -48,7 +48,7 @@ references:
 executors:
   test-executor:
     docker:
-      - image: broadinstitute/study-server-build:java-2023-03-28A
+      - image: broadinstitute/study-server-build:java-2023-03-28C
       # start pubsub emulator
       - image: broadinstitute/study-server-build:pubsub-1
       - image: cimg/redis:5.0
@@ -58,7 +58,7 @@ executors:
           MYSQL_DATABASE: test_db
           MYSQL_USER: user
           MYSQL_PASSWORD: passw0rd
-    resource_class: medium+ #default medium not big enough for tests
+    resource_class: large #default medium not big enough for tests
 
   build-deploy-executor:
     docker: # todo: create new image endpoint, add this in admin tab for faster starts
@@ -604,7 +604,7 @@ commands:
             if [[ ! -z '<<parameters.module>>' ]]; then
               MODULES_OPTION='-pl <<parameters.module>>'
             fi
-            mvn -X <<parameters.phase>> --batch-mode \
+            mvn <<parameters.phase>> --batch-mode \
                     -f <<parameters.pom_file>> \
                     $CHECKSTYLE_OPTION \
                     $SKIPTESTS_OPTION \
@@ -612,7 +612,7 @@ commands:
                     -Ditext.license=output-config/itextkey.xml \
                     $CONFIG_FILE_OPTION  \
                     -Dmaven.repo.local=<< parameters.m2_repo >> <<parameters.additional_options>> \
-                    $MODULES_OPTION || true # todo arz fixme write out test results cleanly, avoid exit code 134
+                    $MODULES_OPTION  # todo arz fixme write out test results cleanly, avoid exit code 134
 # maybe update docker container to more recent version of maven and JDK
           background: <<parameters.background>>
       - when:
@@ -686,7 +686,7 @@ commands:
       - run:
           name: Compile and run checkstyle on all jars
           command: |
-            mvn -X install --batch-mode -DskipTests -Dmaven.repo.local=<< parameters.m2_repo >> -pl dsm-core,dss-core,studybuilder-cli -am
+            mvn install --batch-mode -DskipTests -Dmaven.repo.local=<< parameters.m2_repo >> -pl dsm-core,dss-core,studybuilder-cli -am
 
   restore-ddp-cache:
     description: Restore ddp cache

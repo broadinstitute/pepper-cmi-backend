@@ -2,7 +2,7 @@
 FROM broadinstitute/dsde-toolbox:DDO-1934 AS dsdetoolbox
 
 # upgrade https://github.com/netty/netty-tcnative/issues/649
-FROM maven:3.8.5-openjdk-17 AS maven
+FROM maven:3-openjdk-17-slim AS maven
 
 FROM alpine:3.17.2
 
@@ -17,8 +17,8 @@ ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 # Copying necessary artifacts to enable configure.rb that lives in our own repo.
 COPY --from=dsdetoolbox /etc/consul-template/config/config.json /etc/consul-template/config/config.json
 ENV VAULT_ADDR https://clotho.broadinstitute.org:8200
-ENV CONSUL_TEMPLATE_VERSION=0.27.2
-ENV VAULT_VERSION=1.4.3
+ENV CONSUL_TEMPLATE_VERSION=0.30.0
+ENV VAULT_VERSION=1.13.0
 
 # Set by build
 ARG TARGETARCH
@@ -36,7 +36,7 @@ RUN case "${TARGETARCH:-amd64}" in \
     # base alpine image does not have ssh
     openssh-client \
     git \
-    openjdk11 \
+    openjdk17 \
     # to support configure.rb
     ruby \
     ruby-json \

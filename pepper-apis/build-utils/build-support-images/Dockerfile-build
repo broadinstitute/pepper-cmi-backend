@@ -1,9 +1,9 @@
 # To make our config generation "compatible" with official dsdetoolbox, extract what is needed from it (this is not the base image)
 FROM broadinstitute/dsde-toolbox:DDO-1934 AS dsdetoolbox
 
-FROM maven:3.8.5-openjdk-17 AS maven
+FROM maven:3-openjdk-17-slim AS maven
 
-FROM google/cloud-sdk:alpine
+FROM google/cloud-sdk:400.0.0-slim
 
 #Essentials for Maven
 COPY --from=maven /usr/share/maven /usr/share/maven
