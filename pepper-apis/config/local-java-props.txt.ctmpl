@@ -3,12 +3,12 @@
 {{with $conf := secret (printf "secret/%s/conf" $environment )}}
 
 Use the following for running tests:
--Ditext.license=output-build-config/itextkey.xml -Dconfig.file=output-build-config/testing-inmemorydb.conf
+-Dio.grpc.netty.shaded.io.netty.transport.noNative=true -Ditext.license=output-build-config/itextkey.xml -Dconfig.file=output-build-config/testing-inmemorydb.conf
 
 Use the following for running DataDonationPlatform:
 local db:        -Dconfig.file=output-build-config/testing-inmemorydb.conf
 shared cloud db: -Dconfig.file=output-config/application.conf
--Ditext.license=output-build-config/itextkey.xml
+-Ditext.license=output-build-config/itextkey.xml -Dio.grpc.netty.shaded.io.netty.transport.noNative=true
 
 {{end}}
 {{end}}

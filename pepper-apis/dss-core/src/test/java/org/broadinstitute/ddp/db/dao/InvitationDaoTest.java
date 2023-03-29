@@ -56,10 +56,10 @@ public class InvitationDaoTest extends TxnAwareBaseTest {
             // requery and verify
             InvitationDto requeriedInvitation = invitationDao.findByInvitationGuid(studyId, invitation.getInvitationGuid()).get();
 
-            assertEquals(createdAt, requeriedInvitation.getCreatedAt());
-            assertEquals(acceptedAt, requeriedInvitation.getAcceptedAt());
-            assertEquals(verifiedAt, requeriedInvitation.getVerifiedAt());
-            assertEquals(voidedAt, requeriedInvitation.getVoidedAt());
+            assertEquals(createdAt.toEpochMilli(), requeriedInvitation.getCreatedAt().toEpochMilli());
+            assertEquals(acceptedAt.toEpochMilli(), requeriedInvitation.getAcceptedAt().toEpochMilli());
+            assertEquals(verifiedAt.toEpochMilli(), requeriedInvitation.getVerifiedAt().toEpochMilli());
+            assertEquals(voidedAt.toEpochMilli(), requeriedInvitation.getVoidedAt().toEpochMilli());
             assertEquals(invitation.getInvitationGuid(), requeriedInvitation.getInvitationGuid());
             assertEquals(email, requeriedInvitation.getContactEmail());
 
@@ -84,7 +84,7 @@ public class InvitationDaoTest extends TxnAwareBaseTest {
             var updated = dao.findByInvitationGuid(studyId, invitation.getInvitationGuid()).orElse(null);
             assertNotNull(updated);
             assertEquals((Long) userId, updated.getUserId());
-            assertEquals(now, updated.getAcceptedAt());
+            assertEquals(now.toEpochMilli(), updated.getAcceptedAt().toEpochMilli());
 
             handle.rollback();
         });

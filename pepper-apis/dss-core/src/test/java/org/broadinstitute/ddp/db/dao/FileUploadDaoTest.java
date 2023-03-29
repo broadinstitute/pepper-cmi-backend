@@ -85,8 +85,8 @@ public class FileUploadDaoTest extends TxnAwareBaseTest {
             var now = Instant.now();
             dao.updateStatus(upload.getId(), now, now, FileScanResult.CLEAN);
             FileUpload actual = dao.findById(upload.getId()).orElse(null);
-            assertEquals(now, actual.getUploadedAt());
-            assertEquals(now, actual.getScannedAt());
+            assertEquals(now.toEpochMilli(), actual.getUploadedAt().toEpochMilli());
+            assertEquals(now.toEpochMilli(), actual.getScannedAt().toEpochMilli());
             assertEquals(FileScanResult.CLEAN, actual.getScanResult());
 
             handle.rollback();
