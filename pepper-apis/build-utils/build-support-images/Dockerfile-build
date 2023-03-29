@@ -1,9 +1,11 @@
 # To make our config generation "compatible" with official dsdetoolbox, extract what is needed from it (this is not the base image)
 FROM broadinstitute/dsde-toolbox:DDO-1934 AS dsdetoolbox
 
+FROM alpine:3.15.0
+
 FROM maven:3-openjdk-17-slim AS maven
 
-FROM google/cloud-sdk:400.0.0-slim
+FROM google/cloud-sdk:400.0.0-alpine
 
 #Essentials for Maven
 COPY --from=maven /usr/share/maven /usr/share/maven
@@ -19,6 +21,7 @@ ENV VAULT_ADDR https://clotho.broadinstitute.org:8200
 ENV CONSUL_TEMPLATE_VERSION=0.27.2
 ENV VAULT_VERSION=1.4.3
 
+
 # Set by build
 ARG TARGETARCH
 
@@ -33,7 +36,7 @@ RUN case "${TARGETARCH:-amd64}" in \
     mysql-client \
     netcat-openbsd \
     git \
-    openjdk11 \
+    openjdk17 \
     # to support configure.rb
     ruby \
     ruby-json  \
@@ -55,7 +58,7 @@ RUN case "${TARGETARCH:-amd64}" in \
 #extracting sheetappend from ddp-angular repo. At some point we can get this from an npm repo
 WORKDIR /opt
 RUN apk --no-cache add npm subversion && \
-    svn export https://github.com/broadinstitute/ddp-angular/trunk/build-utils \
+    svn export https://github.com/broadinstitute/pepper-cmi-angular/trunk/build-utils \
         && npm install ./build-utils/sheetappend \
         && npm install -g ./build-utils/sheetappend \
         && chmod 555 build-utils/reportdeploy.sh
