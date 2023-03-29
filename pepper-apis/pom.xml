@@ -128,6 +128,7 @@
                 <groupId>com.google.cloud</groupId>
                 <artifactId>google-cloud-pubsub</artifactId>
                 <version>1.50.0</version>
+                <!-- todo arz instead of disabling netty native, do exlcusion https://stackoverflow.com/questions/71920265/jvm-crashes-while-authenticating-pub-sub -->
             </dependency>
 
             <dependency>
