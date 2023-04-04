@@ -175,7 +175,14 @@ public class UserDeleteService {
         deleteAgeUpCandidates(handle, user);
         deleteDataSyncRequest(handle, user);
         deleteUser(handle, user);
-        deleteElasticSearchData(handle, user, userCollectedData, fullDelete);
+
+        try {
+            // todo arz fixme migration temporarily ignoring this to validating purging data for isolated instance
+            deleteElasticSearchData(handle, user, userCollectedData, fullDelete);
+        } catch (Exception e) {
+            log.error("Could not delete user " + user.getGuid() + " from elastic.  All other data has "
+                    + "for this user has been removed", e);
+        }
 
         if (fullDelete) {
             deleteAuth0User(user, auth0ManagementClient);
