@@ -45,6 +45,7 @@ import org.broadinstitute.ddp.model.activity.types.EventTriggerType;
 import org.broadinstitute.ddp.model.activity.types.InstanceStatusType;
 import org.broadinstitute.ddp.util.Auth0Util;
 import org.broadinstitute.ddp.util.ConfigUtil;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -59,7 +60,7 @@ public class HousekeepingSendgridEmailNotificationTest extends HousekeepingTest 
     public static String template;
     public static String templateVersion;
     private static long insertedEventConfigId = -1;
-    private static Auth0Util.TestingUser testingUser;
+    private static SharedTestUserUtil.SharedTestUser testingUser;
     private static FormActivityDef testActivity;
     private static ActivityInstanceDto testActivityInstance;
 
@@ -92,7 +93,7 @@ public class HousekeepingSendgridEmailNotificationTest extends HousekeepingTest 
             long testingUserId = testingUser.getUserId();
             String testingUserGuid = testingUser.getUserGuid();
             log.info("Using generated testing user {} with guid {} and auth0 id {}", testingUserId, testingUserGuid,
-                    testingUser.getAuth0Id());
+                    testingUser.getAuth0UserId());
 
             // create an activity instance of the created activity for the user
             testActivityInstance = activityInstanceDao.insertInstance(testActivity.getActivityId(),
@@ -165,7 +166,7 @@ public class HousekeepingSendgridEmailNotificationTest extends HousekeepingTest 
         doReturn(ApiResult.ok(200, null)).when(mockSendGridClient).sendMail(any());
 
         String emailSentLogEntry = String.format("Sent template %s version %s to %s", template,
-                templateVersion, testingUser.getEmail());
+                templateVersion, testingUser.getUserEmail());
         moveStatusToInProgressAndThenToComplete();
         log.info("Inserted status that should trigger email event processing for activity instance {}",
                 testActivityInstance.getGuid());

@@ -80,7 +80,7 @@ public class PubSubMessageBuilderTest extends TxnAwareBaseTest {
         NotificationMessage content = gson.fromJson(msg.getData().toStringUtf8(), NotificationMessage.class);
         assertEquals(testData.getUserGuid(), content.getParticipantGuid());
         assertEquals(1, content.getDistributionList().size());
-        assertEquals(testData.getTestingUser().getEmail(), content.getDistributionList().iterator().next());
+        assertEquals(testData.getTestingUser().getUserEmail(), content.getDistributionList().iterator().next());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class PubSubMessageBuilderTest extends TxnAwareBaseTest {
             NotificationMessage content = gson.fromJson(msg.getData().toStringUtf8(), NotificationMessage.class);
             assertEquals(gov.getGovernedUserGuid(), content.getParticipantGuid());
             assertEquals(1, content.getDistributionList().size());
-            assertEquals(testData.getTestingUser().getEmail(), content.getDistributionList().iterator().next());
+            assertEquals(testData.getTestingUser().getUserEmail(), content.getDistributionList().iterator().next());
 
             Optional<String> proxyFirstName = content.getTemplateSubstitutionValue(DDP_PROXY_FIRST_NAME);
             assertTrue(proxyFirstName.isPresent());
@@ -151,7 +151,7 @@ public class PubSubMessageBuilderTest extends TxnAwareBaseTest {
             NotificationMessage content = gson.fromJson(msg.getData().toStringUtf8(), NotificationMessage.class);
             assertEquals(gov.getGovernedUserGuid(), content.getParticipantGuid());
             assertEquals(1, content.getDistributionList().size());
-            assertEquals(testData.getTestingUser().getEmail(), content.getDistributionList().iterator().next());
+            assertEquals(testData.getTestingUser().getUserEmail(), content.getDistributionList().iterator().next());
 
             Optional<String> proxyFirstName = content.getTemplateSubstitutionValue(DDP_PROXY_FIRST_NAME);
             assertTrue(proxyFirstName.isPresent());

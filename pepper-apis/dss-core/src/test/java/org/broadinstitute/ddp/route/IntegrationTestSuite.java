@@ -4,7 +4,6 @@ import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_ADM
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_ID;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_NAME;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_SECRET;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_USER_AUTH0_ID;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -45,11 +44,7 @@ import org.broadinstitute.ddp.filter.UserAuthCheckFilterTest;
 import org.broadinstitute.ddp.security.AesUtil;
 import org.broadinstitute.ddp.security.EncryptionKey;
 import org.broadinstitute.ddp.security.JWTConverterTest;
-import org.broadinstitute.ddp.util.ConfigManager;
-import org.broadinstitute.ddp.util.JavaProcessSpawner;
-import org.broadinstitute.ddp.util.LogbackConfigurationPrinter;
-import org.broadinstitute.ddp.util.MySqlTestContainerUtil;
-import org.broadinstitute.ddp.util.TestDataSetupUtil;
+import org.broadinstitute.ddp.util.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -130,6 +125,8 @@ public class IntegrationTestSuite {
     private static final String DEBUG_FLAG = "-agentlib:jdwp";
     private static int callCounter = 0;
 
+    protected static SharedTestUserUtil.SharedTestUser sharedTestUser;
+
     @BeforeClass
     public static void setup() {
         setup(true);
@@ -206,7 +203,6 @@ public class IntegrationTestSuite {
     private static void initializeStaticTestUserData() {
         Config auth0Config = RouteTestUtil.getConfig().getConfig(ConfigFile.AUTH0);
         String testClientName = auth0Config.getString(AUTH0_CLIENT_NAME);
-        String testUserAuth0UserId = auth0Config.getString(AUTH0_TEST_USER_AUTH0_ID);
         String adminTestUserAuth0Id = auth0Config.getString(AUTH0_ADMIN_TEST_USER_AUTH0_ID);
         String testClientId = auth0Config.getString(AUTH0_CLIENT_ID);
         String testClientSecret = auth0Config.getString(AUTH0_CLIENT_SECRET);
@@ -249,8 +245,11 @@ public class IntegrationTestSuite {
             JdbiUser jdbiUser = handle.attach(JdbiUser.class);
 
             Map<String, String> guidToAuth0UserIds = new HashMap<>();
-            guidToAuth0UserIds.put(TestConstants.TEST_USER_GUID, testUserAuth0UserId);
             guidToAuth0UserIds.put(TestConstants.TEST_ADMIN_GUID, adminTestUserAuth0Id);
+            if (sharedTestUser == null) {
+                sharedTestUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+            }
+            guidToAuth0UserIds.put(sharedTestUser.getUserGuid(), sharedTestUser.getAuth0UserId());
             for (Map.Entry<String, String> guidAndAuth0IdTuple : guidToAuth0UserIds.entrySet()) {
                 String testUserGuid = guidAndAuth0IdTuple.getKey();
                 String testUserAuth0Id = guidAndAuth0IdTuple.getValue();

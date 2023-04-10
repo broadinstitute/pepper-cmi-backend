@@ -1,15 +1,13 @@
 package org.broadinstitute.ddp.route;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 
 import java.time.Instant;
 
 import io.restassured.http.ContentType;
 import io.restassured.mapper.ObjectMapperType;
+import io.restassured.response.ValidatableResponse;
 import org.broadinstitute.ddp.constants.RouteConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.db.dao.AuthDao;
@@ -113,7 +111,7 @@ public class AdminLookupInvitationRouteTest extends IntegrationTestSuite.TestCas
         });
         try {
             var payload = new LookupInvitationPayload(invitation.getInvitationGuid());
-            given().auth().oauth2(testData.getTestingUser().getToken())
+            ValidatableResponse response = given().auth().oauth2(testData.getTestingUser().getToken())
                     .pathParam("study", testData.getStudyGuid())
                     .body(payload, ObjectMapperType.GSON)
                     .when().post(urlTemplate)
@@ -123,7 +121,7 @@ public class AdminLookupInvitationRouteTest extends IntegrationTestSuite.TestCas
                     .body("createdAt", not(empty()))
                     .body("acceptedAt", not(empty()))
                     .body("userGuid", equalTo(testData.getUserGuid()))
-                    .body("userLoginEmail", equalTo(testData.getTestingUser().getEmail()));
+                    .body("userLoginEmail", equalToIgnoringCase(testData.getTestingUser().getUserEmail()));
         } finally {
             if (invitation != null) {
                 TransactionWrapper.useTxn(handle -> handle.attach(InvitationSql.class)

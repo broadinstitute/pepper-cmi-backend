@@ -1,10 +1,6 @@
 package org.broadinstitute.ddp.util;
 
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_EMAIL;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_USER_GUID;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.*;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_DAY;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_MONTH;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_YEAR;
@@ -134,158 +130,9 @@ public class TestDataSetupUtil {
     public static final String BASELINE_SEED_TEST_DATA = "db-testscripts/baseline-seed-test-data.xml";
     private static final Config cfg = ConfigManager.getInstance().getConfig();
     private static final Config auth0Config = cfg.getConfig(ConfigFile.AUTH0);
-    private static final String testUser = auth0Config.getString(AUTH0_TEST_EMAIL);
-    private static final String testUserGuid = auth0Config.getString(AUTH0_TEST_USER_GUID);
     private static final String password = auth0Config.getString(AUTH0_TEST_PASSWORD);
     private static final List<GeneratedTestData> testDataToDelete = new ArrayList<>();
     private static final String CONSENT_PDF_LOCATION = "src/test/resources/ConsentForm.pdf";
-
-    public static void main(String[] args) throws Exception {
-        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.ERROR);
-        Options options = new Options();
-
-        options.addOption("s", true, "Study Guid");
-        options.addOption("c", true, "Auth0 ClientId");
-        options.addOption("n", true, "Number of Users to Create");
-        options.addOption("p", false, "Should create random profiles");
-        options.addOption("m", false, "Should create mail address");
-        options.addOption("a", false, "Should create random activities");
-        options.addOption("r", false, "Should randomly complete random activities");
-        options.addOption("i", false, "Should create random institutions");
-
-
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse(options, args);
-
-        Config cfg = ConfigManager.getInstance().getConfig();
-        Config auth0Config = cfg.getConfig(ConfigFile.AUTH0);
-
-        String backendTestAuth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
-        String backendTestDomain = auth0Config.getString(ConfigFile.DOMAIN);
-
-        initializeDb(cfg);
-        TransactionWrapper.useTxn(handle -> {
-            try {
-                String studyGuid;
-                StudyDto studyDto;
-                if (cmd.hasOption('s')) {
-                    studyGuid = cmd.getOptionValue('s');
-                    studyDto = handle.attach(JdbiUmbrellaStudy.class).findByStudyGuid(studyGuid);
-                    if (studyDto == null) {
-                        throw new Exception("Can't generate Test Data, study guid does not exist: " + studyGuid);
-                    }
-                } else {
-                    studyDto = generateTestStudy(handle, cfg);
-                    studyGuid = studyDto.getGuid();
-                }
-
-                System.out.println("--- USING STUDY: " + studyDto.getGuid());
-
-                GeneratedTestData testActivityData = null;
-                if (cmd.hasOption('a')) {
-                    testActivityData = new GeneratedTestData();
-                    testActivityData.setTestingStudy(studyDto);
-                    addTestConsent(handle, testActivityData);
-                    System.out.println("--- SETTING TEST ACTIVITIES, ACTIVITY INSTANCE ID: " + testActivityData.getConsentActivityId());
-                    addEnrollmentHook(handle, testActivityData);
-                    System.out.println("--- ADDING ENROLLMENT HOOK, ENROLLMENT CFG ID: " + testActivityData.getEnrollmentConfigurationId());
-                }
-
-                String auth0ClientId;
-                if (cmd.hasOption('c')) {
-                    auth0ClientId = cmd.getOptionValue('c');
-                } else {
-                    auth0ClientId = backendTestAuth0ClientId;
-                }
-
-                JdbiClient jdbiClient = handle.attach(JdbiClient.class);
-                StudyClientConfiguration studyClientConfiguration =
-                        jdbiClient.getStudyClientConfigurationByClientAndDomain(auth0ClientId, backendTestDomain)
-                                .orElseThrow(() -> new Exception("Could not find client: " + auth0ClientId));
-
-                System.out.println("--- USING AUTH0CLIENTID: " + studyClientConfiguration.getAuth0ClientId());
-
-                if (cmd.hasOption('n')) {
-                    int numberOfUsersToCreate = Integer.parseInt(cmd.getOptionValue('n'));
-                    System.out.println(String.format("--- CREATING %s USERS: ", numberOfUsersToCreate));
-                    System.out.print("USER_ID\tFIRST_NAME\tLAST_NAME\tSEX\tBIRTHDATE");
-                    if (cmd.hasOption('r') && cmd.hasOption('p')) {
-                        System.out.println("\tCOMPLETED");
-                    } else {
-                        System.out.println();
-                    }
-                    for (int i = 0; i < numberOfUsersToCreate; i++) {
-                        JdbiUser userDao = handle.attach(JdbiUser.class);
-
-                        String userGuid = DBUtils.uniqueUserGuid(handle);
-                        String userHruid = DBUtils.uniqueUserHruid(handle);
-                        long userId = userDao.insert(null, userGuid, studyClientConfiguration.getClientId(), userHruid);
-
-                        handle.attach(JdbiUserStudyEnrollment.class)
-                                .changeUserStudyEnrollmentStatus(userGuid, studyGuid, EnrollmentStatusType.REGISTERED);
-                        Auth0Util.TestingUser testingUser = new Auth0Util.TestingUser(userId,
-                                userGuid,
-                                userHruid,
-                                null,
-                                null,
-                                null,
-                                null);
-
-                        System.out.print(String.valueOf(userId) + "\t");
-                        UserProfile profile = null;
-                        if (cmd.hasOption('p')) {
-                            profile = createTestingProfile(handle, userId, true);
-                            LocalDate birthDate = profile.getBirthDate();
-                            System.out.print(String.format("%s\t%s\t%s\t%s\t", profile.getFirstName(),
-                                    profile.getLastName(),
-                                    profile.getSexType().name(),
-                                    DateTimeFormatter.ISO_DATE.format(birthDate)));
-                        }
-
-                        GeneratedTestData generatedTestData = new GeneratedTestData(testingUser, profile,
-                                studyDto, studyClientConfiguration);
-                        if (testActivityData != null) {
-                            generatedTestData.mergeTestActivityData(testActivityData);
-                        }
-
-                        if (cmd.hasOption("i")) {
-                            createTestMedicalProvider(handle, generatedTestData, true);
-                        }
-
-                        if (cmd.hasOption('m')) {
-                            createTestingMailAddress(handle, generatedTestData);
-                        }
-                        Random random = new Random();
-
-                        if (cmd.hasOption('r')) {
-                            if (!cmd.hasOption('p')) {
-                                throw new Exception("You can't very well answer questions without a profile. "
-                                        + "Choose -p!");
-                            }
-                            boolean completedRelease = random.nextBoolean();
-                            answerTestConsent(handle, completedRelease, random.nextBoolean(), random.nextBoolean(),
-                                    TEST_USER_PROFILE_BIRTH_DAY,
-                                    TEST_USER_PROFILE_BIRTH_MONTH,
-                                    TEST_USER_PROFILE_BIRTH_YEAR,
-                                    generatedTestData);
-
-                            if (completedRelease) {
-                                System.out.println("COMPLETED CONSENT");
-                            } else {
-                                System.out.println("DID NOT COMPLETE CONSENT");
-                            }
-                        } else {
-                            System.out.println();
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw e;
-            }
-        });
-    }
 
     private static void initializeDb(Config cfg) {
         int maxConnections = cfg.getInt(ConfigFile.NUM_POOLED_CONNECTIONS);
@@ -379,71 +226,21 @@ public class TestDataSetupUtil {
         }
 
         GeneratedTestData generatedTestData = null;
-        Auth0Util.TestingUser testUserBeingUsed = null;
-        UserProfile profile = null;
-
         if (!forceUserCreation) {
-            Long userId = null;
-            try {
-                UserDto user = handle.attach(JdbiUser.class).findByUserGuid(testUserGuid);
-                if (user == null) {
-                    // TODO Separate Unit Tests and Integration Tests. Units should not touch the DB
-                    log.error("Missing canonical test user. This must be a TXNAwareTest which is not an "
-                            + "integration test");
-                    String testUserAuth0Id = ConfigManager.getInstance().getConfig().getConfig(ConfigFile.AUTH0).getString(
-                            ConfigFile.TEST_USER_AUTH0_ID);
-                    userId = TestingUserUtil.createCanonicalTestUser(handle,
-                            studyClientConfiguration.getClientId(),
-                            testUserAuth0Id,
-                            testUserGuid,
-                            TestConstants.TEST_USER_HRUID);
-                }
-
-                testUserBeingUsed = TestingUserUtil.loginExistingTestingUser(
-                        handle,
-                        testUser,
-                        password,
-                        testUserGuid,
-                        auth0clientName,
-                        auth0clientId,
-                        auth0Secret,
-                        study.getGuid()
-                );
-
-                if (userId != null) {
-                    testUserBeingUsed.setUserId(userId);
-                }
-            } catch (Auth0Exception e) {
-                // This is a test, so this is ok.
-                if (e.getMessage().toLowerCase().contains("too many logins")) {
-                    throw new RuntimeException("Too many logins with " + testUser + " on " + auth0Domain + ".  You "
-                            + "may need to remove cached token files from "
-                            + System.getProperty("java.io.tmpdir"), e);
-                }
-                throw new RuntimeException(e);
-            }
-
-            profile = handle.attach(UserProfileDao.class).findProfileByUserGuid(testUserGuid).orElse(null);
-            if (profile == null) {
-                profile = createTestingProfile(handle, testUserBeingUsed.getUserId(), false);
-            }
-
-            generatedTestData = new GeneratedTestData(testUserBeingUsed, profile, study, studyClientConfiguration);
+            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().getSharedTestUser(
+                    handle
+            );
+            generatedTestData = new GeneratedTestData(testUser, testUser.getProfile(), study, studyClientConfiguration);
         } else {
-            try {
-                testUserBeingUsed = generateTestUser(handle, auth0Domain,
-                        auth0clientName,
-                        auth0clientId,
-                        auth0Secret,
-                        study.getGuid());
-
-                profile = createTestingProfile(handle, testUserBeingUsed.getUserId(), false);
-
-            } catch (Auth0Exception e) {
-                throw new RuntimeException("Could not generate testing user", e);
-            }
-
-            generatedTestData = new GeneratedTestData(testUserBeingUsed, profile, study, studyClientConfiguration);
+            // todo arz rename all this
+            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().createNewTestUser(handle,
+                    auth0Domain,
+                    auth0clientName,
+                    auth0clientId,
+                    auth0Secret,
+                    mgmtClientId,
+                    mgmtSecret);
+            generatedTestData = new GeneratedTestData(testUser, testUser.getProfile(), study, studyClientConfiguration);
             testDataToDelete.add(generatedTestData);
         }
 
@@ -767,7 +564,7 @@ public class TestDataSetupUtil {
     }
 
     public static void addAboutYou(Handle handle, GeneratedTestData generatedTestData) {
-        UserDto testAdministrator = handle.attach(JdbiUser.class).findByUserGuid(testUserGuid);
+        UserDto testAdministrator = handle.attach(JdbiUser.class).findByUserGuid(generatedTestData.getUserGuid());
 
         String aboutYouActivityCode = GuidUtils.randomStringFromDictionary(UPPER_ALPHA_NUMERIC, 20);
         generatedTestData.setDateOfDiagnosisStableId("DATE_OF_DIAGNOSIS_"
@@ -806,7 +603,7 @@ public class TestDataSetupUtil {
     }
 
     public static void addTestConsent(Handle handle, GeneratedTestData generatedTestData) {
-        UserDto testAdministrator = handle.attach(JdbiUser.class).findByUserGuid(testUserGuid);
+        UserDto testAdministrator = handle.attach(JdbiUser.class).findByUserGuid(generatedTestData.getUserGuid());
 
         String consentActivityCode = GuidUtils.randomStringFromDictionary(UPPER_ALPHA_NUMERIC, 20);
         generatedTestData.setBloodQuestionStableId("BLOOD_" + GuidUtils.randomStringFromDictionary(UPPER_ALPHA_NUMERIC, 20));
@@ -1020,7 +817,7 @@ public class TestDataSetupUtil {
         String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
         String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
 
-        TestingUserUtil.deleteTestUser(generatedTestData.getTestingUser().getAuth0Id(),
+        TestingUserUtil.deleteTestUser(generatedTestData.getTestingUser().getAuth0UserId(),
                 auth0domain,
                 mgmtClientId,
                 mgmtSecret);
@@ -1102,7 +899,7 @@ public class TestDataSetupUtil {
     }
 
     public static class GeneratedTestData {
-        private Auth0Util.TestingUser testingUser;
+        private SharedTestUserUtil.SharedTestUser testingUser;
         private StudyDto study;
         private StudyClientConfiguration client;
         private UserProfile testUserProfile;
@@ -1125,7 +922,7 @@ public class TestDataSetupUtil {
         private long consentActivityStatusTriggerId;
         private long enrollmentConfigurationId;
 
-        public GeneratedTestData(Auth0Util.TestingUser testingUser,
+        public GeneratedTestData(SharedTestUserUtil.SharedTestUser testingUser,
                                  UserProfile testUserProfile,
                                  StudyDto study,
                                  StudyClientConfiguration client) {
@@ -1154,7 +951,7 @@ public class TestDataSetupUtil {
             this.consentActivityCode = otherTestData.consentActivityCode;
         }
 
-        public Auth0Util.TestingUser getTestingUser() {
+        public SharedTestUserUtil.SharedTestUser getTestingUser() {
             return testingUser;
         }
 

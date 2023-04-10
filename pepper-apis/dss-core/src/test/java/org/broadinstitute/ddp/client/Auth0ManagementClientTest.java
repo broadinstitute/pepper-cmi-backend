@@ -70,13 +70,13 @@ public class Auth0ManagementClientTest extends TxnAwareBaseTest {
                 .getBody().getId();
         assertNotNull(connectionId);
 
-        String email = testData.getTestingUser().getEmail();
+        String email = testData.getTestingUser().getUserEmail();
         String redirectUrl = "https://code.datadonationplatform.org/";
         var actual = client.createPasswordResetTicket(email, connectionId, redirectUrl);
         assertEquals(200, actual.getStatusCode());
         assertNotNull(actual.getBody());
 
-        String auth0UserId = testData.getTestingUser().getAuth0Id();
+        String auth0UserId = testData.getTestingUser().getAuth0UserId();
         actual = client.createPasswordResetTicket(auth0UserId, redirectUrl);
         assertEquals(200, actual.getStatusCode());
         assertNotNull(actual.getBody());
@@ -92,7 +92,7 @@ public class Auth0ManagementClientTest extends TxnAwareBaseTest {
 
         String fakeClient = "FakeTestClient" + System.currentTimeMillis();
         String fakeUserGuid = Long.toString(System.currentTimeMillis());
-        String testUserAuth0UserId = testData.getTestingUser().getAuth0Id();
+        String testUserAuth0UserId = testData.getTestingUser().getAuth0UserId();
         String testUserGuid = testData.getUserGuid();
         User auth0User = mgmtClient.setUserGuidForAuth0User(testUserAuth0UserId, fakeClient, fakeUserGuid);
 

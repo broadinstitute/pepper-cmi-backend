@@ -181,7 +181,8 @@ public class UserDeleteService {
             deleteElasticSearchData(handle, user, userCollectedData, fullDelete);
         } catch (Exception e) {
             log.error("Could not delete user " + user.getGuid() + " from elastic.  All other data has "
-                    + "for this user has been removed", e);
+                    + "for this user has been removed.  This error should be turned back into an exception "
+                    + "after CMI isolation is complete.", e);
         }
 
         if (fullDelete) {

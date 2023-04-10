@@ -73,7 +73,7 @@ public class UpdateUserPasswordRouteTest extends IntegrationTestSuite.TestCase {
     @Test
     public void test_givenUserNotAssociatedWithAuth0User_whenRouteIsCalled_thenItReturnsForbiddenAndValidErrorCode() {
         // Set auth0 user id to null
-        String oldUserAuth0Id = testData.getTestingUser().getAuth0Id();
+        String oldUserAuth0Id = testData.getTestingUser().getAuth0UserId();
         try {
             TransactionWrapper.useTxn(handle -> handle.attach(JdbiUser.class).updateAuth0Id(testData.getUserGuid(), null));
             String url = makeUrl(testData.getUserGuid());

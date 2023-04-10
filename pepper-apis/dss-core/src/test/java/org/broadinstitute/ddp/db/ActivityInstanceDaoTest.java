@@ -63,7 +63,7 @@ public class ActivityInstanceDaoTest extends TxnAwareBaseTest {
     public void testGetGuidOfLatestInstanceForUserAndActivities_activityNotFound() {
         Optional<String> instanceGuid = TransactionWrapper.withTxn(
                 handle -> dao.getGuidOfLatestInstanceForUserAndActivity(
-                        handle, TestConstants.TEST_USER_GUID, "abcxyz", data.getStudyId()
+                        handle, data.getUserGuid(), "abcxyz", data.getStudyId()
                 )
         );
         assertNotNull(instanceGuid);

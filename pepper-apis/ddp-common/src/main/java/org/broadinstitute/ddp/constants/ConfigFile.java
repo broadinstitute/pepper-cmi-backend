@@ -111,7 +111,6 @@ public class ConfigFile {
     public static final String SLACK_CHANNEL = "slack.channel";
     public static final String SLACK_QUEUE_SIZE = "slack.queueSize";
     public static final String SLACK_INTERVAL_IN_MILLIS = "slack.intervalInMillis";
-    public static final String TEST_USER_AUTH0_ID = "testUserAuth0Id";
 
     public static final String DOMAIN = "domain";
     public static final String SEND_METRICS = "sendMetrics";
@@ -159,12 +158,14 @@ public class ConfigFile {
         public static final String AUTH0_SECRET = "clientSecret";
         public static final String AUTH0_TEST_EMAIL = "testUser";
         public static final String AUTH0_TEST_USER_GUID = "testUserGuid";
+        public static final String AUTH0_TEST_USER_HRUID = "testUserHruid";
         public static final String AUTH0_TEST_PASSWORD = "testUserPassword";
         public static final String AUTH0_TEST_ADMIN_EMAIL = "testAdmin";
         public static final String AUTH0_TEST_ADMIN_PASSWORD = "testAdminPassword";
         public static final String AUTH0_CLIENT_NAME = "clientName";
-        public static final String AUTH0_TEST_USER_AUTH0_ID = "testUserAuth0Id";
+
         public static final String AUTH0_ADMIN_TEST_USER_AUTH0_ID = "testAdminUserAuth0Id";
+
         public static final String AUTH0_CLIENT_SECRET = "clientSecret";
         public static final String AUTH0_MGMT_API_CLIENT_ID = "managementApiClientId";
         public static final String AUTH0_MGMT_API_CLIENT_SECRET = "managementApiSecret";

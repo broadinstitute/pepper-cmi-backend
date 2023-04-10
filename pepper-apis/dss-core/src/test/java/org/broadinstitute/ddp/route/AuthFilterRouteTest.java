@@ -5,6 +5,7 @@ import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGM
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID2;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET2;
+import static org.broadinstitute.ddp.route.IntegrationTestSuite.sharedTestUser;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ import org.broadinstitute.ddp.db.dao.JdbiUser;
 import org.broadinstitute.ddp.db.dao.UserProfileDao;
 import org.broadinstitute.ddp.json.Profile;
 import org.broadinstitute.ddp.util.ConfigManager;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -38,10 +40,10 @@ import org.junit.Test;
 
 public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
 
-    private static final String BASE_USER_ENDPOINT = getBaseUserEndpoint(TestConstants.TEST_USER_GUID);
-    private static final String PROFILE_ENDPOINT = BASE_USER_ENDPOINT + "/profile";
-    private static final String STUDY_ENDPOINT = getStudyEndpoint(TestConstants.TEST_USER_GUID, TestConstants.TEST_STUDY_GUID);
-    private static final String STUDY2_ENDPOINT = getStudyEndpoint(TestConstants.TEST_USER_GUID, TestConstants.SECOND_STUDY_GUID);
+    private static String getProfileEndpoint() {
+        return getBaseUserEndpoint(sharedTestUser.getUserGuid()) + "/profile";
+    }
+
     private static final Header GARBAGE_AUTH_HEADER = new BasicHeader(RouteConstants.Header.AUTHORIZATION, "Bearer foo");
     private static final String EXPIRED_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IlF6SkROVVJDTmtVMU5q"
             + "TkVPVEF3TjBReFF6aEZRa1EyTjBRek1VWTRNRUl3TkRGQ01EbENNUSJ9.eyJodHRwczovL2RhdGFkb25hdGlvbnBsYXRmb3J"
@@ -139,7 +141,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
     @Before
     public void clearProfile() {
         TransactionWrapper.useTxn(handle -> {
-            long userId = handle.attach(JdbiUser.class).getUserIdByGuid(TestConstants.TEST_USER_GUID);
+            long userId = handle.attach(JdbiUser.class).getUserIdByGuid(sharedTestUser.getUserGuid());
             handle.attach(UserProfileDao.class).getUserProfileSql().deleteByUserId(userId);
 
         });
@@ -163,20 +165,22 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
     }
 
     private String buildProfileUrl() {
-        return RouteTestUtil.getTestingBaseUrl() + PROFILE_ENDPOINT;
+        return RouteTestUtil.getTestingBaseUrl() + getProfileEndpoint();
     }
 
     private String buildStudyUrl() {
-        return RouteTestUtil.getTestingBaseUrl() + STUDY_ENDPOINT;
+        return RouteTestUtil.getTestingBaseUrl() + getStudyEndpoint(sharedTestUser.getUserGuid(),
+                TestConstants.TEST_STUDY_GUID);
     }
 
     private String buildStudy2Url() {
-        return RouteTestUtil.getTestingBaseUrl() + STUDY2_ENDPOINT;
+        return RouteTestUtil.getTestingBaseUrl() + getStudyEndpoint(sharedTestUser.getUserGuid(),
+                TestConstants.SECOND_STUDY_GUID);
     }
 
     private String buildGovernedStudyParticipantsUrl() {
         String url = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.USER_STUDY_PARTICIPANTS;
-        return url.replace(RouteConstants.PathParam.USER_GUID, TestConstants.TEST_USER_GUID)
+        return url.replace(RouteConstants.PathParam.USER_GUID, sharedTestUser.getUserGuid())
                 .replace(RouteConstants.PathParam.STUDY_GUID, TestConstants.TEST_STUDY_GUID);
     }
 
@@ -190,14 +194,13 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
         int statusCode = activitiesGetRequest.execute().returnResponse().getStatusLine().getStatusCode();
         Assert.assertTrue((statusCode == HttpStatus.SC_OK));
 
-
         // Can user2 access study2?
         String user2IdToken = generatedTestDataUser2.getTestingUser().getToken();
         activitiesGetRequest = RouteTestUtil.buildAuthorizedGetRequest(user2IdToken, RouteTestUtil.getTestingBaseUrl()
                 + getStudyEndpoint(generatedTestDataUser2.getUserGuid(), generatedTestDataUser2.getStudyGuid()));
 
         statusCode = activitiesGetRequest.execute().returnResponse().getStatusLine().getStatusCode();
-        Assert.assertTrue((statusCode == HttpStatus.SC_OK));
+        Assert.assertEquals(HttpStatus.SC_OK, statusCode);
 
         // Can user1 access study2?
         activitiesGetRequest = RouteTestUtil.buildAuthorizedGetRequest(user1IdToken, RouteTestUtil.getTestingBaseUrl()
@@ -241,7 +244,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
                 RouteTestUtil.getTestingBaseUrl() + getBaseUserEndpoint(generatedTestDataUser1.getUserGuid()) + "/profile");
 
         int statusCode = profileGetRequest.execute().returnResponse().getStatusLine().getStatusCode();
-        Assert.assertTrue((statusCode == HttpStatus.SC_OK));
+        Assert.assertEquals(HttpStatus.SC_OK, statusCode);
     }
 
     @Test
@@ -295,7 +298,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
     @Test
     public void testGovernedStudyParticipants_failsWhenRequestedUserIsNotOperatorItself() {
         String url = buildGovernedStudyParticipantsUrl()
-                .replace(TestConstants.TEST_USER_GUID, "another-user-guid");
+                .replace(sharedTestUser.getUserGuid(), "another-user-guid");
         RestAssured.given().auth().oauth2(testUserToken)
                 .when().get(url)
                 .then().assertThat()

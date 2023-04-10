@@ -12,6 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.exception.DDPException;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.images.AbstractImagePullPolicy;
+import org.testcontainers.images.ImageData;
+import org.testcontainers.images.ImagePullPolicy;
+import org.testcontainers.images.PullPolicy;
+import org.testcontainers.lifecycle.Startables;
+import org.testcontainers.utility.DockerImageName;
 
 @Slf4j
 public class MySqlTestContainerUtil {
@@ -91,13 +97,16 @@ public class MySqlTestContainerUtil {
             log.info("Starting test dbs.  This may take a while due to docker image fetchery");
 
             long containerStartTime = System.currentTimeMillis();
-            apisDb = new MySQLContainer(MYSQL_VERSION);
-            housekeepingDb = new MySQLContainer(MYSQL_VERSION);
+            apisDb = (MySQLContainer) new MySQLContainer(MYSQL_VERSION).withImagePullPolicy(new CachedPullPolicy());
+            housekeepingDb = (MySQLContainer) new MySQLContainer(MYSQL_VERSION).withImagePullPolicy(
+                    new CachedPullPolicy());
             housekeepingDb.withConfigurationOverride(TEST_DB_MYSQL_CONF_DIR);
             apisDb.withConfigurationOverride(TEST_DB_MYSQL_CONF_DIR);
 
-            apisDb.start();
-            housekeepingDb.start();
+            // todo arz make these vm vars
+            housekeepingDb.withReuse(true);
+            apisDb.withReuse(true);
+            Startables.deepStart(apisDb, housekeepingDb).join();
 
             log.info("It took {}ms to start the test containers.", System.currentTimeMillis() - containerStartTime);
 
@@ -145,6 +154,17 @@ public class MySqlTestContainerUtil {
             hasInitialized = true;
         } else {
             log.info("Already initialized test dbs");
+        }
+    }
+
+    /**
+     * Always go for the cached image if you have it
+     */
+    public static class CachedPullPolicy implements ImagePullPolicy {
+
+        @Override
+        public boolean shouldPull(DockerImageName dockerImageName) {
+            return false;
         }
     }
 

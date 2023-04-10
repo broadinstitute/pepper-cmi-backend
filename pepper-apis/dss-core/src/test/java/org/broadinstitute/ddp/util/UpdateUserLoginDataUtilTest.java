@@ -28,10 +28,10 @@ public class UpdateUserLoginDataUtilTest extends TxnAwareBaseTest {
         testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
     }
 
-    public UserDto convertTestingUserToDto(Auth0Util.TestingUser testingUser) {
+    public UserDto convertTestingUserToDto(SharedTestUserUtil.SharedTestUser testingUser) {
         return new UserDto(
             testingUser.getUserId(),
-            testingUser.getAuth0Id(),
+            testingUser.getAuth0UserId(),
             null,
             testingUser.getUserGuid(),
             null,
@@ -43,7 +43,7 @@ public class UpdateUserLoginDataUtilTest extends TxnAwareBaseTest {
         );
     }
 
-    private Auth0CallResponse updateUserEmail(ManagementAPI mgmtAPI, Auth0Util.TestingUser testingUser, String newEmail) {
+    private Auth0CallResponse updateUserEmail(ManagementAPI mgmtAPI, SharedTestUserUtil.SharedTestUser testingUser, String newEmail) {
         return Auth0Util.updateUserEmail(
                 mgmtAPI,
                 convertTestingUserToDto(testingUser),
@@ -52,7 +52,7 @@ public class UpdateUserLoginDataUtilTest extends TxnAwareBaseTest {
         );
     }
 
-    private Auth0CallResponse updateUserPassword(ManagementAPI mgmtAPI, Auth0Util.TestingUser testingUser, String newPassword) {
+    private Auth0CallResponse updateUserPassword(ManagementAPI mgmtAPI, SharedTestUserUtil.SharedTestUser testingUser, String newPassword) {
         return Auth0Util.updateUserPassword(
                 mgmtAPI,
                 convertTestingUserToDto(testingUser),

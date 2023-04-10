@@ -40,6 +40,7 @@ import org.broadinstitute.ddp.model.activity.definition.template.Template;
 import org.broadinstitute.ddp.model.user.User;
 import org.broadinstitute.ddp.util.ConfigManager;
 import org.broadinstitute.ddp.util.RouteUtil;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.broadinstitute.ddp.util.TestingUserUtil;
 import org.jdbi.v3.core.Handle;
 
@@ -230,7 +231,7 @@ public class RouteTestUtil {
             if (isAdmin) {
                 stmt.setString(2, TestConstants.TEST_ADMIN_GUID);
             } else {
-                stmt.setString(2, TestConstants.TEST_USER_GUID);
+                stmt.setString(2, SharedTestUserUtil.getInstance().getSharedTestUser(handle).getUserGuid());
             }
             int numRows = stmt.executeUpdate();
             if (numRows != 1) {

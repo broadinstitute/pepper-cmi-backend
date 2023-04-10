@@ -373,6 +373,24 @@ public class Auth0ManagementClient {
         });
     }
 
+    public ApiResult<User, APIException> getAuth0UserByEmail(String username) {
+        String msg = "Hit rate limit while fetching auth0 user " + username + ", retrying";
+        return withRetries(msg, () -> {
+            try {
+                mgmtApi.setApiToken(getToken());
+                var users = mgmtApi.users().listByEmail(username, null).execute();
+                if (!users.isEmpty()) {
+                    if (users.size() > 1) {
+                        throw new DDPException("Found " + users.size() + " users with username " + username);
+                    }
+                }
+                return ApiResult.ok(200, users.iterator().next());
+            } catch (Exception e) {
+                return ApiResult.thrown(e);
+            }
+        });
+    }
+
     /**
      * Delete the auth0 user. Note: this is a dangerous operation, use with caution.
      *

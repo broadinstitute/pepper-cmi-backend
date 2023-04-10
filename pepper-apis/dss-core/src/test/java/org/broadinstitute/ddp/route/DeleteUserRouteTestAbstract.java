@@ -60,27 +60,27 @@ public class DeleteUserRouteTestAbstract extends IntegrationTestSuite.TestCase {
             testData = TestDataSetupUtil.generateBasicUserTestData(handle);
 
             userNonGoverned = createUser(handle, testData.getTestingStudy(), null, false,
-                    testData.getProfile(), testData.getTestingUser().getEmail(),
+                    testData.getProfile(), testData.getTestingUser().getUserEmail(),
                     false, true);
             userMultiGoverned = createUser(handle, testData.getTestingStudy(), null, false,
-                    testData.getProfile(), testData.getTestingUser().getEmail(),
+                    testData.getProfile(), testData.getTestingUser().getUserEmail(),
                      false, true, testData.getUserId(), userNonGoverned.getId());
             userWithAccount = createUser(handle, testData.getTestingStudy(), "some_account", false,
-                    testData.getProfile(), testData.getTestingUser().getEmail(),
+                    testData.getProfile(), testData.getTestingUser().getUserEmail(),
                     false, true, testData.getUserId());
             userEnrolled = createUser(handle, testData.getTestingStudy(), null, true,
-                    testData.getProfile(), testData.getTestingUser().getEmail(),
+                    testData.getProfile(), testData.getTestingUser().getUserEmail(),
                     false, true,
                     testData.getUserId());
             userWithKit = createUser(handle, testData.getTestingStudy(), null, false,
-                    testData.getProfile(), testData.getTestingUser().getEmail(),
+                    testData.getProfile(), testData.getTestingUser().getUserEmail(),
                     true, true,
                     testData.getUserId());
             userNormal = createUser(handle, testData.getTestingStudy(), null, false,
-                    testData.getProfile(), testData.getTestingUser().getEmail(),
+                    testData.getProfile(), testData.getTestingUser().getUserEmail(),
                     false, true, testData.getUserId());
             userNoGovernance = createUser(handle, testData.getTestingStudy(), null, true,
-                    testData.getProfile(), testData.getTestingUser().getEmail(),
+                    testData.getProfile(), testData.getTestingUser().getUserEmail(),
                     false, false,
                     testData.getUserId());
         });

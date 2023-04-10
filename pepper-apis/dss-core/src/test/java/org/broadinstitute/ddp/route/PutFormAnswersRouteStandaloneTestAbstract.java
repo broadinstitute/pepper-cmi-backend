@@ -44,6 +44,7 @@ import org.broadinstitute.ddp.model.activity.types.TemplateType;
 import org.broadinstitute.ddp.model.activity.types.TextInputType;
 import org.broadinstitute.ddp.model.workflow.WorkflowTransition;
 import org.broadinstitute.ddp.util.Auth0Util;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.broadinstitute.ddp.util.TestUtil;
 import org.jdbi.v3.core.Handle;
@@ -55,7 +56,7 @@ public class PutFormAnswersRouteStandaloneTestAbstract extends IntegrationTestSu
 
     protected static ActivityVersionDto activityVersionDto;
     protected static TestDataSetupUtil.GeneratedTestData testData;
-    protected static Auth0Util.TestingUser user;
+    protected static SharedTestUserUtil.SharedTestUser user;
     protected static FormActivityDef parentForm;
     protected static FormActivityDef form;
     protected static ConditionalBlockDef conditionalBlock;
