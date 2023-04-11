@@ -156,9 +156,6 @@ public class ConfigFile {
     public static class Auth0Testing {
         public static final String AUTH0_CLIENT_ID = "clientId";
         public static final String AUTH0_SECRET = "clientSecret";
-        public static final String AUTH0_TEST_EMAIL = "testUser";
-        public static final String AUTH0_TEST_USER_GUID = "testUserGuid";
-        public static final String AUTH0_TEST_USER_HRUID = "testUserHruid";
         public static final String AUTH0_TEST_PASSWORD = "testUserPassword";
         public static final String AUTH0_TEST_ADMIN_EMAIL = "testAdmin";
         public static final String AUTH0_TEST_ADMIN_PASSWORD = "testAdminPassword";

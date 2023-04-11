@@ -50,7 +50,18 @@
         "testAdmin": "{{$testingAuth.testAdmin}}",
         "testAdminPassword": "{{$testingAuth.testAdminPassword}}",
         "testAdminUserAuth0Id": "{{$testingAuth.testAdminUserAuth0Id}}",
-        "dsmApiAudience": "https://dsm.datadonationplatform.org",
+        {{if eq $environment "pepper-cmi/dev"}}
+            "dsmApiAudience": "https://cmi-dev.us.auth0.com/api/v2/",
+        {{end}}
+        {{if eq $environment "pepper-cmi/test"}}
+            "dsmApiAudience": "https://cmi-test.us.auth0.com/api/v2/",
+        {{end}}
+        {{if eq $environment "pepper-cmi/staging"}}
+            "dsmApiAudience": "https://cmi-staging.us.auth0.com/api/v2/",
+        {{end}}
+        {{if eq $environment "pepper-cmi/prod"}}
+            "dsmApiAudience": "https://cmi-prod.us.auth0.com/api/v2/",
+        {{end}}
         "dsmDomain": "{{$auth0.dsmDomain}}",
         "dsmClientId": "{{$testingAuth.dsmClientId}}",
         "dsmClientSecret": "{{$testingAuth.dsmClientSecret}}",

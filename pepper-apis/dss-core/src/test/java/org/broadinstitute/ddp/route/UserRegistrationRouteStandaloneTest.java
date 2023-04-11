@@ -94,10 +94,7 @@ import org.broadinstitute.ddp.model.pex.Expression;
 import org.broadinstitute.ddp.model.user.EnrollmentStatusType;
 import org.broadinstitute.ddp.model.user.User;
 import org.broadinstitute.ddp.model.user.UserProfile;
-import org.broadinstitute.ddp.util.Auth0Util;
-import org.broadinstitute.ddp.util.ConfigManager;
-import org.broadinstitute.ddp.util.GuidUtils;
-import org.broadinstitute.ddp.util.TestDataSetupUtil;
+import org.broadinstitute.ddp.util.*;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -130,6 +127,8 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
     private static String user2Guid;
     private static String user3Guid;
 
+    private static SharedTestUserUtil.SharedTestUser testUser;
+
     private final Set<String> auth0UserIdsToDelete = new HashSet<>();
     private final Set<String> userGuidsToDelete = new HashSet<>();
 
@@ -142,11 +141,12 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
         auth0UserId = jwt.getSubject();
         auth0Domain = jwt.getClaim(Auth0Constants.DDP_TENANT_CLAIM).asString();
         auth0ClientId = RouteTestUtil.getAuth0TestClientId();
-        testUserEmail = cfg.getConfig(ConfigFile.AUTH0).getString(ConfigFile.Auth0Testing.AUTH0_TEST_EMAIL);
 
         url = RouteTestUtil.getTestingBaseUrl() + API.REGISTRATION;
 
         TransactionWrapper.useTxn(handle -> {
+            testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+            testUserEmail = testUser.getUserEmail();
             study1 = TestDataSetupUtil.generateTestStudy(handle, cfg);
             study2 = TestDataSetupUtil.generateTestStudy(handle, cfg);
             tempStudy = TestDataSetupUtil.generateTestStudy(handle, cfg);
@@ -690,6 +690,7 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
             int numInserted = jdbiMailingList.insertByStudyGuidIfNotStoredAlready("foo", "bar", testUserEmail,
                     study1.getGuid(), null, Instant.now().toEpochMilli());
             assertEquals("should have inserted to mailing list", 1, numInserted);
+            log.info("Added " + testUserEmail + " to the mailing list for " + study1.getGuid());
             return jdbiMailingList.findIdByEmailAndStudyGuid(testUserEmail, study1.getGuid()).get();
         });
 
@@ -701,7 +702,7 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
             TransactionWrapper.useTxn(handle -> {
                 Optional<Long> actual = handle.attach(JdbiMailingList.class)
                         .findIdByEmailAndStudyGuid(testUserEmail, study1.getGuid());
-                assertFalse("should have removed mailing list entry", actual.isPresent());
+                assertFalse("should have removed mailing list entry for " + testUserEmail + " in study " + study1.getGuid(), actual.isPresent());
             });
         } finally {
             TransactionWrapper.useTxn(handle -> handle.attach(JdbiMailingList.class).deleteById(mailListEntryId));
