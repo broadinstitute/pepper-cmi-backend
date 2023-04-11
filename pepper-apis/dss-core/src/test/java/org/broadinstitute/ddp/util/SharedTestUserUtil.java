@@ -8,6 +8,7 @@ import com.auth0.json.mgmt.users.User;
 import com.auth0.net.AuthRequest;
 import com.typesafe.config.Config;
 import lombok.extern.slf4j.Slf4j;
+import org.broadinstitute.ddp.cache.LanguageStore;
 import org.broadinstitute.ddp.client.ApiResult;
 import org.broadinstitute.ddp.client.Auth0ManagementClient;
 import org.broadinstitute.ddp.constants.Auth0Constants;
@@ -93,6 +94,7 @@ public class SharedTestUserUtil {
         String testUserPassword = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD);
         String encryptionKey = auth0Config.getString(ConfigFile.ENCRYPTION_SECRET);
         String encryptedAuth0BackendClientSecret = AesUtil.encrypt(auth0Secret, encryptionKey);
+        LanguageStore.init(handle);
         return setupTestUser(handle, auth0Domain, mgmtClientId, mgmtSecret, testUserPassword, auth0ClientId,
                 auth0Secret, encryptedAuth0BackendClientSecret, auth0clientName);
     }
