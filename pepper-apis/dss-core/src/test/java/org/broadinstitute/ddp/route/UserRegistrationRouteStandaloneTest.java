@@ -94,7 +94,11 @@ import org.broadinstitute.ddp.model.pex.Expression;
 import org.broadinstitute.ddp.model.user.EnrollmentStatusType;
 import org.broadinstitute.ddp.model.user.User;
 import org.broadinstitute.ddp.model.user.UserProfile;
-import org.broadinstitute.ddp.util.*;
+import org.broadinstitute.ddp.util.Auth0Util;
+import org.broadinstitute.ddp.util.ConfigManager;
+import org.broadinstitute.ddp.util.GuidUtils;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
+import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -702,7 +706,8 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
             TransactionWrapper.useTxn(handle -> {
                 Optional<Long> actual = handle.attach(JdbiMailingList.class)
                         .findIdByEmailAndStudyGuid(testUserEmail, study1.getGuid());
-                assertFalse("should have removed mailing list entry for " + testUserEmail + " in study " + study1.getGuid(), actual.isPresent());
+                assertFalse("should have removed mailing list entry for " + testUserEmail + " in study "
+                        + study1.getGuid(), actual.isPresent());
             });
         } finally {
             TransactionWrapper.useTxn(handle -> handle.attach(JdbiMailingList.class).deleteById(mailListEntryId));
