@@ -1,5 +1,11 @@
 package org.broadinstitute.ddp.util;
 
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_ID;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_NAME;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_SECRET;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_ADMIN_EMAIL;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_ADMIN_PASSWORD;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,8 +41,6 @@ import org.broadinstitute.ddp.db.dto.UserDto;
 import org.broadinstitute.ddp.exception.DDPException;
 import org.broadinstitute.ddp.security.JWTConverter;
 import org.jdbi.v3.core.Handle;
-
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.*;
 
 @Slf4j
 public class TestingUserUtil {

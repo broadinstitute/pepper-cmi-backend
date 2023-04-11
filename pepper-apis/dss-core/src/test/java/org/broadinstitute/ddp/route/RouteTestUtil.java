@@ -235,7 +235,7 @@ public class RouteTestUtil {
             }
             int numRows = stmt.executeUpdate();
             if (numRows != 1) {
-                throw new RuntimeException("Could not lock user " + TestConstants.TEST_USER_GUID
+                throw new RuntimeException("Could not lock user " + TestConstants.TEST_ADMIN_GUID
                         + " because " + numRows + " rows were updated");
             }
             return null;

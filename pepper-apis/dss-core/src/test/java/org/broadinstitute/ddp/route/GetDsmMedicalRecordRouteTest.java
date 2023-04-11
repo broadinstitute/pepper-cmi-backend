@@ -1,7 +1,6 @@
 package org.broadinstitute.ddp.route;
 
 import static io.restassured.RestAssured.given;
-import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_GUID;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_DAY;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_MONTH;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_YEAR;

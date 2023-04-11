@@ -43,7 +43,6 @@ import org.broadinstitute.ddp.model.activity.types.NestedActivityRenderHint;
 import org.broadinstitute.ddp.model.activity.types.TemplateType;
 import org.broadinstitute.ddp.model.activity.types.TextInputType;
 import org.broadinstitute.ddp.model.workflow.WorkflowTransition;
-import org.broadinstitute.ddp.util.Auth0Util;
 import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.broadinstitute.ddp.util.TestUtil;

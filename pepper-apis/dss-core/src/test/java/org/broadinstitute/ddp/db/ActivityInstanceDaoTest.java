@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.broadinstitute.ddp.TxnAwareBaseTest;
-import org.broadinstitute.ddp.constants.TestConstants;
 import org.broadinstitute.ddp.db.dao.ActivityDao;
 import org.broadinstitute.ddp.db.dao.JdbiActivityInstance;
 import org.broadinstitute.ddp.db.dao.JdbiUser;

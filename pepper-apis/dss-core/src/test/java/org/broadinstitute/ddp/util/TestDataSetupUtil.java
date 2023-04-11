@@ -1,9 +1,8 @@
 package org.broadinstitute.ddp.util;
 
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.*;
-import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_DAY;
-import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_MONTH;
-import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_YEAR;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
+import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD;
 import static org.broadinstitute.ddp.constants.TestConstants.getTestStudyBloodPexEXPR;
 import static org.broadinstitute.ddp.constants.TestConstants.getTestStudyTissuePexEXPR;
 import static org.broadinstitute.ddp.model.activity.types.InstanceStatusType.CREATED;
@@ -16,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,15 +22,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import com.auth0.exception.Auth0Exception;
 import com.typesafe.config.Config;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
 import org.apache.commons.io.IOUtils;
 import org.broadinstitute.ddp.cache.CacheService;
 import org.broadinstitute.ddp.cache.LanguageStore;
@@ -117,7 +109,6 @@ import org.broadinstitute.ddp.security.StudyClientConfiguration;
 import org.broadinstitute.ddp.service.DsmAddressValidationStatus;
 import org.broadinstitute.ddp.service.OLCService;
 import org.jdbi.v3.core.Handle;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utility that helps setup general purpose generatedTestData for testing.

@@ -5,7 +5,6 @@ import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGM
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID2;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET2;
-import static org.broadinstitute.ddp.route.IntegrationTestSuite.sharedTestUser;
 
 import java.io.IOException;
 import java.sql.SQLException;

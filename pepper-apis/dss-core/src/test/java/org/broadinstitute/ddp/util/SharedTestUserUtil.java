@@ -13,8 +13,11 @@ import org.broadinstitute.ddp.client.Auth0ManagementClient;
 import org.broadinstitute.ddp.constants.Auth0Constants;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.TestConstants;
-import org.broadinstitute.ddp.db.TransactionWrapper;
-import org.broadinstitute.ddp.db.dao.*;
+import org.broadinstitute.ddp.db.dao.JdbiAuth0Tenant;
+import org.broadinstitute.ddp.db.dao.JdbiClient;
+import org.broadinstitute.ddp.db.dao.JdbiClientUmbrellaStudy;
+import org.broadinstitute.ddp.db.dao.JdbiUmbrellaStudy;
+import org.broadinstitute.ddp.db.dao.JdbiUser;
 import org.broadinstitute.ddp.db.dto.Auth0TenantDto;
 import org.broadinstitute.ddp.db.dto.ClientDto;
 import org.broadinstitute.ddp.db.dto.StudyDto;
@@ -22,10 +25,13 @@ import org.broadinstitute.ddp.db.dto.UserDto;
 import org.broadinstitute.ddp.exception.DDPException;
 import org.broadinstitute.ddp.model.user.UserProfile;
 import org.broadinstitute.ddp.security.AesUtil;
-import org.broadinstitute.ddp.security.EncryptionKey;
 import org.jdbi.v3.core.Handle;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
@@ -79,7 +85,9 @@ public class SharedTestUserUtil {
                 mgmtClientId, mgmtSecret);
     }
 
-    public SharedTestUser createNewTestUser(Handle handle, String auth0Domain, String auth0clientName, String auth0ClientId, String auth0Secret, String mgmtClientId, String mgmtSecret) {
+    public SharedTestUser createNewTestUser(Handle handle, String auth0Domain, String auth0clientName,
+                                            String auth0ClientId, String auth0Secret, String mgmtClientId,
+                                            String mgmtSecret) {
         Config cfg = configManager.getConfig();
         Config auth0Config = cfg.getConfig("auth0");
         String testUserPassword = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD);
@@ -113,8 +121,7 @@ public class SharedTestUserUtil {
         JdbiUmbrellaStudy studyDao = handle.attach(JdbiUmbrellaStudy.class);
         JdbiClientUmbrellaStudy clientStudyDao = handle.attach(JdbiClientUmbrellaStudy.class);
 
-        String userEmail = "testUser-" + jvmUser + "-" + System.currentTimeMillis() +
-                "@datadonationplatform.org";
+        String userEmail = "testUser-" + jvmUser + "-" + System.currentTimeMillis() + "@datadonationplatform.org";
 
         String userGuid = GuidUtils.randomUserGuid();
         String userHruid = GuidUtils.randomUserHruid();
@@ -157,7 +164,7 @@ public class SharedTestUserUtil {
                     tenantDto.getId(), null);
             clientDto = clientDao.findByAuth0ClientIdAndAuth0TenantId(auth0BackendTestClientId,
                     tenantDto.getId()).get();
-           List<String> staticTestStudies = Arrays.asList(TestConstants.TEST_STUDY_GUID);
+            List<String> staticTestStudies = Arrays.asList(TestConstants.TEST_STUDY_GUID);
             for (String staticTestStudy : staticTestStudies) {
                 StudyDto studyDto = studyDao.findByStudyGuid(staticTestStudy);
                 if (studyDto == null) {
@@ -205,8 +212,8 @@ public class SharedTestUserUtil {
         }
 
         testUser = new SharedTestUser(user.getUserId(), userEmail, testUserPassword, userGuid, userHruid,
-                clientDto.getId(), auth0User.getId(), profile, auth0Domain, auth0BackendTestClientId, auth0ClientSecret,
-                auth0BackendTestClientName);
+                clientDto.getId(), auth0User.getId(), profile, auth0Domain, auth0BackendTestClientId,
+                auth0ClientSecret, auth0BackendTestClientName);
         log.info("Will use shared test user " + testUser);
         log.info("Updated auth0 test user " + auth0User.getId() + " metadata to reference guid "
                 + userGuid);
@@ -303,13 +310,13 @@ public class SharedTestUserUtil {
 
         @Override
         public String toString() {
-            return "SharedTestUser{" +
-                    "userEmail='" + userEmail + '\'' +
-                    ", userPassword='" + userPassword + '\'' +
-                    ", userGuid='" + userGuid + '\'' +
-                    ", userHruid='" + userHruid + '\'' +
-                    ", pepperClientId=" + pepperClientId +
-                    '}';
+            return "SharedTestUser{"
+                    + "userEmail='" + userEmail + '\''
+                    + ", userPassword='" + userPassword + '\''
+                    + ", userGuid='" + userGuid + '\''
+                    + ", userHruid='" + userHruid + '\''
+                    + ", pepperClientId=" + pepperClientId
+                    + '}';
         }
     }
 }

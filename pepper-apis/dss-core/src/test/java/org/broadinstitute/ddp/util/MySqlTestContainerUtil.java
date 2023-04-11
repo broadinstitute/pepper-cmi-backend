@@ -12,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.exception.DDPException;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.images.AbstractImagePullPolicy;
-import org.testcontainers.images.ImageData;
 import org.testcontainers.images.ImagePullPolicy;
-import org.testcontainers.images.PullPolicy;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 

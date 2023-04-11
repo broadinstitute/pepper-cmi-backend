@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.broadinstitute.ddp.TxnAwareBaseTest;
-import org.broadinstitute.ddp.constants.TestConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.db.dao.ActivityInstanceDao;
 import org.broadinstitute.ddp.db.dao.UserDao;
@@ -34,6 +33,7 @@ import org.broadinstitute.ddp.pex.PexException;
 import org.broadinstitute.ddp.pex.PexInterpreter;
 import org.broadinstitute.ddp.pex.TreeWalkInterpreter;
 import org.broadinstitute.ddp.service.actvityinstancebuilder.form.FormInstanceCreatorHelper;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.jdbi.v3.core.Handle;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -43,7 +43,9 @@ import org.junit.rules.ExpectedException;
 
 public class UpdateBlockStatusesTest extends TxnAwareBaseTest {
 
-    private static String userGuid = TestConstants.TEST_USER_GUID;
+    private static String userGuid;
+
+    private static SharedTestUserUtil.SharedTestUser testUser;
     private static PexInterpreter interpreter;
     private static FormInstanceCreatorHelper formInstanceCreatorHelper;
 
@@ -55,6 +57,10 @@ public class UpdateBlockStatusesTest extends TxnAwareBaseTest {
     public static void setup() {
         interpreter = new TreeWalkInterpreter();
         formInstanceCreatorHelper = new FormInstanceCreatorHelper();
+        TransactionWrapper.useTxn(handle -> {
+            testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+        });
+        userGuid = testUser.getUserGuid();
     }
 
     @Before

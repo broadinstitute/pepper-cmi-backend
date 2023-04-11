@@ -43,7 +43,6 @@ import org.broadinstitute.ddp.housekeeping.message.HousekeepingMessage;
 import org.broadinstitute.ddp.model.activity.definition.FormActivityDef;
 import org.broadinstitute.ddp.model.activity.types.EventTriggerType;
 import org.broadinstitute.ddp.model.activity.types.InstanceStatusType;
-import org.broadinstitute.ddp.util.Auth0Util;
 import org.broadinstitute.ddp.util.ConfigUtil;
 import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
