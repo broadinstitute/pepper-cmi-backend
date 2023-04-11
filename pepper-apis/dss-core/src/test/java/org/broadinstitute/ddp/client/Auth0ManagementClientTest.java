@@ -72,7 +72,8 @@ public class Auth0ManagementClientTest extends TxnAwareBaseTest {
 
         String email = testData.getTestingUser().getUserEmail();
         String redirectUrl = "https://code.datadonationplatform.org/";
-        var actual = client.createPasswordResetTicket(email, connectionId, redirectUrl);
+        var actual = client.createPasswordResetTicket(testData.getTestingUser().getAuth0UserId(), redirectUrl);
+        //var actual = client.createPasswordResetTicket(email, connectionId, redirectUrl);
         assertEquals(200, actual.getStatusCode());
         assertNotNull(actual.getBody());
 

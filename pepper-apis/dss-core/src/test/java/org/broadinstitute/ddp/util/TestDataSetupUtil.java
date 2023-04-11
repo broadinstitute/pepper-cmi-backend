@@ -134,6 +134,7 @@ public class TestDataSetupUtil {
     }
 
     public static GeneratedTestData generateBasicUserTestData(Handle handle) {
+        LanguageStore.init(handle);
         return generateBasicUserTestData(handle, false);
     }
 
