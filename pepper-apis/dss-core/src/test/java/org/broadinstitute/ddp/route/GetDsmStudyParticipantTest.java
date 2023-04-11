@@ -1,6 +1,7 @@
 package org.broadinstitute.ddp.route;
 
 import static io.restassured.RestAssured.given;
+import static org.broadinstitute.ddp.route.IntegrationTestSuite.sharedTestUser;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -21,7 +22,7 @@ import org.junit.Test;
 public class GetDsmStudyParticipantTest extends DsmRouteTest {
 
     private static String url;
-    private static String legacyAltPid = "12345.GUID-GUID-GUID";
+    private static String legacyAltPid = "12345.GUID-GUID-GUID";  // todo arz set these values on newly generated user
     private static String TEST_LEGACY_SHORTID = "12345.LEGACY-SHORTID";
 
     @BeforeClass
@@ -88,7 +89,7 @@ public class GetDsmStudyParticipantTest extends DsmRouteTest {
     @Test
     public void test_providingGuid_getsUser() {
         doLookupWithId(userGuid)
-                .and().body("participantId", equalTo(userGuid));
+                .and().body("participantId", equalTo(sharedTestUser.getUserGuid()));
     }
 
     @Test
@@ -97,7 +98,7 @@ public class GetDsmStudyParticipantTest extends DsmRouteTest {
                 handle.attach(JdbiUserStudyEnrollment.class).changeUserStudyEnrollmentStatus(
                         userGuid, studyGuid, EnrollmentStatusType.CONSENT_SUSPENDED));
         doLookupWithId(userGuid)
-                .and().body("participantId", equalTo(userGuid));
+                .and().body("participantId", equalTo(sharedTestUser.getUserGuid()));
     }
 
     private ValidatableResponse doLookupWithId(String userGuidOrLegacyAltPid) {
@@ -110,7 +111,7 @@ public class GetDsmStudyParticipantTest extends DsmRouteTest {
                 .body("firstName", equalTo(TestConstants.TEST_USER_PROFILE_FIRST_NAME))
                 .and().body("lastName", equalTo(TestConstants.TEST_USER_PROFILE_LAST_NAME))
                 .and().body("country", equalTo(TestConstants.TEST_USER_MAIL_ADDRESS_COUNTRY))
-                .and().body("shortId", equalTo(TestConstants.TEST_USER_HRUID))
+                .and().body("shortId", equalTo(sharedTestUser.getUserHruid()))
                 .and().body("legacyShortId", equalTo(TEST_LEGACY_SHORTID))
                 .and().body("validAddress", equalTo("2"))
                 .and().body("city", equalTo(TestConstants.TEST_USER_MAIL_ADDRESS_CITY))

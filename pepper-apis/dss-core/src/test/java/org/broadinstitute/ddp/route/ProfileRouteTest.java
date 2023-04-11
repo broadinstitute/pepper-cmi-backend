@@ -25,6 +25,7 @@ import org.broadinstitute.ddp.db.dao.UserProfileDao;
 import org.broadinstitute.ddp.json.Profile;
 import org.broadinstitute.ddp.json.errors.ApiError;
 import org.broadinstitute.ddp.model.user.UserProfile;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,7 +52,11 @@ public class ProfileRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        token = RouteTestUtil.loginStaticTestUserForToken();
+        // we are updating/deleting user profiles in this test so let's use a test-specific user
+        SharedTestUserUtil.SharedTestUser testUser = TransactionWrapper.withTxn(handle -> {
+            return SharedTestUserUtil.getInstance().createNewTestUser(handle);
+        });
+        token = testUser.getToken();
         guid = RouteTestUtil.getUnverifiedUserGuidFromToken(token);
         url = RouteTestUtil.getTestingBaseUrl() + API.USER_PROFILE.replace(PathParam.USER_GUID, guid);
     }

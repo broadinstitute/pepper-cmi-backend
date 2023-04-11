@@ -5,6 +5,7 @@ import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_GUID;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_DAY;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_MONTH;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_USER_PROFILE_BIRTH_YEAR;
+import static org.broadinstitute.ddp.route.IntegrationTestSuite.sharedTestUser;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
@@ -151,7 +152,7 @@ public class GetDsmMedicalRecordRouteTest extends DsmRouteTest {
 
         try {
             doLookupWithId(userGuid)
-                    .and().body("participantId", equalTo(TEST_USER_GUID))
+                    .and().body("participantId", equalTo(sharedTestUser.getUserGuid()))
                     .and().body("institutions[0].id", not(TestConstants.TEST_INSTITUTION_LEGACY_GUID));
         } finally {
             TransactionWrapper.useTxn(handle -> {

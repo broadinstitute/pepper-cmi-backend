@@ -63,6 +63,22 @@ public class SharedTestUserUtil {
         return testUser;
     }
 
+    /**
+     * Create a new test user using auth0 configuration
+     * from the config file
+     */
+    public SharedTestUser createNewTestUser(Handle handle) {
+        Config auth0Config = configManager.getConfig().getConfig("auth0");
+        String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
+        String auth0Secret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
+        String auth0clientName = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_NAME);
+        String auth0Domain = auth0Config.getString(ConfigFile.DOMAIN);
+        String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
+        String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
+        return createNewTestUser(handle, auth0Domain, auth0clientName, auth0ClientId, auth0Secret,
+                mgmtClientId, mgmtSecret);
+    }
+
     public SharedTestUser createNewTestUser(Handle handle, String auth0Domain, String auth0clientName, String auth0ClientId, String auth0Secret, String mgmtClientId, String mgmtSecret) {
         Config cfg = configManager.getConfig();
         Config auth0Config = cfg.getConfig("auth0");

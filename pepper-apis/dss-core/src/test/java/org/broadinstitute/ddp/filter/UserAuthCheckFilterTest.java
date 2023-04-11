@@ -60,8 +60,7 @@ public class UserAuthCheckFilterTest extends IntegrationTestSuite.TestCase {
     public void testAuthUser_canAccessBothAuthAndAllowlistRoutes() {
         String profileUrl = makeUrl(API.USER_PROFILE
                 .replace(PathParam.USER_GUID, testData.getUserGuid()));
-        String previousName = TransactionWrapper.withTxn(handle -> handle.attach(UserProfileDao.class)
-                .findProfileByUserId(testData.getUserId()).get().getFirstName());
+        String previousName = testData.getTestingUser().getProfile().getFirstName();
 
         try {
             String newName = "foo" + Instant.now().toEpochMilli();
@@ -80,7 +79,8 @@ public class UserAuthCheckFilterTest extends IntegrationTestSuite.TestCase {
                     .statusCode(HttpStatus.SC_OK).contentType(ContentType.JSON)
                     .body("firstName", equalTo(newName));
         } finally {
-            TransactionWrapper.useTxn(handle -> assertEquals(1, handle.attach(UserProfileDao.class)
+            TransactionWrapper.useTxn(handle -> assertEquals(1,
+                    handle.attach(UserProfileDao.class)
                     .getUserProfileSql().updateFirstName(testData.getUserId(), previousName)));
         }
     }

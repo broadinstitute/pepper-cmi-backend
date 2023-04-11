@@ -40,8 +40,10 @@ import org.junit.Test;
 
 public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
 
+    private static SharedTestUserUtil.SharedTestUser authFilterRouteTestUser;
+
     private static String getProfileEndpoint() {
-        return getBaseUserEndpoint(sharedTestUser.getUserGuid()) + "/profile";
+        return getBaseUserEndpoint(authFilterRouteTestUser.getUserGuid()) + "/profile";
     }
 
     private static final Header GARBAGE_AUTH_HEADER = new BasicHeader(RouteConstants.Header.AUTHORIZATION, "Bearer foo");
@@ -77,7 +79,10 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setupAuthToken() throws Auth0Exception {
-        testUserToken = RouteTestUtil.loginStaticTestUserForToken();
+        authFilterRouteTestUser = TransactionWrapper.withTxn(handle -> {
+            return SharedTestUserUtil.getInstance().createNewTestUser(handle);
+        });
+        testUserToken = authFilterRouteTestUser.getToken();
         setupUsers();
     }
 
@@ -141,7 +146,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
     @Before
     public void clearProfile() {
         TransactionWrapper.useTxn(handle -> {
-            long userId = handle.attach(JdbiUser.class).getUserIdByGuid(sharedTestUser.getUserGuid());
+            long userId = handle.attach(JdbiUser.class).getUserIdByGuid(authFilterRouteTestUser.getUserGuid());
             handle.attach(UserProfileDao.class).getUserProfileSql().deleteByUserId(userId);
 
         });
@@ -169,18 +174,18 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
     }
 
     private String buildStudyUrl() {
-        return RouteTestUtil.getTestingBaseUrl() + getStudyEndpoint(sharedTestUser.getUserGuid(),
+        return RouteTestUtil.getTestingBaseUrl() + getStudyEndpoint(authFilterRouteTestUser.getUserGuid(),
                 TestConstants.TEST_STUDY_GUID);
     }
 
     private String buildStudy2Url() {
-        return RouteTestUtil.getTestingBaseUrl() + getStudyEndpoint(sharedTestUser.getUserGuid(),
+        return RouteTestUtil.getTestingBaseUrl() + getStudyEndpoint(authFilterRouteTestUser.getUserGuid(),
                 TestConstants.SECOND_STUDY_GUID);
     }
 
     private String buildGovernedStudyParticipantsUrl() {
         String url = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.USER_STUDY_PARTICIPANTS;
-        return url.replace(RouteConstants.PathParam.USER_GUID, sharedTestUser.getUserGuid())
+        return url.replace(RouteConstants.PathParam.USER_GUID, authFilterRouteTestUser.getUserGuid())
                 .replace(RouteConstants.PathParam.STUDY_GUID, TestConstants.TEST_STUDY_GUID);
     }
 
@@ -298,7 +303,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
     @Test
     public void testGovernedStudyParticipants_failsWhenRequestedUserIsNotOperatorItself() {
         String url = buildGovernedStudyParticipantsUrl()
-                .replace(sharedTestUser.getUserGuid(), "another-user-guid");
+                .replace(authFilterRouteTestUser.getUserGuid(), "another-user-guid");
         RestAssured.given().auth().oauth2(testUserToken)
                 .when().get(url)
                 .then().assertThat()
