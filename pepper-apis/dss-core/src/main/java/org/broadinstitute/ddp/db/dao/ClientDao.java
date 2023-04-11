@@ -2,6 +2,7 @@ package org.broadinstitute.ddp.db.dao;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.broadinstitute.ddp.db.dto.ClientDto;
 import org.broadinstitute.ddp.security.AesUtil;
@@ -28,6 +29,7 @@ public interface ClientDao extends SqlObject {
 
     /**
      * Saves a new client and gives it access to the given list of studies
+     * if the client does not exist already
      *
      * @param auth0ClientId      auth0's internal client id
      * @param auth0ClientSecret  auth0's secret for the client
@@ -42,17 +44,24 @@ public interface ClientDao extends SqlObject {
                                 Long auth0TenantId) {
 
         String encryptedClientSecret = AesUtil.encrypt(auth0ClientSecret, encryptionKey);
+        Optional<ClientDto> clientDto = getClientDao().findByAuth0ClientIdAndAuth0TenantId(auth0ClientId, auth0TenantId);
+        Long clientId = null;
 
-        long clientId = getClientDao().insertClient(auth0ClientId, encryptedClientSecret, auth0TenantId,
-                                                    null);
-        log.info("Inserted client {}", clientId);
+        if (!clientDto.isPresent()) {
+            clientId = getClientDao().insertClient(auth0ClientId, encryptedClientSecret, auth0TenantId,
+                    null);
+            log.info("Inserted client {}", clientId);
 
-        for (String studyGuid : studyGuidsToAccess) {
-            long aclId = getClientUmbrellaStudyDao().insert(clientId, getUmbrellaStudyDao().findByStudyGuid(studyGuid).getId());
-            log.info(
-                    "Inserted client__umbrella_study id {} for client {}, tenant {} and study {}",
-                    aclId, auth0ClientId, auth0TenantId, studyGuid
-            );
+            for (String studyGuid : studyGuidsToAccess) {
+                long aclId = getClientUmbrellaStudyDao().insert(clientId, getUmbrellaStudyDao().findByStudyGuid(studyGuid).getId());
+                log.info(
+                        "Inserted client__umbrella_study id {} for client {}, tenant {} and study {}",
+                        aclId, auth0ClientId, auth0TenantId, studyGuid
+                );
+            }
+        } else {
+            log.info("Client " + clientId + " already exists for " + auth0ClientId + " tenant " + auth0TenantId);
+            clientId = clientDto.get().getId();
         }
         return clientId;
     }
