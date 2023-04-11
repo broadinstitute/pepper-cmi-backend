@@ -123,7 +123,7 @@ public class SharedTestUserUtil {
         JdbiUmbrellaStudy studyDao = handle.attach(JdbiUmbrellaStudy.class);
         JdbiClientUmbrellaStudy clientStudyDao = handle.attach(JdbiClientUmbrellaStudy.class);
 
-        String userEmail = "testUser-" + jvmUser + "-" + System.currentTimeMillis() + "@datadonationplatform.org";
+        String userEmail = "testuser-" + jvmUser + "-" + System.currentTimeMillis() + "@datadonationplatform.org";
 
         String userGuid = GuidUtils.randomUserGuid();
         String userHruid = GuidUtils.randomUserHruid();
