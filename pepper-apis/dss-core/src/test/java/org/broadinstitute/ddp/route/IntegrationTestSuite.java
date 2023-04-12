@@ -187,11 +187,9 @@ public class IntegrationTestSuite {
     }
 
     private static void insertTestData() {
-        log.warn("Inserting test data!!!!");
         RouteTestUtil.setupDatabasePool();
         TestDataSetupUtil.insertStaticTestData();
         initializeStaticTestUserData();
-        log.warn("Test data has been inserted!!!!");
     }
 
     private static List<Class> ignoredClasses() {

@@ -254,15 +254,16 @@ public class TestDataSetupUtil {
     /**
      * Inserts the environment-sensitive tenant used for testing
      */
-    private static void insertTestingTenant(Handle handle, Config auth0Cfg) {
+    private static Auth0TenantDto insertTestingTenant(Handle handle, Config auth0Cfg) {
         JdbiAuth0Tenant jdbiAuth0Tenant = handle.attach(JdbiAuth0Tenant.class);
         String domain = auth0Cfg.getString(ConfigFile.DOMAIN);
         String mgmtApiClient = auth0Cfg.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID);
         String mgmtSecret = auth0Cfg.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET);
 
         String encryptedSecret = AesUtil.encrypt(mgmtSecret, EncryptionKey.getEncryptionKey());
-        jdbiAuth0Tenant.insertIfNotExists(domain, mgmtApiClient, encryptedSecret);
-        log.info("Inserted testing tenant {}", domain);
+        Auth0TenantDto tenantDto = jdbiAuth0Tenant.insertIfNotExists(domain, mgmtApiClient, encryptedSecret);
+        log.info("Inserted testing tenant {} for {}", tenantDto.getId(), tenantDto.getDomain());
+        return tenantDto;
     }
 
     /**
@@ -270,23 +271,17 @@ public class TestDataSetupUtil {
      */
     public static synchronized void insertStaticTestData() {
         Config cfg = ConfigManager.getInstance().getConfig();
-        TransactionWrapper.useTxn(handle -> {
-            insertTestingTenant(handle, cfg.getConfig(ConfigFile.AUTH0));
+        Auth0TenantDto tenant = TransactionWrapper.withTxn(handle -> {
+            return insertTestingTenant(handle, cfg.getConfig(ConfigFile.AUTH0));
         });
+        log.info("Inserted testing tenant " + tenant.getId());
         List<String> scripts = new ArrayList<>();
-        // temporarily disable client/study tenant relationships so that we can add
-        // legacy seed test data to existing dbs without requiring a drop/reload
-        scripts.add(TEMP_DISABLE_CLIENT_STUDY_TENANT_CONSTRAINTS);
+        // add legacy seed test data to existing dbs without requiring a drop/reload
         scripts.add(BASELINE_SEED_TEST_DATA);
-        scripts.add(MIGRATE_LEGACY_STUDY_CLIENT_TENANT_AND_ENABLE_CONSTRAINTS);
-        try {
-            for (String script : scripts) {
-                log.info("Running legacy test setup script {}", script);
-                String dbUrl = cfg.getString(TransactionWrapper.DB.APIS.getDbUrlConfigKey());
-                LiquibaseUtil.runChangeLog(dbUrl, script);
-            }
-        } catch (Exception e) {
-            log.error("Failed to insert static test account data", e);
+        for (String script : scripts) {
+            log.info("Running legacy test setup script {}", script);
+            String dbUrl = cfg.getString(TransactionWrapper.DB.APIS.getDbUrlConfigKey());
+            LiquibaseUtil.runChangeLog(dbUrl, script);
         }
     }
 
