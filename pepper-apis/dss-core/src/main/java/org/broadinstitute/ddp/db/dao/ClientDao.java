@@ -44,16 +44,20 @@ public interface ClientDao extends SqlObject {
                                 Long auth0TenantId) {
 
         String encryptedClientSecret = AesUtil.encrypt(auth0ClientSecret, encryptionKey);
-        Optional<ClientDto> clientDto = getClientDao().findByAuth0ClientIdAndAuth0TenantId(auth0ClientId, auth0TenantId);
+        Optional<ClientDto> clientDto = getClientDao().findByAuth0ClientIdAndAuth0TenantId(auth0ClientId,
+                auth0TenantId);
+
         Long clientId = null;
 
         if (clientDto.isEmpty()) {
+            log.info("Inserting new client " + auth0ClientId + " for tenant " + auth0TenantId);
             clientId = getClientDao().insertClient(auth0ClientId, encryptedClientSecret, auth0TenantId,
                     null);
             log.info("Inserted client {}", clientId);
 
             for (String studyGuid : studyGuidsToAccess) {
-                long aclId = getClientUmbrellaStudyDao().insert(clientId, getUmbrellaStudyDao().findByStudyGuid(studyGuid).getId());
+                long aclId = getClientUmbrellaStudyDao().insert(clientId,
+                        getUmbrellaStudyDao().findByStudyGuid(studyGuid).getId());
                 log.info(
                         "Inserted client__umbrella_study id {} for client {}, tenant {} and study {}",
                         aclId, auth0ClientId, auth0TenantId, studyGuid
