@@ -226,9 +226,10 @@ public class IntegrationTestSuite {
                     mgmtApiClientId,
                     encryptedSecret);
 
-            Optional<Long> clientId = jdbiClient.getClientIdByAuth0ClientAndDomain(testClientId, defaultDomain);
+            Optional<Long> clientId = jdbiClient.getClientIdByAuth0ClientIdAndAuth0TenantId(testClientId,
+                    auth0Tenant.getId());
 
-            if (!clientId.isPresent()) {
+            if (clientId.isEmpty()) {
                 // add the client and access to the test studies if needed
                 long insertedClientId = handle.attach(ClientDao.class)
                         .registerClient(testClientId, testClientSecret, new ArrayList<>(),
