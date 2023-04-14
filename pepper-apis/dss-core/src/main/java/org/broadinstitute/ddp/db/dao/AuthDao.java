@@ -26,7 +26,7 @@ public interface AuthDao extends SqlObject {
 
     @GetGeneratedKeys
     @SqlUpdate("insert into study_admin (user_id, umbrella_study_id) values (:userId, :studyId)"
-            + "ON DUPLICATE KEY UPDATE user_id = :user_id, umbrella_study_id = :studyId")
+            + "ON DUPLICATE KEY UPDATE user_id = :userId, umbrella_study_id = :studyId")
     long assignStudyAdmin(@Bind("userId") long userId, @Bind("studyId") long studyId);
 
     @SqlUpdate("delete from study_admin where user_id = :userId")
