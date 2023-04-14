@@ -101,4 +101,12 @@ public interface JdbiUser extends SqlObject {
 
     @SqlUpdate("delete from user where guid in (<guid>)")
     int deleteAllByGuids(@BindList(value = "guid", onEmpty = BindList.EmptyHandling.NULL) Set<String> guids);
+
+    /**
+     * When running tests in parallel in circle ci, it's possible that different VMs
+     * will collide when trying to insert the same test user.  To avoid this,
+     * we resort to locking the user table during test user creation.
+     */
+    @SqlUpdate("select * from user for update")
+    void lockForParallelTestSetup();
 }

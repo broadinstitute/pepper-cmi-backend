@@ -1,10 +1,7 @@
 package org.broadinstitute.ddp.util;
 
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_ID;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_NAME;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_SECRET;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_ADMIN_EMAIL;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_ADMIN_PASSWORD;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -195,11 +192,13 @@ public class TestingUserUtil {
     }
 
     public static Auth0Util.TestingUser loginTestAdminUser(Handle handle, Config auth0Config) throws Auth0Exception {
+        SharedTestUserUtil.SharedTestUser adminTestUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+
         return loginExistingTestingUser(handle,
-                auth0Config.getString(AUTH0_TEST_ADMIN_EMAIL),
-                auth0Config.getString(AUTH0_TEST_ADMIN_PASSWORD),
-                TestConstants.TEST_ADMIN_GUID,
-                auth0Config.getString(AUTH0_CLIENT_NAME),
+                adminTestUser.getUserEmail(),
+                adminTestUser.getUserPassword(),
+                adminTestUser.getUserGuid(),
+                adminTestUser.getUserHruid(),
                 auth0Config.getString(AUTH0_CLIENT_ID),
                 auth0Config.getString(AUTH0_SECRET),
                 TestConstants.TEST_STUDY_GUID);

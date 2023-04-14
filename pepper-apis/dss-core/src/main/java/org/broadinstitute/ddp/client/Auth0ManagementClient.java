@@ -383,6 +383,8 @@ public class Auth0ManagementClient {
                     if (users.size() > 1) {
                         throw new DDPException("Found " + users.size() + " users with username " + username);
                     }
+                } else {
+                    return ApiResult.ok(200, null);  // no such user
                 }
                 return ApiResult.ok(200, users.iterator().next());
             } catch (Exception e) {

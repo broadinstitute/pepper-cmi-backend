@@ -26,7 +26,6 @@ import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing;
 import org.broadinstitute.ddp.constants.RouteConstants;
 import org.broadinstitute.ddp.constants.SqlConstants;
-import org.broadinstitute.ddp.constants.TestConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.db.dao.DataExportDao;
 import org.broadinstitute.ddp.db.dao.JdbiAuth0Tenant;
@@ -223,19 +222,22 @@ public class RouteTestUtil {
 
     private static void setLockFlagForTestUser(boolean isLocked, boolean isAdmin) throws SQLException {
         TransactionWrapper.withTxn(handle -> {
+            String userGuid = null;
             PreparedStatement stmt = handle.getConnection().prepareStatement("update user set "
                     + SqlConstants.IS_USER_LOCKED
                     + "= ? where " + SqlConstants
                     .DDP_USER_GUID + " = ?");
             stmt.setBoolean(1, isLocked);
+
             if (isAdmin) {
-                stmt.setString(2, TestConstants.TEST_ADMIN_GUID);
+                userGuid = SharedTestUserUtil.getInstance().getSharedAdminTestUser(handle).getUserGuid();
             } else {
-                stmt.setString(2, SharedTestUserUtil.getInstance().getSharedTestUser(handle).getUserGuid());
+                userGuid = SharedTestUserUtil.getInstance().getSharedTestUser(handle).getUserGuid();
             }
+            stmt.setString(2, userGuid);
             int numRows = stmt.executeUpdate();
             if (numRows != 1) {
-                throw new RuntimeException("Could not lock user " + TestConstants.TEST_ADMIN_GUID
+                throw new RuntimeException("Could not lock user " + userGuid
                         + " because " + numRows + " rows were updated");
             }
             return null;

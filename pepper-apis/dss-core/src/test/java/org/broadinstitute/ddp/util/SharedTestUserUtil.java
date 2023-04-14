@@ -8,17 +8,20 @@ import com.auth0.json.mgmt.users.User;
 import com.auth0.net.AuthRequest;
 import com.typesafe.config.Config;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.ddp.cache.LanguageStore;
 import org.broadinstitute.ddp.client.ApiResult;
 import org.broadinstitute.ddp.client.Auth0ManagementClient;
 import org.broadinstitute.ddp.constants.Auth0Constants;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.TestConstants;
+import org.broadinstitute.ddp.db.dao.AuthDao;
 import org.broadinstitute.ddp.db.dao.JdbiAuth0Tenant;
 import org.broadinstitute.ddp.db.dao.JdbiClient;
 import org.broadinstitute.ddp.db.dao.JdbiClientUmbrellaStudy;
 import org.broadinstitute.ddp.db.dao.JdbiUmbrellaStudy;
 import org.broadinstitute.ddp.db.dao.JdbiUser;
+import org.broadinstitute.ddp.db.dao.UserProfileDao;
 import org.broadinstitute.ddp.db.dto.Auth0TenantDto;
 import org.broadinstitute.ddp.db.dto.ClientDto;
 import org.broadinstitute.ddp.db.dto.StudyDto;
@@ -36,11 +39,14 @@ import java.util.Optional;
 
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
+import static org.broadinstitute.ddp.constants.TestConstants.AUTH0_TEST_USER_GUID_FIELD;
 
 @Slf4j
 public class SharedTestUserUtil {
 
     private SharedTestUser testUser;
+
+    private SharedTestUser adminTestUser;
 
     private static SharedTestUserUtil instance;
 
@@ -56,6 +62,7 @@ public class SharedTestUserUtil {
      * @return
      */
     public SharedTestUser getSharedTestUser(Handle handle) {
+        // todo arz use seed email address from env and check that first.
         if (testUser == null) {
             Config auth0Config = configManager.getConfig().getConfig("auth0");
             String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
@@ -65,9 +72,37 @@ public class SharedTestUserUtil {
             String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
             String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
             testUser = createNewTestUser(handle, auth0Domain, auth0clientName, auth0ClientId, auth0Secret,
-                    mgmtClientId, mgmtSecret);
+                    mgmtClientId, mgmtSecret, getSharedUserEmailFromEnvironment(false));
         }
         return testUser;
+    }
+
+    private static String getSharedUserEmailFromEnvironment(boolean isAdmin) {
+        String testUserBase = System.getenv(TestConstants.DYNAMIC_SHARED_TEST_USER);
+        String testUserEmail = null;
+        if (testUserBase != null && !testUserBase.isBlank()) {
+            testUserEmail = testUserBase;
+            if (isAdmin) {
+                testUserEmail +=  "-admin";
+            }
+            testUserEmail += "@datadonationplatform.org";
+        }
+        return testUserEmail;
+    }
+
+    public SharedTestUser getSharedAdminTestUser(Handle handle) {
+        String adminUser = getSharedUserEmailFromEnvironment(true);
+        if (StringUtils.isNotBlank(adminUser)) {
+            // todo arz See if the user exists already.  It may have been created
+            // in another parallel VM
+
+        }
+        if (adminTestUser == null) {
+            adminTestUser = createNewTestUser(handle, getSharedUserEmailFromEnvironment(true));
+            StudyDto testStudy = handle.attach(JdbiUmbrellaStudy.class).findByStudyGuid(TestConstants.TEST_STUDY_GUID);
+            handle.attach(AuthDao.class).assignStudyAdmin(adminTestUser.getUserId(), testStudy.getId());
+        }
+        return adminTestUser;
     }
 
     /**
@@ -75,6 +110,11 @@ public class SharedTestUserUtil {
      * from the config file
      */
     public SharedTestUser createNewTestUser(Handle handle) {
+        return createNewTestUser(handle, null);
+    }
+
+    private SharedTestUser createNewTestUser(Handle handle, String testUserEmail) {
+        handle.attach(JdbiUser.class).lockForParallelTestSetup();
         Config auth0Config = configManager.getConfig().getConfig("auth0");
         String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
         String auth0Secret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
@@ -83,7 +123,7 @@ public class SharedTestUserUtil {
         String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
         String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
         return createNewTestUser(handle, auth0Domain, auth0clientName, auth0ClientId, auth0Secret,
-                mgmtClientId, mgmtSecret);
+                mgmtClientId, mgmtSecret, testUserEmail);
     }
 
     public SharedTestUser createNewTestUser(Handle handle, String auth0Domain, String auth0clientName,
@@ -96,8 +136,22 @@ public class SharedTestUserUtil {
         String encryptedAuth0BackendClientSecret = AesUtil.encrypt(auth0Secret, encryptionKey);
         LanguageStore.init(handle);
         return setupTestUser(handle, auth0Domain, mgmtClientId, mgmtSecret, testUserPassword, auth0ClientId,
-                auth0Secret, encryptedAuth0BackendClientSecret, auth0clientName);
+                auth0Secret, encryptedAuth0BackendClientSecret, auth0clientName, null);
     }
+
+    private SharedTestUser createNewTestUser(Handle handle, String auth0Domain, String auth0clientName,
+                                            String auth0ClientId, String auth0Secret, String mgmtClientId,
+                                            String mgmtSecret, String testUserEmail) {
+        Config cfg = configManager.getConfig();
+        Config auth0Config = cfg.getConfig("auth0");
+        String testUserPassword = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD);
+        String encryptionKey = auth0Config.getString(ConfigFile.ENCRYPTION_SECRET);
+        String encryptedAuth0BackendClientSecret = AesUtil.encrypt(auth0Secret, encryptionKey);
+        LanguageStore.init(handle);
+        return setupTestUser(handle, auth0Domain, mgmtClientId, mgmtSecret, testUserPassword, auth0ClientId,
+                auth0Secret, encryptedAuth0BackendClientSecret, auth0clientName, testUserEmail);
+    }
+
 
     public static synchronized SharedTestUserUtil getInstance() {
         if (instance == null) {
@@ -114,7 +168,8 @@ public class SharedTestUserUtil {
                                          String auth0BackendTestClientId,
                                          String auth0ClientSecret,
                                          String encryptedTestClientSecret,
-                                         String auth0BackendTestClientName) {
+                                         String auth0BackendTestClientName,
+                                         String testUserEmail) {
 
         SharedTestUser testUser = null;
         String jvmUser = System.getProperty("user.name");
@@ -122,36 +177,39 @@ public class SharedTestUserUtil {
         JdbiClient clientDao = handle.attach(JdbiClient.class);
         JdbiUmbrellaStudy studyDao = handle.attach(JdbiUmbrellaStudy.class);
         JdbiClientUmbrellaStudy clientStudyDao = handle.attach(JdbiClientUmbrellaStudy.class);
+        User auth0User = null;
+        UserDto user = null;
+        UserProfile profile = null;
 
         String userEmail = "testuser-" + jvmUser + "-" + System.currentTimeMillis() + "@datadonationplatform.org";
+        if (testUserEmail != null && !testUserEmail.isEmpty()) {
+            userEmail = testUserEmail;
+        }
 
-        String userGuid = GuidUtils.randomUserGuid();
-        String userHruid = GuidUtils.randomUserHruid();
-        long testUserId = -1;
+
 
         var mgmtClient = new Auth0ManagementClient(auth0Domain, mgmtClientId, mgmtClientSecret);
-
-        log.info("Creating test user record in auth0 based on database user " + userGuid);
-        ApiResult<User, APIException> createdUser = mgmtClient.createAuth0User(
-                Auth0ManagementClient.DEFAULT_DB_CONN_NAME, userEmail, testUserPassword);
-        if (createdUser.hasFailure()) {
-            if (createdUser.getError() != null && createdUser.getError().getStatusCode() == 409) {
-                // try to query by username.  we might have the user in auth0 but have the wrong auth0 user id
-                log.info("User " + userEmail + " already exists.  Will query by username.");
-                createdUser  = mgmtClient.getAuth0UserByEmail(userEmail);
-                if (createdUser.hasFailure()) {
-                    throw new DDPException("Could not find test user " + userEmail + " in auth0",
-                            createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
+        boolean shouldCreateUser = true;
+        ApiResult<User, APIException> existingAuth0User = mgmtClient.getAuth0UserByEmail(userEmail);
+        if (!existingAuth0User.hasFailure()) {
+            if (existingAuth0User.hasBody()) {
+                auth0User = existingAuth0User.getBody();
+                if (auth0User.getAppMetadata() != null) {
+                    String existingUserGuid = auth0User.getAppMetadata().get(AUTH0_TEST_USER_GUID_FIELD).toString();
+                    if (StringUtils.isNotBlank(existingUserGuid)) {
+                        user = userDao.findByUserGuid(existingUserGuid);
+                        if (user != null) {
+                            log.info("Will use existing test user " + userEmail + ".");
+                            shouldCreateUser = false;
+                            profile = handle.attach(UserProfileDao.class).findProfileByUserId(user.getUserId()).get();
+                        }
+                    }
                 }
-            } else {
-                throw new DDPException("Could not find test user " + userEmail + " in auth0",
-                        createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
             }
+        } else {
+            throw new DDPException("Could not query auth0 user " + userEmail + ": " + existingAuth0User.getError(),
+                    existingAuth0User.getThrown());
         }
-        log.info("Created new test auth0 user " + createdUser.getBody().getId() + " for user guid "
-                + userGuid);
-        User auth0User = createdUser.getBody();
-
 
         ClientDto clientDto = null;
         JdbiAuth0Tenant jdbiAuth0Tenant = handle.attach(JdbiAuth0Tenant.class);
@@ -180,45 +238,71 @@ public class SharedTestUserUtil {
             clientDto = optClientDto.get();
         }
 
-        testUserId = userDao.insert(
-                auth0User.getId(),
-                userGuid,
-                clientDto.getId(),
-                userHruid);
-        UserProfile profile = TestDataSetupUtil.createTestingProfile(handle, testUserId, false);
+        if (shouldCreateUser) {
+            String userGuid = GuidUtils.randomUserGuid();
+            String userHruid = GuidUtils.randomUserHruid();
+            long testUserId = -1;
+            log.info("Creating new test user " + testUserEmail + " with guid " + userGuid);
+            ApiResult<User, APIException> createdUser = mgmtClient.createAuth0User(
+                    Auth0ManagementClient.DEFAULT_DB_CONN_NAME, userEmail, testUserPassword);
+            if (createdUser.hasFailure()) {
+                if (createdUser.getError() != null && createdUser.getError().getStatusCode() == 409) {
+                    // try to query by username.  we might have the user in auth0 but have the wrong auth0 user id
+                    log.info("User " + userEmail + " already exists.  Will query by username.");
+                    createdUser = mgmtClient.getAuth0UserByEmail(userEmail);
+                    if (createdUser.hasFailure()) {
+                        throw new DDPException("Could not find test user " + userEmail + " in auth0",
+                                createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
+                    }
+                } else {
+                    throw new DDPException("Could not find test user " + userEmail + " in auth0",
+                            createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
+                }
+            }
+            log.info("Created new test auth0 user " + createdUser.getBody().getId() + " for user guid "
+                    + userGuid);
+            auth0User = createdUser.getBody();
 
-        log.info("Saved test user " + userGuid + " in the database with auth0 user id " + auth0User.getId()
-                + " and db id " + testUserId);
-        UserDto user = userDao.findByUserId(testUserId);
+            testUserId = userDao.insert(
+                    auth0User.getId(),
+                    userGuid,
+                    clientDto.getId(),
+                    userHruid);
+            profile = TestDataSetupUtil.createTestingProfile(handle, testUserId, false);
 
-        Map<String, Object> auth0UserMetadata = new HashMap<>();
-        auth0UserMetadata.put(Auth0Constants.USER_METADATA_GUID_FIELD, userGuid);
-        auth0UserMetadata.put("test_jvm_user", jvmUser);
+            log.info("Saved test user " + userGuid + " in the database with auth0 user id " + auth0User.getId()
+                    + " and db id " + testUserId);
+            user = userDao.findByUserId(testUserId);
 
-        var result = mgmtClient.updateUserMetadata(auth0User.getId(), auth0UserMetadata);
+            Map<String, Object> auth0UserMetadata = new HashMap<>();
+            auth0UserMetadata.put(Auth0Constants.USER_METADATA_GUID_FIELD, userGuid);
+            auth0UserMetadata.put("test_jvm_user", jvmUser);
 
-        if (result.hasThrown() || result.hasError()) {
-            var e = result.hasThrown() ? result.getThrown() : result.getError();
-            throw new DDPException("Could not update auth0 metadata for test user with auth0 id "
-                    + auth0User.getId() + " and guid " + userGuid, e);
+            var result = mgmtClient.updateUserMetadata(auth0User.getId(), auth0UserMetadata);
+
+            if (result.hasThrown() || result.hasError()) {
+                var e = result.hasThrown() ? result.getThrown() : result.getError();
+                throw new DDPException("Could not update auth0 metadata for test user with auth0 id "
+                        + auth0User.getId() + " and guid " + userGuid, e);
+            }
+
+            Map<String, Object> auth0UserAppMetadata = new HashMap<>();
+            auth0UserAppMetadata.put(AUTH0_TEST_USER_GUID_FIELD, userGuid);
+            result = mgmtClient.updateUserAppMetadata(auth0User.getId(), auth0UserAppMetadata);
+
+            if (result.hasThrown() || result.hasError()) {
+                var e = result.hasThrown() ? result.getThrown() : result.getError();
+                throw new DDPException("Could not update auth0 app metadata for test user with auth0 id "
+                        + auth0User.getId() + " and guid " + userGuid, e);
+            }
+            log.info("Updated auth0 test user " + auth0User.getId() + " metadata to reference guid "
+                    + userGuid);
         }
 
-        Map<String, Object> auth0UserAppMetadata = new HashMap<>();
-        auth0UserAppMetadata.put("testingGuid", userGuid);
-        result = mgmtClient.updateUserAppMetadata(auth0User.getId(), auth0UserAppMetadata);
-
-        if (result.hasThrown() || result.hasError()) {
-            var e = result.hasThrown() ? result.getThrown() : result.getError();
-            throw new DDPException("Could not update auth0 app metadata for test user with auth0 id "
-                    + auth0User.getId() + " and guid " + userGuid, e);
-        }
-
-        testUser = new SharedTestUser(user.getUserId(), userEmail, testUserPassword, userGuid, userHruid,
-                clientDto.getId(), auth0User.getId(), profile, auth0Domain, auth0BackendTestClientId,
-                auth0ClientSecret, auth0BackendTestClientName);
+        testUser = new SharedTestUser(user.getUserId(), userEmail, testUserPassword, user.getUserGuid(),
+                user.getUserHruid(), clientDto.getId(), auth0User.getId(), profile, auth0Domain,
+                auth0BackendTestClientId, auth0ClientSecret, auth0BackendTestClientName);
         log.info("Will use shared test user " + testUser);
-        log.info("Updated auth0 test user " + auth0User.getId() + " metadata to reference guid "
-                + userGuid);
 
         return testUser;
     }

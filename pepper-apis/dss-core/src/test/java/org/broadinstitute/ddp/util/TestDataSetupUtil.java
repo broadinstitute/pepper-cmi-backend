@@ -3,6 +3,8 @@ package org.broadinstitute.ddp.util;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD;
+import static org.broadinstitute.ddp.constants.TestConstants.SECOND_STUDY_GUID;
+import static org.broadinstitute.ddp.constants.TestConstants.TEST_STUDY_GUID;
 import static org.broadinstitute.ddp.constants.TestConstants.getTestStudyBloodPexEXPR;
 import static org.broadinstitute.ddp.constants.TestConstants.getTestStudyTissuePexEXPR;
 import static org.broadinstitute.ddp.model.activity.types.InstanceStatusType.CREATED;
@@ -37,6 +39,7 @@ import org.broadinstitute.ddp.db.dao.ActivityDao;
 import org.broadinstitute.ddp.db.dao.ActivityInstanceDao;
 import org.broadinstitute.ddp.db.dao.AnswerDao;
 import org.broadinstitute.ddp.db.dao.ClientDao;
+import org.broadinstitute.ddp.db.dao.EventTriggerSql;
 import org.broadinstitute.ddp.db.dao.FormActivityDao;
 import org.broadinstitute.ddp.db.dao.JdbiActivityStatusTrigger;
 import org.broadinstitute.ddp.db.dao.JdbiAuth0Tenant;
@@ -45,7 +48,6 @@ import org.broadinstitute.ddp.db.dao.JdbiClientUmbrellaStudy;
 import org.broadinstitute.ddp.db.dao.JdbiEventAction;
 import org.broadinstitute.ddp.db.dao.JdbiEventConfiguration;
 import org.broadinstitute.ddp.db.dao.JdbiEventConfigurationOccurrenceCounter;
-import org.broadinstitute.ddp.db.dao.EventTriggerSql;
 import org.broadinstitute.ddp.db.dao.JdbiMailAddress;
 import org.broadinstitute.ddp.db.dao.JdbiMedicalProvider;
 import org.broadinstitute.ddp.db.dao.JdbiRevision;
@@ -63,6 +65,7 @@ import org.broadinstitute.ddp.db.dto.EnrollmentStatusDto;
 import org.broadinstitute.ddp.db.dto.MedicalProviderDto;
 import org.broadinstitute.ddp.db.dto.SendgridConfigurationDto;
 import org.broadinstitute.ddp.db.dto.StudyDto;
+import org.broadinstitute.ddp.db.dto.UmbrellaDto;
 import org.broadinstitute.ddp.db.dto.UserDto;
 import org.broadinstitute.ddp.model.activity.definition.ConsentActivityDef;
 import org.broadinstitute.ddp.model.activity.definition.ConsentElectionDef;
@@ -115,23 +118,11 @@ import org.jdbi.v3.core.Handle;
  */
 @Slf4j
 public class TestDataSetupUtil {
-    public static final String TEMP_DISABLE_CLIENT_STUDY_TENANT_CONSTRAINTS = "db-testscripts/disable-tenant-constraints.xml";
-    public static final String MIGRATE_LEGACY_STUDY_CLIENT_TENANT_AND_ENABLE_CONSTRAINTS =
-            "db-testscripts/backfill-test-tenants-and-re-enable-tenant-constrains.xml";
-    public static final String BASELINE_SEED_TEST_DATA = "db-testscripts/baseline-seed-test-data.xml";
     private static final Config cfg = ConfigManager.getInstance().getConfig();
     private static final Config auth0Config = cfg.getConfig(ConfigFile.AUTH0);
     private static final String password = auth0Config.getString(AUTH0_TEST_PASSWORD);
     private static final List<GeneratedTestData> testDataToDelete = new ArrayList<>();
     private static final String CONSENT_PDF_LOCATION = "src/test/resources/ConsentForm.pdf";
-
-    private static void initializeDb(Config cfg) {
-        int maxConnections = cfg.getInt(ConfigFile.NUM_POOLED_CONNECTIONS);
-        String dbUrl = cfg.getString(ConfigFile.DB_URL);
-
-        TransactionWrapper.init(
-                new TransactionWrapper.DbConfiguration(TransactionWrapper.DB.APIS, maxConnections, dbUrl));
-    }
 
     public static GeneratedTestData generateBasicUserTestData(Handle handle) {
         LanguageStore.init(handle);
@@ -267,22 +258,42 @@ public class TestDataSetupUtil {
     }
 
     /**
-     * Setup database with hardcoded test data like test umbrella, study, user, and client.
+     * Setup database with hardcoded test data for umbrella and studies
      */
     public static synchronized void insertStaticTestData() {
         Config cfg = ConfigManager.getInstance().getConfig();
-        Auth0TenantDto tenant = TransactionWrapper.withTxn(handle -> {
-            return insertTestingTenant(handle, cfg.getConfig(ConfigFile.AUTH0));
+        String testUmbrellaName = "test-umbrella";
+        TransactionWrapper.useTxn(handle -> {
+            Auth0TenantDto testTenant =  insertTestingTenant(handle, cfg.getConfig(ConfigFile.AUTH0));
+            JdbiUmbrella umbrellaDao = handle.attach(JdbiUmbrella.class);
+            JdbiUmbrellaStudy studyDao = handle.attach(JdbiUmbrellaStudy.class);
+            long testUmbrellaId = -1;
+            long testStudy1Id = -1;
+            long testStudy2Id = -1;
+            Optional<UmbrellaDto> existingUmbrella = umbrellaDao.findByGuid(testUmbrellaName);
+            if (existingUmbrella.isEmpty()) {
+                testUmbrellaId = umbrellaDao.insert(testUmbrellaName, testUmbrellaName);
+            } else {
+                testUmbrellaId = existingUmbrella.get().getId();
+            }
+
+            StudyDto existingStudy1 = studyDao.findByStudyGuid(TEST_STUDY_GUID);
+            if (existingStudy1 == null) {
+                testStudy1Id = studyDao.insert(TEST_STUDY_GUID, TEST_STUDY_GUID, testUmbrellaId, null,
+                        testTenant.getId(), null, false, null, null, null, false);
+            } else {
+                testStudy1Id = existingStudy1.getId();
+            }
+
+            StudyDto existingStudy2 = studyDao.findByStudyGuid(SECOND_STUDY_GUID);
+
+            if (existingStudy2 == null) {
+                testStudy2Id = studyDao.insert(SECOND_STUDY_GUID, SECOND_STUDY_GUID, testUmbrellaId, null, testTenant.getId(),
+                        null, false, null, null, null, false);
+            } else {
+                testStudy2Id = existingStudy1.getId();
+            }
         });
-        log.info("Inserted testing tenant " + tenant.getId());
-        List<String> scripts = new ArrayList<>();
-        // add legacy seed test data to existing dbs without requiring a drop/reload
-        scripts.add(BASELINE_SEED_TEST_DATA);
-        for (String script : scripts) {
-            log.info("Running legacy test setup script {}", script);
-            String dbUrl = cfg.getString(TransactionWrapper.DB.APIS.getDbUrlConfigKey());
-            LiquibaseUtil.runChangeLog(dbUrl, script);
-        }
     }
 
     public static StudyDto generateTestStudy(Handle handle, Config topLevelConfig) {

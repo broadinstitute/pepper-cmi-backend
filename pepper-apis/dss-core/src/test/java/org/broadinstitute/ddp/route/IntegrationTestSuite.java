@@ -132,6 +132,8 @@ public class IntegrationTestSuite {
 
     protected static SharedTestUserUtil.SharedTestUser sharedTestUser;
 
+    protected static SharedTestUserUtil.SharedTestUser sharedAdminTestUser;
+
     @BeforeClass
     public static void setup() {
         setup(true);
@@ -249,7 +251,10 @@ public class IntegrationTestSuite {
             JdbiUser jdbiUser = handle.attach(JdbiUser.class);
 
             Map<String, String> guidToAuth0UserIds = new HashMap<>();
-            guidToAuth0UserIds.put(TestConstants.TEST_ADMIN_GUID, adminTestUserAuth0Id);
+            if (sharedAdminTestUser == null) {
+                sharedAdminTestUser = SharedTestUserUtil.getInstance().getSharedAdminTestUser(handle);
+            }
+            guidToAuth0UserIds.put(sharedAdminTestUser.getUserGuid(), adminTestUserAuth0Id);
             if (sharedTestUser == null) {
                 sharedTestUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
             }

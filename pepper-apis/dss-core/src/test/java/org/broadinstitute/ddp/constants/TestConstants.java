@@ -48,6 +48,16 @@ public class TestConstants {
     public static final String TEST_INSTITUTION_PHONE = "617-867-5309";
     public static final String TEST_INSTITUTION_LEGACY_GUID = "GUID.GUID.GUID.123456";
     public static final String TEST_INSTITUTION_STREET = "Main street";
+    // when running tests in parallel in circleci, we use this environment variable
+    // to make sure that each batch of tests uses a shared user in order to minimize
+    // auth0 management api rate limits and reduce the number of auth0 accounts
+    public static final String DYNAMIC_SHARED_TEST_USER = "SHARED_TEST_USER";
+
+    /**
+     * Field in auth0 user's app metadata field that is used by testing
+     * clients when querying user guid during registration
+     */
+    public static final String AUTH0_TEST_USER_GUID_FIELD = "testingGuid";
 
     public static String getTestStudyTissuePexEXPR(String testId, String activityUuid, String tissueStableId) {
         return "user.studies[\"" + testId + "\"].forms[\"" + activityUuid + "\"].questions[\"" + tissueStableId + "\"].answers.hasTrue()";
