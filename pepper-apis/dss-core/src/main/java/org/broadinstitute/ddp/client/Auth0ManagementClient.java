@@ -59,6 +59,8 @@ public class Auth0ManagementClient {
     public static final String KEY_PASSWORD_COMPLEXITY_OPTIONS = "password_complexity_options";
     public static final String KEY_MIN_LENGTH = "min_length";
 
+    public static final String APP_METADATA_TEST_GUID = "testingGuid";
+
     public static final String APP_METADATA_PEPPER_USER_GUIDS = "pepper_user_guids";
 
     private static final String AUDIENCE_SUFFIX = "api/v2/";
@@ -68,7 +70,7 @@ public class Auth0ManagementClient {
     private static final Gson gson = new Gson();
 
     // Rate limit and retries
-    private static final int DEFAULT_MAX_RETRIES = 5;
+    private static final int DEFAULT_MAX_RETRIES = 10;
     private static final long DEFAULT_BACKOFF_MILLIS = 2000L;
     private static final int MAX_JITTER_MILLIS = 100;
     private static final int MAX_RESULTS_PER_PAGE = 50;
@@ -492,6 +494,33 @@ public class Auth0ManagementClient {
         }
         Map<String, String> guidByClientId = (Map<String, String>) appMetadata
                 .computeIfAbsent(APP_METADATA_PEPPER_USER_GUIDS, key -> new HashMap<>());
+        guidByClientId.put(auth0ClientId, userGuid);
+
+        result = updateUserAppMetadata(auth0UserId, appMetadata);
+        if (result.hasFailure()) {
+            var e = result.hasThrown() ? result.getThrown() : result.getError();
+            throw new DDPException("Failed to update app metadata for auth0 user " + auth0UserId, e);
+        }
+
+        log.info("Updated auth0 user {} with user guid {} for client {}", auth0UserId, userGuid, auth0ClientId);
+        return result.getBody();
+    }
+
+    public User setTestUserGuidForAuth0User(String auth0UserId, String auth0ClientId, String userGuid) {
+        log.info("About to update auth0 test user {} with test guid {} for client {}", auth0UserId, userGuid, auth0ClientId);
+        var result = getAuth0User(auth0UserId);
+        if (result.hasFailure()) {
+            var e = result.hasThrown() ? result.getThrown() : result.getError();
+            throw new DDPException("Failed to get auth0 user " + auth0UserId, e);
+        }
+
+        User auth0User = result.getBody();
+        Map<String, Object> appMetadata = auth0User.getAppMetadata();
+        if (appMetadata == null) {
+            appMetadata = new HashMap<>();
+        }
+        Map<String, String> guidByClientId = (Map<String, String>) appMetadata
+                .computeIfAbsent(APP_METADATA_TEST_GUID, key -> new HashMap<>());
         guidByClientId.put(auth0ClientId, userGuid);
 
         result = updateUserAppMetadata(auth0UserId, appMetadata);

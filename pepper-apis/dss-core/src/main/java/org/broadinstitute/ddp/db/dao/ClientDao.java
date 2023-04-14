@@ -50,6 +50,7 @@ public interface ClientDao extends SqlObject {
         Long clientId = null;
 
         if (clientDto.isEmpty()) {
+            // this one works
             log.info("Inserting new client " + auth0ClientId + " for tenant " + auth0TenantId);
             clientId = getClientDao().insertClient(auth0ClientId, encryptedClientSecret, auth0TenantId,
                     null);

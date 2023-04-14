@@ -62,20 +62,18 @@ public class SharedTestUserUtil {
      * the shared test user if it doesn't exist already.
      * @return
      */
-    public SharedTestUser getSharedTestUser() {
-        TransactionWrapper.useTxn(handle -> {
-            if (testUser == null) {
-                Config auth0Config = configManager.getConfig().getConfig("auth0");
-                String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
-                String auth0Secret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
-                String auth0clientName = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_NAME);
-                String auth0Domain = auth0Config.getString(ConfigFile.DOMAIN);
-                String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
-                String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
-                testUser = createNewTestUser(handle, auth0Domain, auth0clientName, auth0ClientId, auth0Secret,
-                        mgmtClientId, mgmtSecret, getSharedUserEmailFromEnvironment(false));
-            }
-        });
+    public SharedTestUser getSharedTestUser(Handle handle) {
+        if (testUser == null) {
+            Config auth0Config = configManager.getConfig().getConfig("auth0");
+            String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
+            String auth0Secret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
+            String auth0clientName = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_NAME);
+            String auth0Domain = auth0Config.getString(ConfigFile.DOMAIN);
+            String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
+            String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
+            testUser = createNewTestUser(handle, auth0Domain, auth0clientName, auth0ClientId, auth0Secret,
+                    mgmtClientId, mgmtSecret, getSharedUserEmailFromEnvironment(false));
+        }
         return testUser;
     }
 
@@ -92,15 +90,12 @@ public class SharedTestUserUtil {
         return testUserEmail;
     }
 
-    public SharedTestUser getSharedAdminTestUser() {
-        TransactionWrapper.useTxn(handle -> {
-            if (adminTestUser == null) {
-                adminTestUser = createNewTestUser(handle, getSharedUserEmailFromEnvironment(true));
-                StudyDto testStudy = handle.attach(JdbiUmbrellaStudy.class).findByStudyGuid(TestConstants.TEST_STUDY_GUID);
-                handle.attach(AuthDao.class).assignStudyAdmin(adminTestUser.getUserId(), testStudy.getId());
-            }
-        });
-
+    public SharedTestUser getSharedAdminTestUser(Handle handle) {
+        if (adminTestUser == null) {
+            adminTestUser = createNewTestUser(handle, getSharedUserEmailFromEnvironment(true));
+            StudyDto testStudy = handle.attach(JdbiUmbrellaStudy.class).findByStudyGuid(TestConstants.TEST_STUDY_GUID);
+            handle.attach(AuthDao.class).assignStudyAdmin(adminTestUser.getUserId(), testStudy.getId());
+        }
         return adminTestUser;
     }
 
@@ -220,7 +215,9 @@ public class SharedTestUserUtil {
         Optional<ClientDto> optClientDto = clientDao.findByAuth0ClientIdAndAuth0TenantId(auth0BackendTestClientId,
                 tenantDto.getId());
         if (!optClientDto.isPresent()) {
-            log.info("Inserting new client row for auth0 client" + auth0BackendTestClientId);
+            // this one hangs
+            log.info("Inserting new client row for auth0 client" + auth0BackendTestClientId + " tenant "
+                    + tenantDto.getId());
             clientDao.insertClient(auth0BackendTestClientId, encryptedTestClientSecret,
                     tenantDto.getId(), null);
             clientDto = clientDao.findByAuth0ClientIdAndAuth0TenantId(auth0BackendTestClientId,

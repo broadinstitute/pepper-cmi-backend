@@ -248,11 +248,11 @@ public class IntegrationTestSuite {
 
             Map<String, String> guidToAuth0UserIds = new HashMap<>();
             if (sharedAdminTestUser == null) {
-                sharedAdminTestUser = SharedTestUserUtil.getInstance().getSharedAdminTestUser();
+                sharedAdminTestUser = SharedTestUserUtil.getInstance().getSharedAdminTestUser(handle);
             }
             guidToAuth0UserIds.put(sharedAdminTestUser.getUserGuid(), sharedAdminTestUser.getAuth0UserId());
             if (sharedTestUser == null) {
-                sharedTestUser = SharedTestUserUtil.getInstance().getSharedTestUser();
+                sharedTestUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
             }
             guidToAuth0UserIds.put(sharedTestUser.getUserGuid(), sharedTestUser.getAuth0UserId());
             for (Map.Entry<String, String> guidAndAuth0IdTuple : guidToAuth0UserIds.entrySet()) {

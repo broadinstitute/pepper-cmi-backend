@@ -1,5 +1,6 @@
 package org.broadinstitute.ddp.constants;
 
+import org.broadinstitute.ddp.client.Auth0ManagementClient;
 import org.broadinstitute.ddp.model.activity.types.InstitutionType;
 import org.broadinstitute.ddp.model.user.UserProfile;
 
@@ -57,7 +58,7 @@ public class TestConstants {
      * Field in auth0 user's app metadata field that is used by testing
      * clients when querying user guid during registration
      */
-    public static final String AUTH0_TEST_USER_GUID_FIELD = "testingGuid";
+    public static final String AUTH0_TEST_USER_GUID_FIELD = Auth0ManagementClient.APP_METADATA_TEST_GUID;
 
     public static String getTestStudyTissuePexEXPR(String testId, String activityUuid, String tissueStableId) {
         return "user.studies[\"" + testId + "\"].forms[\"" + activityUuid + "\"].questions[\"" + tissueStableId + "\"].answers.hasTrue()";

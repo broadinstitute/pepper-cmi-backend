@@ -210,7 +210,7 @@ public class TestDataSetupUtil {
 
         GeneratedTestData generatedTestData = null;
         if (!forceUserCreation) {
-            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().getSharedTestUser();
+            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
             generatedTestData = new GeneratedTestData(testUser, testUser.getProfile(), study, studyClientConfiguration);
         } else {
             // todo arz rename all this
