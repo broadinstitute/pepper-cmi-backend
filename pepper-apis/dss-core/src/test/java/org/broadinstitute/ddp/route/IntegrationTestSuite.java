@@ -1,8 +1,6 @@
 package org.broadinstitute.ddp.route;
 
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_ADMIN_TEST_USER_AUTH0_ID;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_ID;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_NAME;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_CLIENT_SECRET;
 
 import java.io.IOException;
@@ -207,8 +205,6 @@ public class IntegrationTestSuite {
      */
     private static void initializeStaticTestUserData() {
         Config auth0Config = RouteTestUtil.getConfig().getConfig(ConfigFile.AUTH0);
-        String testClientName = auth0Config.getString(AUTH0_CLIENT_NAME);
-        String adminTestUserAuth0Id = auth0Config.getString(AUTH0_ADMIN_TEST_USER_AUTH0_ID);
         String testClientId = auth0Config.getString(AUTH0_CLIENT_ID);
         String testClientSecret = auth0Config.getString(AUTH0_CLIENT_SECRET);
         String defaultDomain = auth0Config.getString(ConfigFile.DOMAIN);
@@ -254,7 +250,7 @@ public class IntegrationTestSuite {
             if (sharedAdminTestUser == null) {
                 sharedAdminTestUser = SharedTestUserUtil.getInstance().getSharedAdminTestUser(handle);
             }
-            guidToAuth0UserIds.put(sharedAdminTestUser.getUserGuid(), adminTestUserAuth0Id);
+            guidToAuth0UserIds.put(sharedAdminTestUser.getUserGuid(), sharedAdminTestUser.getAuth0UserId());
             if (sharedTestUser == null) {
                 sharedTestUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
             }

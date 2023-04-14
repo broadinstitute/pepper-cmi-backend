@@ -157,11 +157,6 @@ public class ConfigFile {
         public static final String AUTH0_CLIENT_ID = "clientId";
         public static final String AUTH0_SECRET = "clientSecret";
         public static final String AUTH0_TEST_PASSWORD = "testUserPassword";
-        public static final String AUTH0_TEST_ADMIN_EMAIL = "testAdmin";
-        public static final String AUTH0_TEST_ADMIN_PASSWORD = "testAdminPassword";
-        public static final String AUTH0_CLIENT_NAME = "clientName";
-
-        public static final String AUTH0_ADMIN_TEST_USER_AUTH0_ID = "testAdminUserAuth0Id";
 
         public static final String AUTH0_CLIENT_SECRET = "clientSecret";
         public static final String AUTH0_MGMT_API_CLIENT_ID = "managementApiClientId";
