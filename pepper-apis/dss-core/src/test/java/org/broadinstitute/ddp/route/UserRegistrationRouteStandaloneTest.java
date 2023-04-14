@@ -238,8 +238,10 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
             }
 
             String existingUserGuid = RouteTestUtil.getUnverifiedUserGuidFromToken(token);
-            long existingUserId = handle.attach(UserDao.class).findUserByGuid(existingUserGuid).get().getId();
-            handle.attach(UserGovernanceDao.class).deleteAllGovernancesForProxy(existingUserId);
+            Optional<User> user = handle.attach(UserDao.class).findUserByGuid(existingUserGuid);
+            if (user.isPresent()) {
+                handle.attach(UserGovernanceDao.class).deleteAllGovernancesForProxy(user.get().getId());
+            }
         });
 
         var mgmtClient = TransactionWrapper.withTxn(handle ->

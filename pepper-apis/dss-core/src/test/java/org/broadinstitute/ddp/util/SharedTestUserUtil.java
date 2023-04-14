@@ -188,8 +188,6 @@ public class SharedTestUserUtil {
             userEmail = testUserEmail;
         }
 
-
-
         var mgmtClient = new Auth0ManagementClient(auth0Domain, mgmtClientId, mgmtClientSecret);
         boolean shouldCreateUser = true;
         ApiResult<User, APIException> existingAuth0User = mgmtClient.getAuth0UserByEmail(userEmail);
