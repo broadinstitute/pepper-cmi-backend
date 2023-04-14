@@ -591,8 +591,7 @@ public class Auth0ManagementClient {
                 break;
             }
             if (res.getStatusCode() == 429) {
-                log.error(retryMessage, res.getError());
-                log.error(res.getBody().toString());
+                log.error(retryMessage + " " + res.getError().getClass().getName(), res.getError());
                 long wait = backoffMillis * numTries + new Random().nextInt(MAX_JITTER_MILLIS);
                 try {
                     TimeUnit.MILLISECONDS.sleep(wait);
