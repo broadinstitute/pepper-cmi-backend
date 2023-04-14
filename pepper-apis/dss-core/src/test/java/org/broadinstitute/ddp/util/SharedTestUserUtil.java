@@ -113,8 +113,8 @@ public class SharedTestUserUtil {
         return createNewTestUser(handle, null);
     }
 
+    // todo arz separate table to coordinate locking across vms when setting up test users
     private SharedTestUser createNewTestUser(Handle handle, String testUserEmail) {
-        handle.attach(JdbiUser.class).lockForParallelTestSetup();
         Config auth0Config = configManager.getConfig().getConfig("auth0");
         String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
         String auth0Secret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
@@ -177,9 +177,11 @@ public class SharedTestUserUtil {
         JdbiClient clientDao = handle.attach(JdbiClient.class);
         JdbiUmbrellaStudy studyDao = handle.attach(JdbiUmbrellaStudy.class);
         JdbiClientUmbrellaStudy clientStudyDao = handle.attach(JdbiClientUmbrellaStudy.class);
+        UserProfileDao profileDao = handle.attach(UserProfileDao.class);
         User auth0User = null;
         UserDto user = null;
         UserProfile profile = null;
+        Auth0TenantDto tenantDto = null;
 
         String userEmail = "testuser-" + jvmUser + "-" + System.currentTimeMillis() + "@datadonationplatform.org";
         if (testUserEmail != null && !testUserEmail.isEmpty()) {
@@ -201,7 +203,7 @@ public class SharedTestUserUtil {
                         if (user != null) {
                             log.info("Will use existing test user " + userEmail + ".");
                             shouldCreateUser = false;
-                            profile = handle.attach(UserProfileDao.class).findProfileByUserId(user.getUserId()).get();
+                            profile = profileDao.findProfileByUserId(user.getUserId()).get();
                         }
                     }
                 }
@@ -213,7 +215,7 @@ public class SharedTestUserUtil {
 
         ClientDto clientDto = null;
         JdbiAuth0Tenant jdbiAuth0Tenant = handle.attach(JdbiAuth0Tenant.class);
-        Auth0TenantDto tenantDto = jdbiAuth0Tenant.insertIfNotExists(auth0Domain, mgmtClientId,
+        tenantDto = jdbiAuth0Tenant.insertIfNotExists(auth0Domain, mgmtClientId,
                 encryptedTestClientSecret);
 
         Optional<ClientDto> optClientDto = clientDao.findByAuth0ClientIdAndAuth0TenantId(auth0BackendTestClientId,
@@ -263,12 +265,20 @@ public class SharedTestUserUtil {
                     + userGuid);
             auth0User = createdUser.getBody();
 
-            testUserId = userDao.insert(
-                    auth0User.getId(),
-                    userGuid,
-                    clientDto.getId(),
-                    userHruid);
-            profile = TestDataSetupUtil.createTestingProfile(handle, testUserId, false);
+            user = userDao.findByAuth0UserId(auth0User.getId(), tenantDto.getId());
+            if (user == null) {
+                // possible race condition: different VMs in circle are trying to create
+                // the shared user at the same time
+                testUserId = userDao.insert(
+                        auth0User.getId(),
+                        userGuid,
+                        clientDto.getId(),
+                        userHruid);
+                profile = TestDataSetupUtil.createTestingProfile(handle, testUserId, false);
+            } else {
+                testUserId = user.getUserId();
+                profile = profileDao.findProfileByUserId(user.getUserId()).get();
+            }
 
             log.info("Saved test user " + userGuid + " in the database with auth0 user id " + auth0User.getId()
                     + " and db id " + testUserId);
