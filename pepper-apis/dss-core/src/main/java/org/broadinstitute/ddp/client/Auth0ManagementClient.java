@@ -22,6 +22,7 @@ import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.client.mgmt.filter.ClientFilter;
 import com.auth0.client.mgmt.filter.ConnectionFilter;
 import com.auth0.exception.APIException;
+import com.auth0.exception.RateLimitException;
 import com.auth0.json.mgmt.Connection;
 import com.auth0.json.mgmt.ConnectionsPage;
 import com.auth0.json.mgmt.client.Client;
@@ -591,8 +592,19 @@ public class Auth0ManagementClient {
                 break;
             }
             if (res.getStatusCode() == 429) {
-                log.error(retryMessage + " " + res.getError().getClass().getName(), res.getError());
                 long wait = backoffMillis * numTries + new Random().nextInt(MAX_JITTER_MILLIS);
+                // if we have more information from auth0 about how long to wait, use it.
+                if (res.getError() instanceof RateLimitException) {
+                    RateLimitException rateLimit = (RateLimitException) res.getError();
+                    long unixTimeAtWhichToRetry = rateLimit.getReset();
+                    long suggestedWaitTime = unixTimeAtWhichToRetry - System.currentTimeMillis();
+                    if (suggestedWaitTime > 0) {
+                        wait = suggestedWaitTime;
+                    }
+                    log.warn("Hit auth0 rate limit.  Pausing for " + wait + "ms based on auth0 headers.");
+                } else {
+                    log.warn("Hit auth0 rate limit.  Pausing for " + wait + "ms");
+                }
                 try {
                     TimeUnit.MILLISECONDS.sleep(wait);
                 } catch (InterruptedException e) {

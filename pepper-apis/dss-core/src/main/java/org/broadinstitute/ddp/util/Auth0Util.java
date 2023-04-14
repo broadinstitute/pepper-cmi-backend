@@ -16,6 +16,7 @@ import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.client.mgmt.filter.UserFilter;
 import com.auth0.exception.APIException;
 import com.auth0.exception.Auth0Exception;
+import com.auth0.exception.RateLimitException;
 import com.auth0.json.auth.TokenHolder;
 import com.auth0.json.mgmt.users.User;
 import com.auth0.json.mgmt.users.UsersPage;
@@ -52,7 +53,7 @@ import org.jdbi.v3.core.Handle;
 public class Auth0Util {
     public static final String USERNAME_PASSWORD_AUTH0_CONN_NAME = "Username-Password-Authentication";
     public static final String REFRESH_ENDPOINT = "oauth/token";
-    private static final long RETRY_TIMEOUT = 1000;
+    private static final long DEFAULT_RETRY_TIMEOUT = 1000;
     private final String baseUrl;
     // map of cached jwk providers so we don't hammer auth0
     private static final Map<String, JwkProvider> jwkProviderMap = new HashMap<>();
@@ -455,11 +456,13 @@ public class Auth0Util {
         return builder.sign(algorithm);
     }
 
-    private static void sleepBeforeRetry() {
-        try {
-            Thread.sleep(RETRY_TIMEOUT);
-        } catch (InterruptedException e) {
-            log.error("Interrupted during sleep", e);
+    private static void sleepBeforeRetry(long sleepTime) {
+        if (sleepTime > 0) {
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                log.error("Interrupted during sleep", e);
+            }
         }
     }
 
@@ -468,8 +471,14 @@ public class Auth0Util {
             return req.execute();
         } catch (APIException e) {
             if (e.getStatusCode() == 429) {
+                long sleepTime = DEFAULT_RETRY_TIMEOUT;
+                if (e instanceof RateLimitException) {
+                    // if there's a hint from auth0 for how long to wait, use it
+                    RateLimitException rateLimit = (RateLimitException)e;
+                    sleepTime = rateLimit.getReset() - System.currentTimeMillis();
+                }
                 log.warn("Pausing for retry after hitting rate limit.");
-                sleepBeforeRetry();
+                sleepBeforeRetry(sleepTime);
                 return req.execute();
             } else {
                 throw e;
