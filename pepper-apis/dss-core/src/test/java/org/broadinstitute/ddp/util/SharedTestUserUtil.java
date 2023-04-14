@@ -15,6 +15,7 @@ import org.broadinstitute.ddp.client.Auth0ManagementClient;
 import org.broadinstitute.ddp.constants.Auth0Constants;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.TestConstants;
+import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.db.dao.AuthDao;
 import org.broadinstitute.ddp.db.dao.JdbiAuth0Tenant;
 import org.broadinstitute.ddp.db.dao.JdbiClient;
@@ -61,19 +62,20 @@ public class SharedTestUserUtil {
      * the shared test user if it doesn't exist already.
      * @return
      */
-    public SharedTestUser getSharedTestUser(Handle handle) {
-        // todo arz use seed email address from env and check that first.
-        if (testUser == null) {
-            Config auth0Config = configManager.getConfig().getConfig("auth0");
-            String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
-            String auth0Secret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
-            String auth0clientName = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_NAME);
-            String auth0Domain = auth0Config.getString(ConfigFile.DOMAIN);
-            String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
-            String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
-            testUser = createNewTestUser(handle, auth0Domain, auth0clientName, auth0ClientId, auth0Secret,
-                    mgmtClientId, mgmtSecret, getSharedUserEmailFromEnvironment(false));
-        }
+    public SharedTestUser getSharedTestUser() {
+        TransactionWrapper.useTxn(handle -> {
+            if (testUser == null) {
+                Config auth0Config = configManager.getConfig().getConfig("auth0");
+                String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
+                String auth0Secret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
+                String auth0clientName = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_NAME);
+                String auth0Domain = auth0Config.getString(ConfigFile.DOMAIN);
+                String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
+                String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
+                testUser = createNewTestUser(handle, auth0Domain, auth0clientName, auth0ClientId, auth0Secret,
+                        mgmtClientId, mgmtSecret, getSharedUserEmailFromEnvironment(false));
+            }
+        });
         return testUser;
     }
 
@@ -90,18 +92,15 @@ public class SharedTestUserUtil {
         return testUserEmail;
     }
 
-    public SharedTestUser getSharedAdminTestUser(Handle handle) {
-        String adminUser = getSharedUserEmailFromEnvironment(true);
-        if (StringUtils.isNotBlank(adminUser)) {
-            // todo arz See if the user exists already.  It may have been created
-            // in another parallel VM
+    public SharedTestUser getSharedAdminTestUser() {
+        TransactionWrapper.useTxn(handle -> {
+            if (adminTestUser == null) {
+                adminTestUser = createNewTestUser(handle, getSharedUserEmailFromEnvironment(true));
+                StudyDto testStudy = handle.attach(JdbiUmbrellaStudy.class).findByStudyGuid(TestConstants.TEST_STUDY_GUID);
+                handle.attach(AuthDao.class).assignStudyAdmin(adminTestUser.getUserId(), testStudy.getId());
+            }
+        });
 
-        }
-        if (adminTestUser == null) {
-            adminTestUser = createNewTestUser(handle, getSharedUserEmailFromEnvironment(true));
-            StudyDto testStudy = handle.attach(JdbiUmbrellaStudy.class).findByStudyGuid(TestConstants.TEST_STUDY_GUID);
-            handle.attach(AuthDao.class).assignStudyAdmin(adminTestUser.getUserId(), testStudy.getId());
-        }
         return adminTestUser;
     }
 
@@ -109,8 +108,10 @@ public class SharedTestUserUtil {
      * Create a new test user using auth0 configuration
      * from the config file
      */
-    public SharedTestUser createNewTestUser(Handle handle) {
-        return createNewTestUser(handle, null);
+    public SharedTestUser createNewTestUser() {
+        return TransactionWrapper.withTxn(handle -> {
+            return createNewTestUser(handle, null);
+        });
     }
 
     // todo arz separate table to coordinate locking across vms when setting up test users

@@ -79,7 +79,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
     @BeforeClass
     public static void setupAuthToken() throws Auth0Exception {
         authFilterRouteTestUser = TransactionWrapper.withTxn(handle -> {
-            return SharedTestUserUtil.getInstance().createNewTestUser(handle);
+            return SharedTestUserUtil.getInstance().createNewTestUser();
         });
         testUserToken = authFilterRouteTestUser.getToken();
         setupUsers();

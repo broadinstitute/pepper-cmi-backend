@@ -149,7 +149,7 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
         url = RouteTestUtil.getTestingBaseUrl() + API.REGISTRATION;
 
         TransactionWrapper.useTxn(handle -> {
-            testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+            testUser = SharedTestUserUtil.getInstance().getSharedTestUser();
             testUserEmail = testUser.getUserEmail();
             study1 = TestDataSetupUtil.generateTestStudy(handle, cfg);
             study2 = TestDataSetupUtil.generateTestStudy(handle, cfg);

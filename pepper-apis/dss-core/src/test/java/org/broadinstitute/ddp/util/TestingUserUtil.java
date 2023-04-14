@@ -180,7 +180,7 @@ public class TestingUserUtil {
     }
 
     public static Auth0Util.TestingUser loginTestUser(Handle handle, Config auth0Config) throws Auth0Exception {
-        SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+        SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().getSharedTestUser();
         return loginExistingTestingUser(handle,
                 testUser.getUserEmail(),
                 testUser.getUserPassword(),
@@ -192,7 +192,7 @@ public class TestingUserUtil {
     }
 
     public static Auth0Util.TestingUser loginTestAdminUser(Handle handle, Config auth0Config) throws Auth0Exception {
-        SharedTestUserUtil.SharedTestUser adminTestUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+        SharedTestUserUtil.SharedTestUser adminTestUser = SharedTestUserUtil.getInstance().getSharedTestUser();
 
         return loginExistingTestingUser(handle,
                 adminTestUser.getUserEmail(),

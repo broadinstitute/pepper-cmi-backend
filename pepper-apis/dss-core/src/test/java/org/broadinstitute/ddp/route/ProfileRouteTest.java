@@ -53,9 +53,7 @@ public class ProfileRouteTest extends IntegrationTestSuite.TestCase {
     @BeforeClass
     public static void beforeClass() throws Exception {
         // we are updating/deleting user profiles in this test so let's use a test-specific user
-        SharedTestUserUtil.SharedTestUser testUser = TransactionWrapper.withTxn(handle -> {
-            return SharedTestUserUtil.getInstance().createNewTestUser(handle);
-        });
+        SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().createNewTestUser();
         token = testUser.getToken();
         guid = RouteTestUtil.getUnverifiedUserGuidFromToken(token);
         url = RouteTestUtil.getTestingBaseUrl() + API.USER_PROFILE.replace(PathParam.USER_GUID, guid);
