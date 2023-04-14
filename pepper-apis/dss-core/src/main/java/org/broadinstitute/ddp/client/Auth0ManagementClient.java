@@ -388,6 +388,8 @@ public class Auth0ManagementClient {
                     return ApiResult.ok(200, null);  // no such user
                 }
                 return ApiResult.ok(200, users.iterator().next());
+            } catch (APIException e) {
+                return ApiResult.err(e.getStatusCode(), e);
             } catch (Exception e) {
                 return ApiResult.thrown(e);
             }
@@ -592,6 +594,8 @@ public class Auth0ManagementClient {
                 break;
             }
             if (res.getStatusCode() == 429) {
+                log.error(res.getError() + " " + res.getError().getClass().getName());
+
                 long wait = backoffMillis * numTries + new Random().nextInt(MAX_JITTER_MILLIS);
                 // if we have more information from auth0 about how long to wait, use it.
                 if (res.getError() instanceof RateLimitException) {
