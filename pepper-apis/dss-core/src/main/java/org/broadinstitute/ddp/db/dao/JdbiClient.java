@@ -18,9 +18,12 @@ public interface JdbiClient extends SqlObject {
      * @param auth0ClientId client id
      * @param auth0TenantId the id of the tenant
      */
-    @SqlUpdate("insert ignore into client(is_revoked,auth0_signing_secret,"
+    @SqlUpdate("insert into client(is_revoked,auth0_signing_secret,"
             + "auth0_client_id,auth0_tenant_id,web_password_redirect_url)"
-            + " values(false,:auth0Secret,:auth0ClientId,:auth0TenantId,:redirectUrl)")
+            + " values(false,:auth0Secret,:auth0ClientId,:auth0TenantId,:redirectUrl)"
+            + " ON DUPLICATE KEY UPDATE is_revoked = false, auth0_signing_secret = :auth0Secret,"
+            + " auth0_client_id = :auth0ClientId, auth0_tenant_id = :auth0TenantId,"
+            + " web_password_redirect_url = :redirectUrl")
     @GetGeneratedKeys
     long insertClient(@Bind("auth0ClientId") String auth0ClientId,
                       @Bind("auth0Secret") String auth0Secret,
