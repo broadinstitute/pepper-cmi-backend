@@ -25,7 +25,7 @@ public interface JdbiClient extends SqlObject {
             + " auth0_client_id = :auth0ClientId, auth0_tenant_id = :auth0TenantId,"
             + " web_password_redirect_url = :redirectUrl")
     @GetGeneratedKeys
-    long insertClient(@Bind("auth0ClientId") String auth0ClientId,
+    Long insertClient(@Bind("auth0ClientId") String auth0ClientId,
                       @Bind("auth0Secret") String auth0Secret,
                       @Bind("auth0TenantId") long auth0TenantId,
                       @Bind("redirectUrl") String redirectUrl);

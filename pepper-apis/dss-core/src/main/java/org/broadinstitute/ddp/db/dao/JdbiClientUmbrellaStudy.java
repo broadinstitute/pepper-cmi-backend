@@ -13,7 +13,7 @@ public interface JdbiClientUmbrellaStudy extends SqlObject {
     @SqlUpdate("insert into client__umbrella_study(client_id,umbrella_study_id) values(:clientId,:studyId)"
             + " ON DUPLICATE KEY UPDATE client_id =:clientId, umbrella_study_id = :studyId")
     @GetGeneratedKeys
-    long insert(@Bind("clientId") long clientId, @Bind("studyId") long studyId);
+    Long insert(@Bind("clientId") long clientId, @Bind("studyId") long studyId);
 
     @SqlQuery("select us.guid from client__umbrella_study as cus "
             + "join client as c on c.client_id = cus.client_id "
