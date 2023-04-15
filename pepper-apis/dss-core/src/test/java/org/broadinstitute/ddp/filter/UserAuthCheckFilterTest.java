@@ -13,6 +13,7 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 import io.restassured.http.ContentType;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -35,6 +36,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+@Slf4j
 public class UserAuthCheckFilterTest extends IntegrationTestSuite.TestCase {
 
     private static TestDataSetupUtil.GeneratedTestData testData;
@@ -64,6 +66,7 @@ public class UserAuthCheckFilterTest extends IntegrationTestSuite.TestCase {
 
         try {
             String newName = "foo" + Instant.now().toEpochMilli();
+            log.info("Attempting to change profile {} with token {}", profileUrl, testData.getTestingUser().getToken());
 
             // Can use an auth-required route
             given().auth().oauth2(testData.getTestingUser().getToken())
@@ -72,6 +75,7 @@ public class UserAuthCheckFilterTest extends IntegrationTestSuite.TestCase {
                     .then().assertThat()
                     .statusCode(HttpStatus.SC_OK);
 
+            log.info("Attempting to query {} with token {}", profileUrl, testData.getTestingUser().getToken());
             // Can use an allowed route
             given().auth().oauth2(testData.getTestingUser().getToken())
                     .when().get(profileUrl)

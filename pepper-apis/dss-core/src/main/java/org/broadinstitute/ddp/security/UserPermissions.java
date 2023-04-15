@@ -74,6 +74,7 @@ public class UserPermissions implements Serializable {
      * study studyGuid for user requestedUserGuid.
      */
     public boolean canAccessStudyDataForUser(String requestedUserGuid, String studyGuid) {
+        log.debug("Checking access to {} for {}", requestedUserGuid, studyGuid);
         if (isDisabled()) {
             log.warn("Either client is revoked or account is locked for user: {} and study: {}", requestedUserGuid, studyGuid);
             return false;
