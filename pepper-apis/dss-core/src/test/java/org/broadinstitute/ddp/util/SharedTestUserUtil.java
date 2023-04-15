@@ -17,8 +17,8 @@ import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.TestConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.db.dao.AuthDao;
+import org.broadinstitute.ddp.db.dao.ClientDao;
 import org.broadinstitute.ddp.db.dao.JdbiAuth0Tenant;
-import org.broadinstitute.ddp.db.dao.JdbiClient;
 import org.broadinstitute.ddp.db.dao.JdbiClientUmbrellaStudy;
 import org.broadinstitute.ddp.db.dao.JdbiUmbrellaStudy;
 import org.broadinstitute.ddp.db.dao.JdbiUser;
@@ -129,10 +129,9 @@ public class SharedTestUserUtil {
         Config auth0Config = cfg.getConfig("auth0");
         String testUserPassword = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD);
         String encryptionKey = auth0Config.getString(ConfigFile.ENCRYPTION_SECRET);
-        String encryptedAuth0BackendClientSecret = AesUtil.encrypt(auth0Secret, encryptionKey);
         LanguageStore.init(handle);
         return setupTestUser(handle, auth0Domain, mgmtClientId, mgmtSecret, testUserPassword, auth0ClientId,
-                auth0Secret, encryptedAuth0BackendClientSecret, auth0clientName, null);
+                auth0Secret, encryptionKey, auth0clientName, null);
     }
 
     private SharedTestUser createNewTestUser(Handle handle, String auth0Domain, String auth0clientName,
@@ -142,10 +141,9 @@ public class SharedTestUserUtil {
         Config auth0Config = cfg.getConfig("auth0");
         String testUserPassword = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD);
         String encryptionKey = auth0Config.getString(ConfigFile.ENCRYPTION_SECRET);
-        String encryptedAuth0BackendClientSecret = AesUtil.encrypt(auth0Secret, encryptionKey);
         LanguageStore.init(handle);
         return setupTestUser(handle, auth0Domain, mgmtClientId, mgmtSecret, testUserPassword, auth0ClientId,
-                auth0Secret, encryptedAuth0BackendClientSecret, auth0clientName, testUserEmail);
+                auth0Secret, encryptionKey, auth0clientName, testUserEmail);
     }
 
 
@@ -163,14 +161,14 @@ public class SharedTestUserUtil {
                                          String testUserPassword,
                                          String auth0BackendTestClientId,
                                          String auth0ClientSecret,
-                                         String encryptedTestClientSecret,
+                                         String encryptionKey,
                                          String auth0BackendTestClientName,
                                          String testUserEmail) {
 
         SharedTestUser testUser = null;
         String jvmUser = System.getProperty("user.name");
         JdbiUser userDao = handle.attach(JdbiUser.class);
-        JdbiClient clientDao = handle.attach(JdbiClient.class);
+        ClientDao clientDao = handle.attach(ClientDao.class);
         JdbiUmbrellaStudy studyDao = handle.attach(JdbiUmbrellaStudy.class);
         JdbiClientUmbrellaStudy clientStudyDao = handle.attach(JdbiClientUmbrellaStudy.class);
         UserProfileDao profileDao = handle.attach(UserProfileDao.class);
@@ -210,28 +208,19 @@ public class SharedTestUserUtil {
         ClientDto clientDto = null;
         JdbiAuth0Tenant jdbiAuth0Tenant = handle.attach(JdbiAuth0Tenant.class);
         tenantDto = jdbiAuth0Tenant.insertIfNotExists(auth0Domain, mgmtClientId,
-                encryptedTestClientSecret);
+                AesUtil.encrypt(mgmtClientSecret, encryptionKey));
 
-        Optional<ClientDto> optClientDto = clientDao.findByAuth0ClientIdAndAuth0TenantId(auth0BackendTestClientId,
+        Optional<ClientDto> optClientDto = clientDao.getClientDao().findByAuth0ClientIdAndAuth0TenantId(auth0BackendTestClientId,
                 tenantDto.getId());
-        if (!optClientDto.isPresent()) {
-            // this one hangs
+        if (optClientDto.isEmpty()) {
+            // this one hangs?
             log.info("Inserting new client row for auth0 client" + auth0BackendTestClientId + " tenant "
                     + tenantDto.getId());
-            clientDao.insertClient(auth0BackendTestClientId, encryptedTestClientSecret,
-                    tenantDto.getId(), null);
-            clientDto = clientDao.findByAuth0ClientIdAndAuth0TenantId(auth0BackendTestClientId,
-                    tenantDto.getId()).get();
             List<String> staticTestStudies = Arrays.asList(TestConstants.TEST_STUDY_GUID);
-            for (String staticTestStudy : staticTestStudies) {
-                StudyDto studyDto = studyDao.findByStudyGuid(staticTestStudy);
-                if (studyDto == null) {
-                    throw new DDPException("Could not find static test study " + staticTestStudy);
-                }
-                clientStudyDao.insert(clientDto.getId(), studyDto.getId());
-                log.info("Added study {} to the list of studies for auth0 client {}", staticTestStudy,
-                        auth0BackendTestClientId);
-            }
+            long clientId = clientDao.registerClient(auth0BackendTestClientId, auth0ClientSecret, staticTestStudies,
+                    encryptionKey, tenantDto.getId());
+            clientDto = clientDao.getClientDao().getClientByAuth0ClientId(auth0BackendTestClientId).get();
+
         } else {
             clientDto = optClientDto.get();
         }

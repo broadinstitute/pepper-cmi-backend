@@ -238,7 +238,7 @@ public class IntegrationTestSuite {
                     JdbiClientUmbrellaStudy jdbiClientUmbrellaStudy = handle.attach(JdbiClientUmbrellaStudy.class);
                     jdbiClientUmbrellaStudy.insert(insertedClientId, studyDto.getId());
                 }
-                log.info("Inserted test client {}", insertedClientId);
+                log.info("Inserted test client {} for tenant {}", testClientId, auth0Tenant.getId());
             }
 
             // set the test user's auth0Id according to whatever is in our environment, since
