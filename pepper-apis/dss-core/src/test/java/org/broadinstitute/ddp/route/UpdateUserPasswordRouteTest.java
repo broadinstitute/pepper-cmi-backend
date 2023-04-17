@@ -11,7 +11,7 @@ import org.broadinstitute.ddp.constants.RouteConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.db.dao.JdbiUser;
 import org.broadinstitute.ddp.json.auth0.UpdateUserPasswordRequestPayload;
-import org.broadinstitute.ddp.util.TestDataSetupUtil;
+import org.broadinstitute.ddp.util.SharedTestUserUtil;
 
 import org.hamcrest.Matchers;
 
@@ -21,7 +21,8 @@ import org.junit.Test;
 @Slf4j
 public class UpdateUserPasswordRouteTest extends IntegrationTestSuite.TestCase {
     private static final String urlTemplate = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.UPDATE_USER_PASSWORD;
-    private static TestDataSetupUtil.GeneratedTestData testData;
+
+    private static SharedTestUserUtil.SharedTestUser userWhosePasswordWeWillChange;
     private static String token;
 
     private static String makeUrl(String userGuid) {
@@ -34,13 +35,13 @@ public class UpdateUserPasswordRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setupClass() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
-        token = testData.getTestingUser().getToken();
+        userWhosePasswordWeWillChange = SharedTestUserUtil.getInstance().createNewTestUser();
+        token = userWhosePasswordWeWillChange.getToken();
     }
 
     @Test
     public void test_givenCurrentPasswordIsBlank_whenRouteIsCalled_thenItReturns422AndValidErrorCode() {
-        String url = makeUrl(testData.getUserGuid());
+        String url = makeUrl(userWhosePasswordWeWillChange.getUserGuid());
         RestAssured.given().auth().oauth2(token)
                 .contentType(ContentType.JSON)
                 .body(TestData.BLANK_CURRENTPASSWORD_PAYLOAD)
@@ -51,7 +52,7 @@ public class UpdateUserPasswordRouteTest extends IntegrationTestSuite.TestCase {
 
     @Test
     public void test_givenPasswordIsBlank_whenRouteIsCalled_thenItReturns422AndValidErrorCode() {
-        String url = makeUrl(testData.getUserGuid());
+        String url = makeUrl(userWhosePasswordWeWillChange.getUserGuid());
         RestAssured.given().auth().oauth2(token)
                 .contentType(ContentType.JSON)
                 .body(TestData.BLANK_PASSWORD_PAYLOAD)
@@ -73,10 +74,11 @@ public class UpdateUserPasswordRouteTest extends IntegrationTestSuite.TestCase {
     @Test
     public void test_givenUserNotAssociatedWithAuth0User_whenRouteIsCalled_thenItReturnsForbiddenAndValidErrorCode() {
         // Set auth0 user id to null
-        String oldUserAuth0Id = testData.getTestingUser().getAuth0UserId();
+        String oldUserAuth0Id = userWhosePasswordWeWillChange.getAuth0UserId();
         try {
-            TransactionWrapper.useTxn(handle -> handle.attach(JdbiUser.class).updateAuth0Id(testData.getUserGuid(), null));
-            String url = makeUrl(testData.getUserGuid());
+            TransactionWrapper.useTxn(handle -> handle.attach(JdbiUser.class).updateAuth0Id(
+                    userWhosePasswordWeWillChange.getUserGuid(), null));
+            String url = makeUrl(userWhosePasswordWeWillChange.getUserGuid());
             RestAssured.given().auth().oauth2(token)
                     .contentType(ContentType.JSON)
                     .body(makePayload(TestData.CURRENT_PASSWORD, TestData.NEW_PASSWORD))
@@ -85,7 +87,8 @@ public class UpdateUserPasswordRouteTest extends IntegrationTestSuite.TestCase {
                     .body("code", Matchers.is(ErrorCodes.USER_NOT_ASSOCIATED_WITH_AUTH0_USER));
         } finally {
             log.info("Restoring old Auth0 user id {}", oldUserAuth0Id);
-            TransactionWrapper.useTxn(handle -> handle.attach(JdbiUser.class).updateAuth0Id(testData.getUserGuid(), oldUserAuth0Id));
+            TransactionWrapper.useTxn(handle -> handle.attach(JdbiUser.class).updateAuth0Id(
+                    userWhosePasswordWeWillChange.getUserGuid(), oldUserAuth0Id));
         }
     }
 
