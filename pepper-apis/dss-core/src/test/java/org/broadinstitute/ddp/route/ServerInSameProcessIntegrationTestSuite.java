@@ -13,11 +13,17 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         AdminCreateStudyParticipantRouteStandaloneTest.class,
+        AdminUpdateInvitationDetailsRouteTest.class,
+        AdminLookupInvitationRouteTest.class,
+        EventServiceTest.class,
         GetParticipantInfoRouteStandaloneTest.class,
+        GetUserAnnouncementsRouteTest.class,
         ListCancersRouteStandaloneTest.class,
         GetCancerSuggestionsRouteStandaloneTest.class,
         GetDsmDrugSuggestionsRouteStandaloneTest.class,
         GetDsmMailingListRouteTest.class,
+        SendExitNotificationRouteTest.class,
+        GetMailAddressInfoRouteTest.class,
         GovernedParticipantRegistrationRouteStandaloneTest.class,
         PatchFormAnswersRouteStandaloneTest.class,
         PutFormAnswersRouteStandaloneTest.class,
