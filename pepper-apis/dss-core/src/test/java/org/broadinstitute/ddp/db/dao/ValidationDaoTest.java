@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.broadinstitute.ddp.TxnAwareBaseTest;
@@ -69,9 +70,13 @@ public class ValidationDaoTest extends TxnAwareBaseTest {
 
     @Before
     public void refreshTestData() {
-        String stableId = "SID" + Instant.now().toEpochMilli();
+        String stableId = newRandomStableId();
         Template prompt = new Template(TemplateType.TEXT, null, "prompt");
         builder = TextQuestionDef.builder(TextInputType.TEXT, stableId, prompt);
+    }
+
+    private String newRandomStableId() {
+        return "SID" + Instant.now().toEpochMilli() + new Random().nextInt(100);
     }
 
     @Test
@@ -126,7 +131,7 @@ public class ValidationDaoTest extends TxnAwareBaseTest {
     public void testInsertAgeRangeRule() {
         TransactionWrapper.useTxn(handle -> {
             AgeRangeRuleDef ageRuleDef = new AgeRangeRuleDef(null, 16, 18);
-            String stableId = "SID" + Instant.now().toEpochMilli();
+            String stableId = newRandomStableId();
             Template prompt = new Template(TemplateType.TEXT, null, "prompt");
             DateQuestionDef question = DateQuestionDef.builder(DateRenderMode.SINGLE_TEXT, stableId, prompt)
                     .addFields(DateFieldType.MONTH, DateFieldType.YEAR, DateFieldType.DAY)
@@ -203,7 +208,7 @@ public class ValidationDaoTest extends TxnAwareBaseTest {
                     new DateFieldRequiredRuleDef(RuleType.YEAR_REQUIRED, null)
             );
             ruleDefs.forEach(validation -> validation.setAllowSave(true));
-            String stableId = "SID" + Instant.now().toEpochMilli();
+            String stableId = newRandomStableId();
             Template prompt = new Template(TemplateType.TEXT, null, "prompt");
             DateQuestionDef.Builder dateBuilder = DateQuestionDef.builder(DateRenderMode.PICKLIST, stableId, prompt)
                     .addFields(DateFieldType.MONTH, DateFieldType.YEAR);
@@ -228,7 +233,7 @@ public class ValidationDaoTest extends TxnAwareBaseTest {
                     new DateFieldRequiredRuleDef(RuleType.YEAR_REQUIRED, null)
             );
             dateRuleDefs.forEach(validation -> validation.setAllowSave(true));
-            String stableId = "SID" + Instant.now().toEpochMilli();
+            String stableId = newRandomStableId();
             Template prompt = new Template(TemplateType.TEXT, null, "prompt");
             DateQuestionDef.Builder dateBuilder = DateQuestionDef.builder(DateRenderMode.PICKLIST, stableId, prompt)
                     .addFields(DateFieldType.MONTH, DateFieldType.YEAR);
