@@ -83,7 +83,6 @@ import org.reflections.Reflections;
         GetDsmMedicalRecordRouteTest.class,
         GetGovernedStudyParticipantsRouteTest.class,
         GetInstitutionSuggestionsRouteTest.class,
-        GetMedicalProviderListRouteTest.class,
         GetPrequalifierInstanceRouteTest.class,
         GetWorkflowRouteTest.class,
         HealthCheckRouteTest.class,

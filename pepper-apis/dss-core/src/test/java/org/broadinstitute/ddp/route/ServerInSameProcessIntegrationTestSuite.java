@@ -24,6 +24,7 @@ import org.junit.runners.Suite;
         GetDsmMailingListRouteTest.class,
         SendExitNotificationRouteTest.class,
         GetMailAddressInfoRouteTest.class,
+        GetMedicalProviderListRouteTest.class,
         GovernedParticipantRegistrationRouteStandaloneTest.class,
         PatchFormAnswersRouteStandaloneTest.class,
         PutFormAnswersRouteStandaloneTest.class,
