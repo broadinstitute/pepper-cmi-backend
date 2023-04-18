@@ -52,7 +52,7 @@ public abstract class SparkServerAwareBaseTest extends TxnAwareBaseTest {
             Spark.awaitInitialization();
             urlTemplate = buildUrlTemplate.get();
             TransactionWrapper.useTxn(handle -> {
-                testData = TestDataSetupUtil.generateBasicUserTestData(handle);
+                testData = TestDataSetupUtil.generateBasicUserTestData(handle, true);
                 handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
                 handle.attach(JdbiClient.class).updateWebPasswordRedirectUrlByAuth0ClientIdAndAuth0Domain(
                         LOCALHOST, testData.getAuth0ClientId(), testData.getTestingClient().getAuth0Domain());

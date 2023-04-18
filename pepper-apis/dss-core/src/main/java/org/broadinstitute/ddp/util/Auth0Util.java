@@ -477,7 +477,7 @@ public class Auth0Util {
                     RateLimitException rateLimit = (RateLimitException)e;
                     sleepTime = rateLimit.getReset() - System.currentTimeMillis();
                 }
-                log.warn("Pausing for retry after hitting rate limit.");
+                log.warn("Pausing for retry for " + sleepTime + " after hitting rate limit.");
                 sleepBeforeRetry(sleepTime);
                 return req.execute();
             } else {
