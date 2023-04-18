@@ -181,21 +181,17 @@ public class TestDataSetupUtil {
         StudyClientConfiguration studyClientConfiguration =
                 jdbiClient.getStudyClientConfigurationByClientAndDomain(auth0clientId, auth0Domain).orElse(null);
 
+        // todo arz fixme skip client config insert, and return study?
         long clientId;
         if (studyClientConfiguration == null) {
             // Insert client and grant study access.
             ClientDao clientDao = handle.attach(ClientDao.class);
-            JdbiAuth0Tenant jdbiAuth0Tenant = handle.attach(JdbiAuth0Tenant.class);
-            String encryptedSecret = AesUtil.encrypt(mgmtSecret, EncryptionKey.getEncryptionKey());
-            Auth0TenantDto auth0Tenant = jdbiAuth0Tenant.insertIfNotExists(auth0Domain,
-                    mgmtClientId,
-                    encryptedSecret);
             clientId = clientDao.registerClient(
                     auth0clientId,
                     auth0Secret,
                     Collections.singletonList(study.getGuid()),
                     encryptionSecret,
-                    auth0Tenant.getId());
+                    study.getAuth0TenantId());
 
             studyClientConfiguration = new StudyClientConfiguration(
                     clientId,

@@ -25,7 +25,8 @@ import org.junit.runners.Suite;
         GetActivityInstanceRouteStandaloneTest.class,
         SendEmailRouteStandaloneTest.class,
         UserActivityInstanceListRouteStandaloneTest.class,
-        UserRegistrationRouteStandaloneTest.class
+        UserRegistrationRouteStandaloneTest.class,
+        PostMedicalProviderRouteTest.class
 })
 public class ServerInSameProcessIntegrationTestSuite extends IntegrationTestSuite {
 }

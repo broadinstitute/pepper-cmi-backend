@@ -2361,7 +2361,7 @@ public class PatchFormAnswersRouteStandaloneTest {
             answerGuidsToDelete.get(QuestionType.NUMERIC).add(guid);
         } finally {
             TransactionWrapper.useTxn(handle -> {
-                handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+                handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
             });
         }
     }
@@ -2388,7 +2388,7 @@ public class PatchFormAnswersRouteStandaloneTest {
             answerGuidsToDelete.get(QuestionType.NUMERIC).add(guid);
         } finally {
             TransactionWrapper.useTxn(handle -> {
-                handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+                handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
             });
         }
     }
@@ -2428,7 +2428,7 @@ public class PatchFormAnswersRouteStandaloneTest {
             answerGuidsToDelete.get(QuestionType.NUMERIC).add(guid);
         } finally {
             TransactionWrapper.useTxn(handle -> {
-                handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+                handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
                 assertEquals(1, handle.execute(updateSql, false, numericQuestionDef.getQuestionId()));
             });
         }

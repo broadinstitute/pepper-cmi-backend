@@ -32,6 +32,9 @@ public interface AuthDao extends SqlObject {
     @SqlUpdate("delete from study_admin where user_id = :userId")
     int removeAdminFromAllStudies(@Bind("userId") long userId);
 
+    @SqlUpdate("delete from study_admin where user_id = :userId and umbrella_study_id = :studyId")
+    int removeAdminFromStudy(@Bind("userId") long userId, @Bind("studyId") long studyId);
+
     default UserPermissions findUserPermissions(String operatorGuid, String auth0ClientId, String auth0Domain) {
         UserClientStatus status = findUserClientStatus(operatorGuid, auth0ClientId, auth0Domain)
                 .orElseThrow(() -> {

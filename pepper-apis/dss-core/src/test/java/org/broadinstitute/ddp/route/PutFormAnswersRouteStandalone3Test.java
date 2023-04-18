@@ -35,7 +35,7 @@ public class PutFormAnswersRouteStandalone3Test extends PutFormAnswersRouteStand
                     .statusCode(200);
         } finally {
             TransactionWrapper.useTxn(handle -> {
-                handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+                handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
             });
         }
     }

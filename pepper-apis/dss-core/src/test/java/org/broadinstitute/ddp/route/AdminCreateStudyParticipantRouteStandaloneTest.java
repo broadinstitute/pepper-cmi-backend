@@ -70,7 +70,7 @@ public class AdminCreateStudyParticipantRouteStandaloneTest extends IntegrationT
     @AfterClass
     public static void cleanupData() {
         TransactionWrapper.useTxn(handle -> {
-            handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+            handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
         });
         String topicName = ConfigManager.getInstance().getConfig().getString(ConfigFile.PUBSUB_DSM_TASKS_TOPIC);
         PubSubPublisherInitializer.setPublisher(topicName, null);

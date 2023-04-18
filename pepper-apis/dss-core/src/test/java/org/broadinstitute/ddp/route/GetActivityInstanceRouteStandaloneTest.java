@@ -1107,7 +1107,7 @@ public class GetActivityInstanceRouteStandaloneTest extends IntegrationTestSuite
             TransactionWrapper.useTxn(handle -> {
                 assertEquals(2, handle.attach(ActivityInstanceDao.class)
                         .bulkUpdateIsHiddenByActivityIds(testData.getUserId(), false, Set.of(activity.getActivityId())));
-                handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+                handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
             });
         }
     }

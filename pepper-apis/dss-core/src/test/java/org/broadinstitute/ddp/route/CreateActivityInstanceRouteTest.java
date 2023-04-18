@@ -342,7 +342,7 @@ public class CreateActivityInstanceRouteTest extends IntegrationTestSuite.TestCa
             activityInstancesToDelete.add(instanceGuid);
         } finally {
             TransactionWrapper.useTxn(handle -> handle.attach(AuthDao.class)
-                    .removeAdminFromAllStudies(testData.getUserId()));
+                    .removeAdminFromStudy(testData.getUserId(), testData.getStudyId()));
         }
     }
 }

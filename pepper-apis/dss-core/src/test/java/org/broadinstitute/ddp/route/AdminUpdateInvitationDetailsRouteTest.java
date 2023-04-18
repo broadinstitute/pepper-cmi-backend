@@ -5,44 +5,47 @@ import static org.junit.Assert.assertEquals;
 
 import io.restassured.mapper.ObjectMapperType;
 import org.broadinstitute.ddp.constants.RouteConstants;
-import org.broadinstitute.ddp.constants.TestConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
+import org.broadinstitute.ddp.db.dao.AuthDao;
 import org.broadinstitute.ddp.db.dao.InvitationDao;
 import org.broadinstitute.ddp.db.dao.InvitationFactory;
 import org.broadinstitute.ddp.db.dao.InvitationSql;
-import org.broadinstitute.ddp.db.dao.JdbiUmbrellaStudy;
-import org.broadinstitute.ddp.db.dto.StudyDto;
 import org.broadinstitute.ddp.json.admin.UpdateInvitationDetailsPayload;
-import org.broadinstitute.ddp.util.SharedTestUserUtil;
+import org.broadinstitute.ddp.util.TestDataSetupUtil;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.TestCase {
 
+    private static TestDataSetupUtil.GeneratedTestData testData;
     private static String urlTemplate;
-
-    private static SharedTestUserUtil.SharedTestUser testAdminUser;
-
-    private static SharedTestUserUtil.SharedTestUser testUser;
-
-    private static StudyDto testStudy = null;
 
     @BeforeClass
     public static void setupData() {
         urlTemplate = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.ADMIN_STUDY_INVITATION_DETAILS
                 .replace(RouteConstants.PathParam.STUDY_GUID, "{study}");
-        TransactionWrapper.useTxn(handle ->  {
-            testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
-            testAdminUser = SharedTestUserUtil.getInstance().getSharedAdminTestUser(handle);
-            testStudy = handle.attach(JdbiUmbrellaStudy.class).findByStudyGuid(TestConstants.TEST_STUDY_GUID);
+        TransactionWrapper.useTxn(handle -> {
+            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
+            handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
+        });
+    }
+
+    @AfterClass
+    public static void cleanupData() {
+        TransactionWrapper.useTxn(handle -> {
+            handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
         });
     }
 
     @Test
     public void testNotStudyAdmin() {
+        TransactionWrapper.useTxn(handle -> {
+            handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
+        });
         var payload = new UpdateInvitationDetailsPayload("foobar", "notes notes");
-        given().auth().oauth2(testUser.getToken())
-                .pathParam("study", testStudy.getGuid())
+        given().auth().oauth2(testData.getTestingUser().getToken())
+                .pathParam("study", testData.getStudyGuid())
                 .body(payload, ObjectMapperType.GSON)
                 .when().patch(urlTemplate)
                 .then().assertThat()
@@ -52,8 +55,8 @@ public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.
     @Test
     public void testInvitationNotFound() {
         var payload = new UpdateInvitationDetailsPayload("foobar", "notes notes");
-        given().auth().oauth2(testAdminUser.getToken())
-                .pathParam("study", testStudy.getGuid())
+        given().auth().oauth2(testData.getTestingUser().getToken())
+                .pathParam("study", testData.getStudyGuid())
                 .body(payload, ObjectMapperType.GSON)
                 .when().post(urlTemplate)
                 .then().assertThat()
@@ -63,17 +66,18 @@ public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.
     @Test
     public void testNotesAreUpdated() {
         var invitation = TransactionWrapper.withTxn(handle -> handle.attach(InvitationFactory.class)
-                .createRecruitmentInvitation(testStudy.getId(), "invite" + System.currentTimeMillis()));
+                .createRecruitmentInvitation(testData.getStudyId(), "invite" + System.currentTimeMillis()));
         try {
             var payload = new UpdateInvitationDetailsPayload(invitation.getInvitationGuid(), "notes notes");
-            given().auth().oauth2(testAdminUser.getToken())
-                    .pathParam("study", testStudy.getGuid())
+            given().auth().oauth2(testData.getTestingUser().getToken())
+                    .pathParam("study", testData.getStudyGuid())
                     .body(payload, ObjectMapperType.GSON)
                     .when().post(urlTemplate)
-                    .then().assertThat().statusCode(200);
+                    .then().assertThat()
+                    .statusCode(200);
             TransactionWrapper.useTxn(handle -> {
                 var actual = handle.attach(InvitationDao.class)
-                        .findByInvitationGuid(testStudy.getId(), invitation.getInvitationGuid());
+                        .findByInvitationGuid(testData.getStudyId(), invitation.getInvitationGuid());
                 assertEquals("notes notes", actual.get().getNotes());
             });
         } finally {

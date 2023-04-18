@@ -42,7 +42,7 @@ public class AdminLookupInvitationRouteTest extends IntegrationTestSuite.TestCas
     @AfterClass
     public static void cleanupData() {
         TransactionWrapper.useTxn(handle -> {
-            handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+            handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
         });
     }
 
@@ -59,15 +59,21 @@ public class AdminLookupInvitationRouteTest extends IntegrationTestSuite.TestCas
     @Test
     public void testNotStudyAdmin() {
         TransactionWrapper.useTxn(handle -> {
-            handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+            handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
         });
-        var payload = new LookupInvitationPayload("foobar");
-        given().auth().oauth2(testData.getTestingUser().getToken())
-                .pathParam("study", testData.getStudyGuid())
-                .body(payload, ObjectMapperType.GSON)
-                .when().get(urlTemplate)
-                .then().assertThat()
-                .statusCode(401);
+        try {
+            var payload = new LookupInvitationPayload("foobar");
+            given().auth().oauth2(testData.getTestingUser().getToken())
+                    .pathParam("study", testData.getStudyGuid())
+                    .body(payload, ObjectMapperType.GSON)
+                    .when().get(urlTemplate)
+                    .then().assertThat()
+                    .statusCode(401);
+        } finally {
+            TransactionWrapper.useTxn(handle -> {
+                handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getUserId());
+            });
+        }
     }
 
     @Test

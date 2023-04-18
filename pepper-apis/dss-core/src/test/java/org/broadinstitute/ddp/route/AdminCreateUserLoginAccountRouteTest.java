@@ -81,7 +81,7 @@ public class AdminCreateUserLoginAccountRouteTest extends TxnAwareBaseTest {
         TransactionWrapper.useTxn(handle -> {
             handle.attach(JdbiClient.class).updateWebPasswordRedirectUrlByAuth0ClientIdAndAuth0Domain(
                     null, testData.getAuth0ClientId(), testData.getTestingClient().getAuth0Domain());
-            handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+            handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
 
             JdbiUserStudyEnrollment jdbiEnrollment = handle.attach(JdbiUserStudyEnrollment.class);
             for (var userGuid : userGuidsToDelete) {

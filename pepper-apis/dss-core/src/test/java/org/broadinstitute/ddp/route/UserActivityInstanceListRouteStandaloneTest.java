@@ -405,7 +405,7 @@ public class UserActivityInstanceListRouteStandaloneTest extends IntegrationTest
             TransactionWrapper.useTxn(handle -> {
                 handle.attach(ActivityInstanceDao.class)
                         .bulkUpdateIsHiddenByActivityIds(testData.getUserId(), false, Set.of(prequal.getActivityId()));
-                handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+                handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
             });
         }
     }

@@ -189,7 +189,7 @@ public class DeleteActivityInstanceRouteTest extends IntegrationTestSuite.TestCa
                 assertEquals(1, handle.attach(ActivityInstanceDao.class)
                         .bulkUpdateIsHiddenByActivityIds(
                                 testData.getUserId(), false, Set.of(parentActivity.getActivityId())));
-                handle.attach(AuthDao.class).removeAdminFromAllStudies(testData.getUserId());
+                handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
             });
         }
     }
