@@ -23,7 +23,7 @@ public class JWTConverterTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle, true));
         token = testData.getTestingUser().getToken();
         auth0Config = RouteTestUtil.getConfig().getConfig(ConfigFile.AUTH0);
     }

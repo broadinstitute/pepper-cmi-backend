@@ -142,7 +142,7 @@ public class EmbeddedComponentActivityInstanceTest extends IntegrationTestSuite.
     @BeforeClass
     public static void setUp() {
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
+            testData = TestDataSetupUtil.generateBasicUserTestData(handle, true);
             FormActivityDef testForm = setupTestActivityWithEmbeddedComponents(handle, testData.getStudyGuid());
 
             ActivityInstanceDao activityInstanceDao = handle.attach(org.broadinstitute.ddp.db.dao.ActivityInstanceDao
