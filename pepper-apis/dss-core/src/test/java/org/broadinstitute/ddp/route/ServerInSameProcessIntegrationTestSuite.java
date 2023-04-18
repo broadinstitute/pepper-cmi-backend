@@ -17,6 +17,7 @@ import org.junit.runners.Suite;
         ListCancersRouteStandaloneTest.class,
         GetCancerSuggestionsRouteStandaloneTest.class,
         GetDsmDrugSuggestionsRouteStandaloneTest.class,
+        GetDsmMailingListRouteTest.class,
         GovernedParticipantRegistrationRouteStandaloneTest.class,
         PatchFormAnswersRouteStandaloneTest.class,
         PutFormAnswersRouteStandaloneTest.class,

@@ -99,7 +99,6 @@ import org.reflections.Reflections;
         AdminLookupInvitationRouteTest.class,
         UserAuthCheckFilterTest.class,
         DsmAuthFilterTest.class,
-        GetDsmMailingListRouteTest.class,
         CheckIrbPasswordRouteTest.class,
         ReceiveDsmNotificationRouteTest.class,
         GetDsmInstitutionRequestsRouteTest.class,
