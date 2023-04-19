@@ -203,7 +203,7 @@ public class SharedTestUserUtil {
             UserProfileDao profileDao = handle.attach(UserProfileDao.class);
             if (StringUtils.isNotBlank(existingUserGuid.get())) {
                 user.set(userDao.findByUserGuid(existingUserGuid.get()));
-                if (user != null) {
+                if (user.get() != null) {
                     log.info("Will use existing test user " + userEmail + ".");
                     shouldCreateUser.set(false);
                     profile.set(profileDao.findProfileByUserId(user.get().getUserId()).get());

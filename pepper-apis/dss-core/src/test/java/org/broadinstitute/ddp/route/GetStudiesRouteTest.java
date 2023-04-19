@@ -51,11 +51,10 @@ public class GetStudiesRouteTest extends IntegrationTestSuite.TestCase {
         Config cfg = RouteTestUtil.getConfig();
         gson = new Gson();
         testData = TestDataSetupUtil.generateBasicUserTestData();
+        token = testData.getTestingUser().getToken();
 
         TransactionWrapper.useTxn(handle -> {
-            token = testData.getTestingUser().getToken();
             umbrella = handle.attach(JdbiUmbrella.class).findById(testData.getTestingStudy().getUmbrellaId()).get().getGuid();
-
             studyDtos = new ArrayList<>();
             studyDtos.add(testData.getTestingStudy());
             enrollmentStatusCounts = new ArrayList<>();
@@ -82,8 +81,8 @@ public class GetStudiesRouteTest extends IntegrationTestSuite.TestCase {
 
     @Test
     public void test_givenStudyExists_andIsTranslated_whenRouteIsCalled_thenItReturns200_andNameIsTranslated() {
+        long languageCodeId = LanguageStore.getDefault().getId();
         long translationId = TransactionWrapper.withTxn(handle -> {
-            long languageCodeId = LanguageStore.getDefault().getId();
             return handle.attach(JdbiUmbrellaStudyI18n.class).insert(
                     testData.getStudyId(),
                     languageCodeId,

@@ -36,7 +36,11 @@
                 <exclude.test.pattern>
                     *StandaloneTest,
                     *Standalone2Test,
-                    *Standalone3Test
+                    *Standalone3Test,
+                    GetStudiesRouteTest,
+                    AdminLookupInvitationRouteTest,
+                    GetMailAddressInfoRouteTest,
+                    GetWorkflowRouteTest
                 </exclude.test.pattern>
             </properties>
         </profile>
