@@ -26,9 +26,9 @@ public class StudyLanguageContentLanguageSettingFilterTest extends IntegrationTe
 
     @BeforeClass
     public static void setupClass() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(
                 handle -> {
-                    testData = TestDataSetupUtil.generateBasicUserTestData(handle);
                     FormActivityDef activityDef = TestDataSetupUtil.generateTestFormActivityForUser(
                             handle, testData.getUserGuid(), testData.getStudyGuid()
                     );

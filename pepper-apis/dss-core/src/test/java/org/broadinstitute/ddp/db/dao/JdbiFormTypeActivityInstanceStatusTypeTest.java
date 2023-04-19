@@ -26,7 +26,7 @@ public class JdbiFormTypeActivityInstanceStatusTypeTest extends TxnAwareBaseTest
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @Test

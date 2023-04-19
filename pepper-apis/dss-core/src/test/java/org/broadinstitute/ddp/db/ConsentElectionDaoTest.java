@@ -40,8 +40,8 @@ public class ConsentElectionDaoTest extends TxnAwareBaseTest {
     @BeforeClass
     public static void setup() {
         dao = new ConsentElectionDao();
+        data = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            data = TestDataSetupUtil.generateBasicUserTestData(handle);
             setupConsentActivities(handle);
         });
     }

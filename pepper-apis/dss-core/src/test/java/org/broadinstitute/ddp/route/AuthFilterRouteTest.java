@@ -87,8 +87,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
 
     @AfterClass
     public static void deleteTestProfiles() throws SQLException, Auth0Exception {
-        RouteTestUtil.deleteProfilesForUserGuid(RouteTestUtil
-                .getUnverifiedUserGuidFromToken(testUserToken));
+        RouteTestUtil.deleteProfilesForUserGuid(RouteTestUtil.getUnverifiedUserGuidFromToken(testUserToken));
         TestDataSetupUtil.deleteGeneratedTestData();
     }
 
@@ -117,8 +116,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
         String encryptionSecret = auth0Config.getString(ConfigFile.ENCRYPTION_SECRET);
 
         generatedTestDataUser1 =
-                TransactionWrapper.withTxn(handle -> TestDataSetupUtil.generateBasicUserTestData(handle,
-                        true,
+                TransactionWrapper.withTxn(handle -> TestDataSetupUtil.generateBasicUserTestData(true,
                         auth0domain,
                         backendTestClientName,
                         backendTestAuth0ClientId,
@@ -129,8 +127,7 @@ public class AuthFilterRouteTest extends IntegrationTestSuite.TestCase {
                         sendgridApiKey));
 
         generatedTestDataUser2 =
-                TransactionWrapper.withTxn(handle -> TestDataSetupUtil.generateBasicUserTestData(handle,
-                        true,
+                TransactionWrapper.withTxn(handle -> TestDataSetupUtil.generateBasicUserTestData(true,
                         auth0domain2,
                         backendTestClientName2,
                         backendTestAuth0ClientId2,

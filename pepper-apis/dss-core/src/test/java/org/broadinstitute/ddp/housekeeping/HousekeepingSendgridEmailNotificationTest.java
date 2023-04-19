@@ -68,6 +68,8 @@ public class HousekeepingSendgridEmailNotificationTest extends HousekeepingTest 
         Config emailTestingTemplate = ConfigUtil.getGenericSendgridTestingTemplate(cfg);
         template = emailTestingTemplate.getString(ConfigFile.Sendgrid.TEMPLATE);
         templateVersion = emailTestingTemplate.getString(ConfigFile.Sendgrid.TEMPLATE_VERSION);
+        TestDataSetupUtil.GeneratedTestData generatedTestData = TestDataSetupUtil.generateBasicUserTestData();
+
 
         TransactionWrapper.useTxn(TransactionWrapper.DB.APIS, apisHandle -> {
             EventActionDao eventActionDao = apisHandle.attach(EventActionDao.class);
@@ -80,7 +82,6 @@ public class HousekeepingSendgridEmailNotificationTest extends HousekeepingTest 
 
             SendgridEmailEventActionDto eventAction = new SendgridEmailEventActionDto(template, "en", false);
             long testEmailActionId = eventActionDao.insertNotificationAction(eventAction);
-            TestDataSetupUtil.GeneratedTestData generatedTestData = TestDataSetupUtil.generateBasicUserTestData(apisHandle);
 
             // create a new activity
             String activityCode = "HOUSEKEEPING_TEST_ACTIVITY" + System.currentTimeMillis();

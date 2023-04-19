@@ -58,12 +58,12 @@ public class SendEmailRouteStandaloneTest extends IntegrationTestSuite.TestCase 
 
     @BeforeClass
     public static void setUp() throws Exception {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         resendEmailTemplateKey = ConfigUtil.getTestingSendgridTemplates(RouteTestUtil.getConfig()).getConfig(
                 "currentActivity").getString(ConfigFile.Sendgrid.TEMPLATE);
         userNotInStudyTemplateKey = ConfigUtil.getTestingSendgridTemplates(RouteTestUtil.getConfig()).getConfig(
                 "userNotEnrolledInStudy").getString(ConfigFile.Sendgrid.TEMPLATE);
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             setupEmailConfigurations(handle);
         });
         url = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.SEND_EMAIL;

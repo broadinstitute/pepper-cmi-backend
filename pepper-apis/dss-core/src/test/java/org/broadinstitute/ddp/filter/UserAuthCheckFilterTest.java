@@ -46,7 +46,7 @@ public class UserAuthCheckFilterTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @AfterClass

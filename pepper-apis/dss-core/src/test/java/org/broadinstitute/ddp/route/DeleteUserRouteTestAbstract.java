@@ -56,8 +56,8 @@ public class DeleteUserRouteTestAbstract extends IntegrationTestSuite.TestCase {
     protected static RestHighLevelClient esClientMock = mock(RestHighLevelClient.class);
 
     protected static void setup() throws Exception {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
 
             userNonGoverned = createUser(handle, testData.getTestingStudy(), null, false,
                     testData.getProfile(), testData.getTestingUser().getUserEmail(),

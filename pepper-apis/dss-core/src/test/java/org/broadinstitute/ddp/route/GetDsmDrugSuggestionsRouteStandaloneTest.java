@@ -9,7 +9,6 @@ import io.restassured.http.ContentType;
 
 import lombok.extern.slf4j.Slf4j;
 import org.broadinstitute.ddp.constants.RouteConstants;
-import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.model.dsm.DrugStore;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
 
@@ -25,8 +24,7 @@ public class GetDsmDrugSuggestionsRouteStandaloneTest extends IntegrationTestSui
 
     @BeforeClass
     public static void setupClass() {
-        TestDataSetupUtil.GeneratedTestData testData =
-                TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        TestDataSetupUtil.GeneratedTestData testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
     }
 

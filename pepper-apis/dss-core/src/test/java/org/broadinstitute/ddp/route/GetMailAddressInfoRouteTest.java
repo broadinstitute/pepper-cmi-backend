@@ -16,7 +16,6 @@ import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Response;
 import org.apache.http.util.EntityUtils;
-import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.model.address.CountryAddressInfo;
 import org.broadinstitute.ddp.model.address.CountryAddressInfoSummary;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
@@ -32,7 +31,7 @@ public class GetMailAddressInfoRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
         url = RouteTestUtil.getTestingBaseUrl() + ADDRESS_COUNTRIES;
     }

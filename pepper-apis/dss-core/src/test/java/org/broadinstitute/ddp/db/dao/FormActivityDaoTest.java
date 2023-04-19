@@ -121,7 +121,7 @@ public class FormActivityDaoTest extends TxnAwareBaseTest {
     public static void setup() {
         org.broadinstitute.ddp.db.ActivityInstanceDao actInstDao = new org.broadinstitute.ddp.db.ActivityInstanceDao();
         service = new ActivityInstanceService(actInstDao, new TreeWalkInterpreter(), new I18nContentRenderer());
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @Test

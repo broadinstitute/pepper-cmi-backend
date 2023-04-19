@@ -64,14 +64,15 @@ public class GetDsmConsentPdfRouteTest extends DsmRouteTest {
                 answerText
         );
 
+        // todo arz should these create new users?
+        secondStudy = TestDataSetupUtil.generateBasicUserTestData(true);
+        thirdStudy = TestDataSetupUtil.generateBasicUserTestData(true);
+
         TransactionWrapper.useTxn(handle -> {
-            secondStudy = TestDataSetupUtil.generateBasicUserTestData(handle);
             assertEquals(1, handle.createUpdate("update user set legacy_altpid = :legacyAltPid where guid = :guid")
                     .bind("legacyAltPid", legacyAltPid)
                     .bind("guid", userGuid)
                     .execute());
-
-            thirdStudy = TestDataSetupUtil.generateBasicUserTestData(handle);
 
             PdfService pdfService = new PdfService();
             PdfConfiguration pdfConfiguration = pdfService.findFullConfigForUser(

@@ -123,7 +123,6 @@ import org.junit.Test;
 
 public class GetActivityInstanceRouteStandaloneTest extends IntegrationTestSuite.TestCaseWithCacheEnabled {
     public static final String TEXT_QUESTION_STABLE_ID = "TEXT_Q";
-
     public static final String MIME_TYPE_1 = "image/gif";
     public static final String MIME_TYPE_2 = "image/jpeg";
 
@@ -157,10 +156,11 @@ public class GetActivityInstanceRouteStandaloneTest extends IntegrationTestSuite
     @BeforeClass
     public static void setup() throws Exception {
         gson = new Gson();
+        testData = TestDataSetupUtil.generateBasicUserTestData(true);
+        token = testData.getTestingUser().getToken();
+        userGuid = testData.getUserGuid();
+
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
-            token = testData.getTestingUser().getToken();
-            userGuid = testData.getUserGuid();
             setupActivityAndInstance(handle);
         });
         String endpoint = API.USER_ACTIVITIES_INSTANCE

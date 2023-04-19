@@ -26,7 +26,7 @@ public class FileUploadDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         studyId = testData.getStudyId();
         userId = testData.getUserId();
     }

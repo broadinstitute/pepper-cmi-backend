@@ -30,7 +30,7 @@ public class ActivityInstanceCreationEventActionTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @Test

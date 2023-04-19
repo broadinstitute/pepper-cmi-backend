@@ -50,7 +50,7 @@ public class SendExitNotificationRouteTest extends IntegrationTestSuite.TestCase
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
 
         String endpoint = RouteConstants.API.USER_STUDY_EXIT

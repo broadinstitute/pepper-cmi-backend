@@ -54,13 +54,11 @@ public class DsmRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void userSetup() {
+        generatedTestData = TestDataSetupUtil.generateBasicUserTestData();
+        userGuid = generatedTestData.getTestingUser().getUserGuid();
+        studyGuid = generatedTestData.getStudyGuid();
         TransactionWrapper.useTxn(handle -> {
             setupTestDSMAuthClientInDatabase(handle);
-
-            generatedTestData = TestDataSetupUtil.generateBasicUserTestData(handle);
-            userGuid = generatedTestData.getTestingUser().getUserGuid();
-            studyGuid = generatedTestData.getStudyGuid();
-
             TestDataSetupUtil.createTestingMailAddress(handle, generatedTestData);
         });
 

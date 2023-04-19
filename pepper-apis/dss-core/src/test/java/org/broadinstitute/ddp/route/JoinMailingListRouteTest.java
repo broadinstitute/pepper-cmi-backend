@@ -57,8 +57,8 @@ public class JoinMailingListRouteTest extends IntegrationTestSuite.TestCase {
     public static void setup() {
         mailingListTemplateKey = ConfigUtil.getTestingSendgridTemplates(RouteTestUtil.getConfig()).getConfig(
                 "joinMailingList").getString(ConfigFile.Sendgrid.TEMPLATE);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             setupMailingListEmailEvent(handle);
             umbrellaGuid = handle.attach(JdbiUmbrella.class).findById(
                     testData.getTestingStudy().getUmbrellaId()

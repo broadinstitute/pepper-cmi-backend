@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.auth0.exception.Auth0Exception;
 import com.typesafe.config.Config;
@@ -124,12 +125,17 @@ public class TestDataSetupUtil {
     private static final List<GeneratedTestData> testDataToDelete = new ArrayList<>();
     private static final String CONSENT_PDF_LOCATION = "src/test/resources/ConsentForm.pdf";
 
-    public static GeneratedTestData generateBasicUserTestData(Handle handle) {
-        LanguageStore.init(handle);
-        return generateBasicUserTestData(handle, false);
+    // todo arz rip out handle and move all callers outside any open transactions
+    // document that no transaction should be active when calling this method
+    // since we are doing partial commits and there may be lengthy locks
+    // that show up when we hit auth0 rate limits or other network sluggishness
+    // from external systems that are required when creating accounts
+    public static GeneratedTestData generateBasicUserTestData() {
+        TransactionWrapper.useTxn(LanguageStore::init);
+        return generateBasicUserTestData(false);
     }
 
-    public static GeneratedTestData generateBasicUserTestData(Handle handle, boolean forceUserCreation) {
+    public static GeneratedTestData generateBasicUserTestData(boolean forceUserCreation) {
         CacheService.getInstance().resetAllCaches();
         String sendgridApiKey = cfg.getString(ConfigFile.SENDGRID_API_KEY);
         String backendTestAuth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
@@ -141,7 +147,6 @@ public class TestDataSetupUtil {
         String encryptionSecret = auth0Config.getString(ConfigFile.ENCRYPTION_SECRET);
 
         return generateBasicUserTestData(
-                handle,
                 forceUserCreation,
                 auth0domain,
                 backendTestClientName,
@@ -162,8 +167,7 @@ public class TestDataSetupUtil {
      * users in auth0. Once the test user has been created once in the VM,
      * the cached copy is returned for all tests, along with freshly generated study.
      */
-    public static synchronized GeneratedTestData generateBasicUserTestData(Handle handle,
-                                                                           boolean forceUserCreation,
+    public static synchronized GeneratedTestData generateBasicUserTestData(boolean forceUserCreation,
                                                                            String auth0Domain,
                                                                            String auth0clientName,
                                                                            String auth0clientId,
@@ -173,55 +177,55 @@ public class TestDataSetupUtil {
                                                                            String mgmtSecret,
                                                                            String sendgridApiKey) {
 
-        StudyDto study = generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret);
-
-        configureStudyForSendgrid(handle, sendgridApiKey, study);
-
-        JdbiClient jdbiClient = handle.attach(JdbiClient.class);
-        StudyClientConfiguration studyClientConfiguration =
-                jdbiClient.getStudyClientConfigurationByClientAndDomain(auth0clientId, auth0Domain).orElse(null);
-
-        // todo arz fixme skip client config insert, and return study?
-        long clientId;
-        if (studyClientConfiguration == null) {
-            // Insert client and grant study access.
-            ClientDao clientDao = handle.attach(ClientDao.class);
-            clientId = clientDao.registerClient(
-                    auth0clientId,
-                    auth0Secret,
-                    Collections.singletonList(study.getGuid()),
-                    encryptionSecret,
-                    study.getAuth0TenantId());
-
-            studyClientConfiguration = new StudyClientConfiguration(
-                    clientId,
-                    auth0Domain,
-                    auth0clientId,
-                    AesUtil.encrypt(auth0Secret, EncryptionKey.getEncryptionKey()));
-        } else {
-            // Just grant access to generated study.
-            clientId = studyClientConfiguration.getClientId();
-            handle.attach(JdbiClientUmbrellaStudy.class).insert(clientId, study.getId());
-        }
-
         GeneratedTestData generatedTestData = null;
+        AtomicReference<StudyDto> study = new AtomicReference<>();
+        AtomicReference<StudyClientConfiguration> studyClientConfiguration = new AtomicReference<>();
+
+        TransactionWrapper.useTxn(handle -> {
+            study.set(generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret));
+
+            configureStudyForSendgrid(handle, sendgridApiKey, study.get());
+
+            JdbiClient jdbiClient = handle.attach(JdbiClient.class);
+            studyClientConfiguration.set(jdbiClient.getStudyClientConfigurationByClientAndDomain(auth0clientId, auth0Domain).orElse(null));
+
+            // todo arz fixme skip client config insert, and return study?
+            long clientId;
+            if (studyClientConfiguration.get() == null) {
+                // Insert client and grant study access.
+                ClientDao clientDao = handle.attach(ClientDao.class);
+                clientId = clientDao.registerClient(
+                        auth0clientId,
+                        auth0Secret,
+                        Collections.singletonList(study.get().getGuid()),
+                        encryptionSecret,
+                        study.get().getAuth0TenantId());
+
+                studyClientConfiguration.set(new StudyClientConfiguration(
+                        clientId,
+                        auth0Domain,
+                        auth0clientId,
+                        AesUtil.encrypt(auth0Secret, EncryptionKey.getEncryptionKey())));
+            } else {
+                // Just grant access to generated study.
+                clientId = studyClientConfiguration.get().getClientId();
+                handle.attach(JdbiClientUmbrellaStudy.class).insert(clientId, study.get().getId());
+            }
+        });
         if (!forceUserCreation) {
-            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
-            generatedTestData = new GeneratedTestData(testUser, testUser.getProfile(), study, studyClientConfiguration);
+            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().getSharedTestUser();
+            generatedTestData = new GeneratedTestData(testUser, testUser.getProfile(), study.get(), studyClientConfiguration.get());
         } else {
             // todo arz rename all this
-            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().createNewTestUser(handle,
-                    auth0Domain,
+            SharedTestUserUtil.SharedTestUser testUser = SharedTestUserUtil.getInstance().createNewTestUser(auth0Domain,
                     auth0clientName,
                     auth0clientId,
                     auth0Secret,
                     mgmtClientId,
                     mgmtSecret);
-            generatedTestData = new GeneratedTestData(testUser, testUser.getProfile(), study, studyClientConfiguration);
+            generatedTestData = new GeneratedTestData(testUser, testUser.getProfile(), study.get(), studyClientConfiguration.get());
             testDataToDelete.add(generatedTestData);
         }
-
-
         return generatedTestData;
     }
 

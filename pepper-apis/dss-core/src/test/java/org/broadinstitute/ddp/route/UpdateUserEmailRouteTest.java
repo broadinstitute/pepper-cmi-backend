@@ -36,7 +36,7 @@ public class UpdateUserEmailRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setupClass() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
     }
 

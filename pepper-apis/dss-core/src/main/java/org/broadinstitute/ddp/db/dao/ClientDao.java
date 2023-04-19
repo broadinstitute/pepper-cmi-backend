@@ -44,7 +44,7 @@ public interface ClientDao extends SqlObject {
                                 Long auth0TenantId) {
 
         String encryptedClientSecret = AesUtil.encrypt(auth0ClientSecret, encryptionKey);
-        Optional<ClientDto> clientDto = getClientDao().findByAuth0ClientIdAndAuth0TenantId(auth0ClientId,
+        Optional<ClientDto> clientDto = getClientDao().findByAuth0ClientIdAndAuth0TenantIdForInsert(auth0ClientId,
                 auth0TenantId);
 
         Long clientId = null;

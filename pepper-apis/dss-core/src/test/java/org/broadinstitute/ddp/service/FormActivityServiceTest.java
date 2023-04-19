@@ -71,7 +71,7 @@ public class FormActivityServiceTest extends TxnAwareBaseTest {
     public void setup() {
         PexInterpreter interpreter = new TreeWalkInterpreter();
         service = new FormActivityService(interpreter);
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @Test

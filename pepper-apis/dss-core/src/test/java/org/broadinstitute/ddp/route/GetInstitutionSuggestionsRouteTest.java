@@ -100,7 +100,7 @@ public class GetInstitutionSuggestionsRouteTest extends IntegrationTestSuite.Tes
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
         endpoint = RouteTestUtil.getTestingBaseUrl() + API.AUTOCOMPLETE_INSTITUTION;
         insertTestData();

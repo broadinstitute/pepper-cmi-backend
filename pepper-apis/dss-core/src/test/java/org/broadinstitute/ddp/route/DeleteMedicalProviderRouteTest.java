@@ -56,7 +56,7 @@ public class DeleteMedicalProviderRouteTest extends IntegrationTestSuite.TestCas
 
     @BeforeClass
     public static void setup() throws Exception {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
         url = RouteTestUtil.getTestingBaseUrl() + API.USER_MEDICAL_PROVIDER;
         insertTestData();

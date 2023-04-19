@@ -53,7 +53,7 @@ public class ActivityInstanceCreationFromAnswersEventSyncProcessorTest extends T
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     /**

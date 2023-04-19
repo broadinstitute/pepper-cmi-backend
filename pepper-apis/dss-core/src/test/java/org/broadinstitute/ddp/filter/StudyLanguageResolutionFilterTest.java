@@ -25,7 +25,7 @@ public class StudyLanguageResolutionFilterTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setupClass() {
-        testData = TransactionWrapper.withTxn(handle -> TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @Test

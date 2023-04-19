@@ -54,8 +54,8 @@ public class KitConfigurationTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setUp() {
+        data = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            data = TestDataSetupUtil.generateBasicUserTestData(handle);
             userGuid = data.getUserGuid();
         });
         TransactionWrapper.useTxn(handle -> {

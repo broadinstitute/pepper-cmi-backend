@@ -57,7 +57,7 @@ public class GetStudyPasswordPolicyRouteTest extends IntegrationTestSuite.TestCa
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         auth0ClientId = testData.getTestingClient().getAuth0ClientId();
         auth0Domain = RouteTestUtil.getConfig().getConfig(ConfigFile.AUTH0).getString(ConfigFile.DOMAIN);
         url = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.STUDY_PASSWORD_POLICY

@@ -34,8 +34,8 @@ public class GetPrequalifierInstanceRouteTest extends IntegrationTestSuite.TestC
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
             setupPrequalActivityAndInstance(handle);
         });

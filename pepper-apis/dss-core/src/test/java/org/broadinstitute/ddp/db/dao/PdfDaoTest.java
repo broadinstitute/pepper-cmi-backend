@@ -61,7 +61,7 @@ public class PdfDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setupData() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @Test

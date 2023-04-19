@@ -1,5 +1,6 @@
 package org.broadinstitute.ddp.route;
 
+import static org.broadinstitute.ddp.util.GuidUtils.UPPER_ALPHA_NUMERIC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -53,6 +54,7 @@ import org.broadinstitute.ddp.model.user.EnrollmentStatusType;
 import org.broadinstitute.ddp.model.user.User;
 import org.broadinstitute.ddp.service.AddressService;
 import org.broadinstitute.ddp.util.ConfigManager;
+import org.broadinstitute.ddp.util.GuidUtils;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.broadinstitute.ddp.util.TestUtil;
 import org.jdbi.v3.core.Handle;
@@ -80,11 +82,11 @@ public class GetStudyStatisticsRouteTest extends IntegrationTestSuite.TestCase {
     @BeforeClass
     public static void setup() {
         gson = new Gson();
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             var userDao = handle.attach(UserDao.class);
-            testUser2 = userDao.createUser(testData.getClientId(), "user2");
-            testUser3 = userDao.createUser(testData.getClientId(), "user3");
+            testUser2 = userDao.createUser(testData.getClientId(), "user2" + GuidUtils.randomStringFromDictionary(UPPER_ALPHA_NUMERIC, 5));
+            testUser3 = userDao.createUser(testData.getClientId(), "user3" + GuidUtils.randomStringFromDictionary(UPPER_ALPHA_NUMERIC, 5));
             token = testData.getTestingUser().getToken();
             user1Guid = testData.getUserGuid();
             user2Guid = testUser2.getGuid();

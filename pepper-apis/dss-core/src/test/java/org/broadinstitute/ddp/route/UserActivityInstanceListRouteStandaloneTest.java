@@ -82,8 +82,8 @@ public class UserActivityInstanceListRouteStandaloneTest extends IntegrationTest
     @BeforeClass
     public static void setup() {
         gson = new Gson();
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
             userGuid = testData.getUserGuid();
             setupActivityAndInstance(handle);

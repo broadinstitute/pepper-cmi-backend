@@ -230,9 +230,9 @@ public class RouteTestUtil {
             stmt.setBoolean(1, isLocked);
 
             if (isAdmin) {
-                userGuid = SharedTestUserUtil.getInstance().getSharedAdminTestUser(handle).getUserGuid();
+                userGuid = SharedTestUserUtil.getInstance().getSharedAdminTestUser().getUserGuid();
             } else {
-                userGuid = SharedTestUserUtil.getInstance().getSharedTestUser(handle).getUserGuid();
+                userGuid = SharedTestUserUtil.getInstance().getSharedTestUser().getUserGuid();
             }
             stmt.setString(2, userGuid);
             int numRows = stmt.executeUpdate();

@@ -141,8 +141,8 @@ public class QuestionDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             langCodeId = testData.getProfile().getPreferredLangId();
         });
     }

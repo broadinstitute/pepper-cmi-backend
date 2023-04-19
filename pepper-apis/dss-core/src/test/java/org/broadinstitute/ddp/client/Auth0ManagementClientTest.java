@@ -30,8 +30,8 @@ public class Auth0ManagementClientTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             client = Auth0ManagementClient.forStudy(handle, testData.getStudyGuid());
         });
     }

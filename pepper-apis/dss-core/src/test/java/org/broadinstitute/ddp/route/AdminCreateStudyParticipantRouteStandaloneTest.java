@@ -55,10 +55,10 @@ public class AdminCreateStudyParticipantRouteStandaloneTest extends IntegrationT
 
     @BeforeClass
     public static void setupData() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         urlTemplate = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.ADMIN_STUDY_PARTICIPANTS
                 .replace(RouteConstants.PathParam.STUDY_GUID, "{study}");
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
         });
 

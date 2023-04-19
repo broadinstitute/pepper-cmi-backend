@@ -29,7 +29,7 @@ public class CheckIrbPasswordRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
-        generatedTestData = TransactionWrapper.withTxn(handle -> TestDataSetupUtil.generateBasicUserTestData(handle));
+        generatedTestData = TestDataSetupUtil.generateBasicUserTestData();
         token = null;
         url = RouteTestUtil.getTestingBaseUrl() + API.CHECK_IRB_PASSWORD;
         TransactionWrapper.useTxn(

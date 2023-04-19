@@ -34,9 +34,7 @@ public class ListStudyLanguagesRouteTest extends IntegrationTestSuite.TestCase {
     @BeforeClass
     public static void setup() {
         gson = new Gson();
-        TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
-        });
+        testData = TestDataSetupUtil.generateBasicUserTestData();
 
         String endpoint = RouteConstants.API.STUDY_LANGUAGES
                 .replace(RouteConstants.PathParam.STUDY_GUID, testData.getStudyGuid());

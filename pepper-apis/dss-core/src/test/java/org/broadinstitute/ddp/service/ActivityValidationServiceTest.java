@@ -50,8 +50,8 @@ public class ActivityValidationServiceTest extends TxnAwareBaseTest {
 
     @Before
     public void setup() throws Exception {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             userGuid = testData.getUserGuid();
             setupActivityAndInstance(handle);
         });

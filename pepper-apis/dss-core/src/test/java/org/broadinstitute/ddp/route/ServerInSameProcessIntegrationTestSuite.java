@@ -13,18 +13,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         AdminCreateStudyParticipantRouteStandaloneTest.class,
-        AdminUpdateInvitationDetailsRouteTest.class,
-        AdminLookupInvitationRouteTest.class,
-        EventServiceTest.class,
         GetParticipantInfoRouteStandaloneTest.class,
-        GetUserAnnouncementsRouteTest.class,
         ListCancersRouteStandaloneTest.class,
         GetCancerSuggestionsRouteStandaloneTest.class,
         GetDsmDrugSuggestionsRouteStandaloneTest.class,
-        GetDsmMailingListRouteTest.class,
-        SendExitNotificationRouteTest.class,
-        GetMailAddressInfoRouteTest.class,
-        GetMedicalProviderListRouteTest.class,
         GovernedParticipantRegistrationRouteStandaloneTest.class,
         PatchFormAnswersRouteStandaloneTest.class,
         PutFormAnswersRouteStandaloneTest.class,
@@ -33,11 +25,7 @@ import org.junit.runners.Suite;
         GetActivityInstanceRouteStandaloneTest.class,
         SendEmailRouteStandaloneTest.class,
         UserActivityInstanceListRouteStandaloneTest.class,
-        UserRegistrationRouteStandaloneTest.class,
-        PostMedicalProviderRouteTest.class,
-        DeleteMedicalProviderRouteTest.class,
-        HealthCheckRouteTest.class,
-        CreateTemporaryUserRouteTest.class
+        UserRegistrationRouteStandaloneTest.class
 })
 public class ServerInSameProcessIntegrationTestSuite extends IntegrationTestSuite {
 }

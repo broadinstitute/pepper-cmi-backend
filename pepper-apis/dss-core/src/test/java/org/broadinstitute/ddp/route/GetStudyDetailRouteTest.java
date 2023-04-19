@@ -18,8 +18,8 @@ public class GetStudyDetailRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() throws Exception {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
         });
         String endpoint = RouteConstants.API.STUDY_DETAIL

@@ -61,8 +61,8 @@ public class ConsentServiceTest extends TxnAwareBaseTest {
         interpreter = new TreeWalkInterpreter();
         studyActDao = new StudyActivityDao();
         consentElectionDao = new ConsentElectionDao();
+        data = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            data = TestDataSetupUtil.generateBasicUserTestData(handle);
             userGuid = data.getUserGuid();
             studyGuid = data.getStudyGuid();
             setupConsentActivities(handle);

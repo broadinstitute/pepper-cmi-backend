@@ -66,14 +66,14 @@ public class GetPdfRouteTest extends DsmRouteTest {
                 answerText
         );
 
+        secondStudy = TestDataSetupUtil.generateBasicUserTestData();
+        thirdStudy = TestDataSetupUtil.generateBasicUserTestData();
+
         TransactionWrapper.useTxn(handle -> {
-            secondStudy = TestDataSetupUtil.generateBasicUserTestData(handle);
             assertEquals(1, handle.createUpdate("update user set legacy_altpid = :legacyAltPid where guid = :guid")
                     .bind("legacyAltPid", legacyAltPid)
                     .bind("guid", userGuid)
                     .execute());
-
-            thirdStudy = TestDataSetupUtil.generateBasicUserTestData(handle);
 
             PdfService pdfService = new PdfService();
             PdfConfiguration pdfConfiguration = pdfService.findFullConfigForUser(

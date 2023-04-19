@@ -39,7 +39,7 @@ public class GetParticipantInfoRouteStandaloneTest extends IntegrationTestSuite.
     @BeforeClass
     public static void beforeClass() {
         gson = new Gson();
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     @After

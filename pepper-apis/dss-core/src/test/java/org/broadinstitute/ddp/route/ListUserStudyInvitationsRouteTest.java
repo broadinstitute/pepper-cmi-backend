@@ -24,9 +24,7 @@ public class ListUserStudyInvitationsRouteTest extends IntegrationTestSuite.Test
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
-        });
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
         String endpoint = RouteConstants.API.USER_STUDY_INVITES
                 .replace(RouteConstants.PathParam.USER_GUID, "{user}")

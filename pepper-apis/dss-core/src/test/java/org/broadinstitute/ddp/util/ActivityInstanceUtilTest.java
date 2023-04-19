@@ -22,9 +22,9 @@ public class ActivityInstanceUtilTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(
                 handle -> {
-                    testData = TestDataSetupUtil.generateBasicUserTestData(handle);
                     activityDef = TestDataSetupUtil.generateTestFormActivityForUser(
                             handle, testData.getUserGuid(), testData.getStudyGuid()
                     );

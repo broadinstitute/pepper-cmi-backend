@@ -101,7 +101,7 @@ public class GetMedicalProviderListRouteTest extends IntegrationTestSuite.TestCa
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
         url = RouteTestUtil.getTestingBaseUrl() + API.USER_MEDICAL_PROVIDERS;
         insertTestData();

@@ -23,8 +23,8 @@ public class InvitationDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             studyId = testData.getStudyId();
             userId = testData.getUserId();
         });

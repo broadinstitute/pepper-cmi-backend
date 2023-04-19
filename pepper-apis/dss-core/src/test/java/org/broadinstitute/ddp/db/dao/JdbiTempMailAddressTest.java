@@ -27,8 +27,8 @@ public class JdbiTempMailAddressTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        data = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            data = TestDataSetupUtil.generateBasicUserTestData(handle);
             userGuid = data.getUserGuid();
         });
     }

@@ -25,8 +25,9 @@ public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.
     public static void setupData() {
         urlTemplate = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.ADMIN_STUDY_INVITATION_DETAILS
                 .replace(RouteConstants.PathParam.STUDY_GUID, "{study}");
+        testData = TestDataSetupUtil.generateBasicUserTestData();
+
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
         });
     }

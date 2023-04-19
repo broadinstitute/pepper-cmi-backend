@@ -36,9 +36,9 @@ public class DsmExitUserRouteTest extends DsmRouteTest {
     @BeforeClass
     public static void insertTestData() {
         url = RouteTestUtil.getTestingBaseUrl() + API.DSM_TERMINATE_USER;
+        generatedTestData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(
                 handle -> {
-                    generatedTestData = TestDataSetupUtil.generateBasicUserTestData(handle);
                     FormActivityDef formActivity = TestDataSetupUtil.generateTestFormActivityForUser(
                             handle, generatedTestData.getUserGuid(), generatedTestData.getStudyGuid()
                     );

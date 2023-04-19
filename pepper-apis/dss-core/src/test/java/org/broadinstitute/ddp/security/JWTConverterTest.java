@@ -8,7 +8,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.typesafe.config.Config;
 import org.broadinstitute.ddp.constants.Auth0Constants;
 import org.broadinstitute.ddp.constants.ConfigFile;
-import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.route.IntegrationTestSuite;
 import org.broadinstitute.ddp.route.RouteTestUtil;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
@@ -23,7 +22,7 @@ public class JWTConverterTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle, true));
+        testData = TestDataSetupUtil.generateBasicUserTestData(true);
         token = testData.getTestingUser().getToken();
         auth0Config = RouteTestUtil.getConfig().getConfig(ConfigFile.AUTH0);
     }

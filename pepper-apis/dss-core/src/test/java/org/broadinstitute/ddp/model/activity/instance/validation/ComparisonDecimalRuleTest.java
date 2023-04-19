@@ -33,7 +33,7 @@ public class ComparisonDecimalRuleTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         testQuestion = new DecimalQuestion("sid", 1L, 2L, false, false, false,
                 null, null, null, List.of(), List.of(), 2);
         questionIdInstanceGuidPair = TransactionWrapper.withTxn(ComparisonDecimalRuleTest::prepareTestData);

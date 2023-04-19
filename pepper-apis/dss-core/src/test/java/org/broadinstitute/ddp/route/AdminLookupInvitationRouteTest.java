@@ -31,10 +31,10 @@ public class AdminLookupInvitationRouteTest extends IntegrationTestSuite.TestCas
 
     @BeforeClass
     public static void setupData() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         urlTemplate = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.ADMIN_STUDY_INVITATION_LOOKUP
                 .replace(RouteConstants.PathParam.STUDY_GUID, "{study}");
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
         });
     }

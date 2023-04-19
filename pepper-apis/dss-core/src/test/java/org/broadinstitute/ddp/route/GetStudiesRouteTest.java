@@ -50,9 +50,9 @@ public class GetStudiesRouteTest extends IntegrationTestSuite.TestCase {
     public static void beforeClass() {
         Config cfg = RouteTestUtil.getConfig();
         gson = new Gson();
+        testData = TestDataSetupUtil.generateBasicUserTestData();
 
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
             umbrella = handle.attach(JdbiUmbrella.class).findById(testData.getTestingStudy().getUmbrellaId()).get().getGuid();
 

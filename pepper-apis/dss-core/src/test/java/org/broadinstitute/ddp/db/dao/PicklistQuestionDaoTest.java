@@ -77,8 +77,8 @@ public class PicklistQuestionDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             userGuid = testData.getUserGuid();
             userId = testData.getUserId();
         });

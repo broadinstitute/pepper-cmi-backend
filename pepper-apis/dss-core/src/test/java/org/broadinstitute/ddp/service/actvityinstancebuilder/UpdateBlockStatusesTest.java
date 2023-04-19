@@ -58,7 +58,7 @@ public class UpdateBlockStatusesTest extends TxnAwareBaseTest {
         interpreter = new TreeWalkInterpreter();
         formInstanceCreatorHelper = new FormInstanceCreatorHelper();
         TransactionWrapper.useTxn(handle -> {
-            testUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
+            testUser = SharedTestUserUtil.getInstance().getSharedTestUser();
         });
         userGuid = testUser.getUserGuid();
     }

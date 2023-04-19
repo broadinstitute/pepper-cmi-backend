@@ -67,8 +67,8 @@ public class InvitationCheckStatusRouteTest extends IntegrationTestSuite.TestCas
 
     @BeforeClass
     public static void setupData() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             testData.setTestingStudy(testData.getTestingStudy().toBuilder().recaptchaSiteKey("XXXXX").build());
         });
     }

@@ -75,11 +75,11 @@ public class ReceiveDsmNotificationRouteTest extends DsmRouteTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         urlTemplate = RouteTestUtil.getTestingBaseUrl() + API.DSM_NOTIFICATION
                 .replace(PathParam.STUDY_GUID, "{study}")
                 .replace(PathParam.USER_GUID, "{user}");
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             eventConfigId = generateDsmNotificationTestEventConfiguration(
                     handle, testData, SALIVA_RECEIVED, SENDGRID_TEST_TEMPLATE);
         });

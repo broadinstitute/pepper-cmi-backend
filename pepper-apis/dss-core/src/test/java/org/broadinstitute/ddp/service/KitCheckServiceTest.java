@@ -49,8 +49,8 @@ public class KitCheckServiceTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setUp() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             userGuid = testData.getUserGuid();
             studyGuid = testData.getStudyGuid();
             JdbiMailAddress jdbiAddress = handle.attach(JdbiMailAddress.class);

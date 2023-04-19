@@ -43,6 +43,7 @@ public interface JdbiClient extends SqlObject {
             + "     AND t.auth0_domain = :auth0Domain"
     )
     @RegisterConstructorMapper(StudyClientConfiguration.class)
+    // todo arz add for update version?
     Optional<StudyClientConfiguration> getStudyClientConfigurationByClientAndDomain(
             @Bind("auth0ClientId") String auth0ClientId,
             @Bind("auth0Domain") String auth0Domain);
@@ -133,6 +134,11 @@ public interface JdbiClient extends SqlObject {
             @Bind("auth0ClientId") String auth0ClientId,
             @Bind("auth0TenantId") long auth0TenantId);
 
+    @SqlQuery("SELECT client_id FROM client WHERE auth0_client_id = :auth0ClientId AND auth0_tenant_id = :auth0TenantId for update")
+    Optional<Long> getClientIdByAuth0ClientIdAndAuth0TenantIdForInsert(
+            @Bind("auth0ClientId") String auth0ClientId,
+            @Bind("auth0TenantId") long auth0TenantId);
+
     @SqlQuery("SELECT "
             + "     c.client_id, "
             + "     c.auth0_client_id, "
@@ -147,6 +153,28 @@ public interface JdbiClient extends SqlObject {
             + "WHERE c.auth0_client_id = :auth0ClientId AND c.auth0_tenant_id = :auth0TenantId")
     @RegisterConstructorMapper(ClientDto.class)
     Optional<ClientDto> findByAuth0ClientIdAndAuth0TenantId(
+            @Bind("auth0ClientId") String auth0ClientId,
+            @Bind("auth0TenantId") long auth0TenantId
+    );
+
+    @SqlQuery("SELECT "
+            + "     c.client_id, "
+            + "     c.auth0_client_id, "
+            + "     c.auth0_signing_secret, "
+            + "     c.web_password_redirect_url, "
+            + "     c.is_revoked, "
+            + "     c.auth0_tenant_id, "
+            + "     t.auth0_domain"
+            + "  FROM client c "
+            + "  LEFT JOIN auth0_tenant t "
+            + "    ON t.auth0_tenant_id = c.auth0_tenant_id "
+            + "WHERE c.auth0_client_id = :auth0ClientId AND c.auth0_tenant_id = :auth0TenantId for update")
+    @RegisterConstructorMapper(ClientDto.class)
+    /**
+     * The same as {@link #findByAuth0ClientIdAndAuth0TenantId(String, long)} but
+     * with a for update lock on the client table.
+     */
+    Optional<ClientDto> findByAuth0ClientIdAndAuth0TenantIdForInsert(
             @Bind("auth0ClientId") String auth0ClientId,
             @Bind("auth0TenantId") long auth0TenantId
     );

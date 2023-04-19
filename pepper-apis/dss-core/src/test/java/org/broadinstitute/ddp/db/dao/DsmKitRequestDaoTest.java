@@ -46,8 +46,8 @@ public class DsmKitRequestDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setupTestUser() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             TestDataSetupUtil.setUserEnrollmentStatus(handle, testData, EnrollmentStatusType.REGISTERED);
             TEST_USER_GUID = testData.getTestingUser().getUserGuid();
             TEST_STUDY_GUID = testData.getStudyGuid();

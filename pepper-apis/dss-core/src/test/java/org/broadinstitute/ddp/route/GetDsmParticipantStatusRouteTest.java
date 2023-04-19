@@ -47,8 +47,8 @@ public class GetDsmParticipantStatusRouteTest extends IntegrationTestSuite.TestC
     @BeforeClass
     public static void setup() {
         cfg = RouteTestUtil.getConfig();
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             TestDataSetupUtil.setUserEnrollmentStatus(handle, testData, EnrollmentStatusType.ENROLLED);
         });
     }

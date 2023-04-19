@@ -23,8 +23,8 @@ public class GetGovernedStudyParticipantsRouteTest extends IntegrationTestSuite.
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
             otherUser = handle.attach(UserDao.class).createUser(testData.getClientId(), null);
         });

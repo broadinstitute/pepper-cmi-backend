@@ -41,9 +41,9 @@ public class PostPasswordResetRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
+        GeneratedTestData testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(
                 handle -> {
-                    GeneratedTestData testData = TestDataSetupUtil.generateBasicUserTestData(handle);
                     auth0ClientId = testData.getTestingClient().getAuth0ClientId();
                     handle.attach(JdbiClient.class)
                             .updateWebPasswordRedirectUrlByAuth0ClientIdAndAuth0Domain(testRedirectUrl, auth0ClientId, auth0Domain);

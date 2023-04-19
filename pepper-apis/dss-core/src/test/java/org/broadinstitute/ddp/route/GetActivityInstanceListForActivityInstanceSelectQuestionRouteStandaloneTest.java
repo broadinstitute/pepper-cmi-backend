@@ -59,8 +59,8 @@ public class GetActivityInstanceListForActivityInstanceSelectQuestionRouteStanda
         IntegrationTestSuite.setup(false);
         gson = new Gson();
 
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
             userGuid = testData.getUserGuid();
             setupActivity(handle);

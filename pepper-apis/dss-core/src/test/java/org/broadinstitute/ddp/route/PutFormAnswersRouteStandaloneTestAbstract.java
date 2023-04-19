@@ -75,8 +75,8 @@ public class PutFormAnswersRouteStandaloneTestAbstract extends IntegrationTestSu
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             user = testData.getTestingUser();
             token = testData.getTestingUser().getToken();
             studyId = testData.getStudyId();

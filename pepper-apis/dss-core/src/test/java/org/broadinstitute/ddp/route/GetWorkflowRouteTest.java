@@ -53,8 +53,8 @@ public class GetWorkflowRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
             studyId = testData.getStudyId();
             fromActivity = insertNewActivity(handle);

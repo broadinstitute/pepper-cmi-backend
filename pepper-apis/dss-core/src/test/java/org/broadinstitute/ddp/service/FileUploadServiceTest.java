@@ -48,7 +48,7 @@ public class FileUploadServiceTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
-        final var testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        final var testData = TestDataSetupUtil.generateBasicUserTestData();
         studyId = testData.getStudyId();
         userId = testData.getUserId();
     }

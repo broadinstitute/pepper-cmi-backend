@@ -62,8 +62,9 @@ public class MailAddressRouteTest extends IntegrationTestSuite.TestCase {
     @BeforeClass
     public static void beforeClass() {
         gson = new Gson();
+        testData = TestDataSetupUtil.generateBasicUserTestData();
+
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             token = testData.getTestingUser().getToken();
             userGuid = testData.getTestingUser().getUserGuid();
             setupConsentActivity(handle);

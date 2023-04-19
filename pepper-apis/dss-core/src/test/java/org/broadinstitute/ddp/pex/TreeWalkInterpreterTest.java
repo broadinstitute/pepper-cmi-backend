@@ -116,8 +116,8 @@ public class TreeWalkInterpreterTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             testStudy = TestDataSetupUtil.generateTestStudy(handle, ConfigManager.getInstance().getConfig());
             userGuid = testData.getTestingUser().getUserGuid();
             setupActivityAndInstance(handle);

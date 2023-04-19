@@ -40,9 +40,9 @@ public class JdbiUserStudyEnrollmentTest extends TxnAwareBaseTest {
 
     @Before
     public void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(
                 handle -> {
-                    testData = TestDataSetupUtil.generateBasicUserTestData(handle);
                     userStudyEnrollmentId = handle.attach(JdbiUserStudyEnrollment.class).changeUserStudyEnrollmentStatus(
                             testData.getUserGuid(),
                             testData.getStudyGuid(),

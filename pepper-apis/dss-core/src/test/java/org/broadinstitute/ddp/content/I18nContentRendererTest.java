@@ -37,7 +37,7 @@ public class I18nContentRendererTest extends TxnAwareBaseTest {
     @BeforeClass
     public static void setup() {
         renderer = new I18nContentRenderer();
-        userId = TransactionWrapper.withTxn(handle -> TestDataSetupUtil.generateBasicUserTestData(handle).getUserId());
+        userId = TestDataSetupUtil.generateBasicUserTestData().getUserId();
     }
 
     @Test

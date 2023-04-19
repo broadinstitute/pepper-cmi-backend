@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.typesafe.config.Config;
+import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
@@ -110,7 +111,19 @@ import org.reflections.Reflections;
         StudyLanguageContentLanguageSettingFilterTest.class,
         GetStudyDetailRouteTest.class,
         GetStudyStatisticsRouteTest.class,
-        DeleteUserRouteTest.class
+        DeleteUserRouteTest.class,
+        AdminUpdateInvitationDetailsRouteTest.class,
+        AdminLookupInvitationRouteTest.class,
+        EventServiceTest.class,
+        GetUserAnnouncementsRouteTest.class,
+        GetDsmMailingListRouteTest.class,
+        SendExitNotificationRouteTest.class,
+        GetMailAddressInfoRouteTest.class,
+        GetMedicalProviderListRouteTest.class,
+        PostMedicalProviderRouteTest.class,
+        DeleteMedicalProviderRouteTest.class,
+        HealthCheckRouteTest.class,
+        CreateTemporaryUserRouteTest.class
 })
 public class IntegrationTestSuite {
     private static final String DEBUG_FLAG = "-agentlib:jdwp";
@@ -200,7 +213,6 @@ public class IntegrationTestSuite {
         String mgmtApiClientId = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID);
         String mgmtApiClientSecret = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET);
 
-
         TransactionWrapper.useTxn(handle -> {
             JdbiClient jdbiClient = handle.attach(JdbiClient.class);
             JdbiUmbrellaStudy jdbiStudy = handle.attach(JdbiUmbrellaStudy.class);
@@ -210,8 +222,7 @@ public class IntegrationTestSuite {
                     mgmtApiClientId,
                     encryptedSecret);
 
-            Optional<Long> clientId = jdbiClient.getClientIdByAuth0ClientIdAndAuth0TenantId(testClientId,
-                    auth0Tenant.getId());
+            Optional<Long> clientId = jdbiClient.getClientIdByAuth0ClientIdAndAuth0TenantIdForInsert(testClientId, auth0Tenant.getId());
 
             if (clientId.isEmpty()) {
                 // add the client and access to the test studies if needed
@@ -228,20 +239,22 @@ public class IntegrationTestSuite {
                 }
                 log.info("Inserted test client {} for tenant {}", testClientId, auth0Tenant.getId());
             }
+        });
 
+        // do auth0 stuff outside of database transaction to avoid holding db locks beyond lockwait timeout
+        Map<String, String> guidToAuth0UserIds = new HashMap<>();
+        if (sharedAdminTestUser == null) {
+            sharedAdminTestUser = SharedTestUserUtil.getInstance().getSharedAdminTestUser();
+        }
+        guidToAuth0UserIds.put(sharedAdminTestUser.getUserGuid(), sharedAdminTestUser.getAuth0UserId());
+        if (sharedTestUser == null) {
+            sharedTestUser = SharedTestUserUtil.getInstance().getSharedTestUser();
+        }
+        TransactionWrapper.useTxn(handle -> {
             // set the test user's auth0Id according to whatever is in our environment, since
             // different environments have different tenants and different users in different tenants
             // can have different auth0 user ids
             JdbiUser jdbiUser = handle.attach(JdbiUser.class);
-
-            Map<String, String> guidToAuth0UserIds = new HashMap<>();
-            if (sharedAdminTestUser == null) {
-                sharedAdminTestUser = SharedTestUserUtil.getInstance().getSharedAdminTestUser(handle);
-            }
-            guidToAuth0UserIds.put(sharedAdminTestUser.getUserGuid(), sharedAdminTestUser.getAuth0UserId());
-            if (sharedTestUser == null) {
-                sharedTestUser = SharedTestUserUtil.getInstance().getSharedTestUser(handle);
-            }
             guidToAuth0UserIds.put(sharedTestUser.getUserGuid(), sharedTestUser.getAuth0UserId());
             for (Map.Entry<String, String> guidAndAuth0IdTuple : guidToAuth0UserIds.entrySet()) {
                 String testUserGuid = guidAndAuth0IdTuple.getKey();

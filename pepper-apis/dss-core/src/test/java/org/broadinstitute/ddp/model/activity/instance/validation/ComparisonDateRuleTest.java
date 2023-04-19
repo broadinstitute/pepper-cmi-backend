@@ -34,7 +34,7 @@ public class ComparisonDateRuleTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         testQuestion = new DateQuestion("sid", 1L, false, false, false,
                 null, null, null, List.of(), List.of(),
                 DateRenderMode.TEXT, true, List.of(DateFieldType.YEAR, DateFieldType.MONTH, DateFieldType.DAY),

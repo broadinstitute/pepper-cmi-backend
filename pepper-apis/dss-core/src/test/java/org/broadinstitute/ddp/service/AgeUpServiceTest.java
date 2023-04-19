@@ -64,7 +64,7 @@ public class AgeUpServiceTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         Instant fixedDate = LocalDate.of(2020, 3, 14).atStartOfDay(ZoneOffset.UTC).toInstant();
         service = new AgeUpService(Clock.fixed(fixedDate, ZoneOffset.UTC));
     }

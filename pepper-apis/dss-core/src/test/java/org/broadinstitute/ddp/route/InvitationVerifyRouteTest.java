@@ -33,8 +33,8 @@ public class InvitationVerifyRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void createInvitation() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             invitation = handle.attach(InvitationFactory.class).createAgeUpInvitation(
                     testData.getStudyId(),
                     testData.getUserId(),

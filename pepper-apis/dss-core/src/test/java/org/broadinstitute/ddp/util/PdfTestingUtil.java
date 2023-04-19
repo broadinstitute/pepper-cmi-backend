@@ -223,8 +223,8 @@ public final class PdfTestingUtil {
         pdfInfo.getExpectedValuesByInstitutionType().put(InstitutionType.INITIAL_BIOPSY, new HashMap<>());
         pdfInfo.getExpectedValuesByInstitutionType().put(InstitutionType.PHYSICIAN, new HashMap<>());
 
+        pdfInfo.setData(TestDataSetupUtil.generateBasicUserTestData());
         TransactionWrapper.useTxn(TransactionWrapper.DB.APIS, handle -> {
-            pdfInfo.setData(TestDataSetupUtil.generateBasicUserTestData(handle));
             TestDataSetupUtil.setUserEnrollmentStatus(handle, pdfInfo.getData(), EnrollmentStatusType.ENROLLED);
             TestDataSetupUtil.createTestingMailAddress(handle, pdfInfo.getData());
 

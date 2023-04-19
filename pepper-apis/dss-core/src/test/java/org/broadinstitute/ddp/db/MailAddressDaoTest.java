@@ -34,8 +34,8 @@ public class MailAddressDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setupTestUser() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
             TEST_USER_GUID = testData.getTestingUser().getUserGuid();
         });
     }

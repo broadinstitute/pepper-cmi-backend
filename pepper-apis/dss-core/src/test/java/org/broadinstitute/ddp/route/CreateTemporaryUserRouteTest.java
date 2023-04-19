@@ -47,7 +47,7 @@ public class CreateTemporaryUserRouteTest extends IntegrationTestSuite.TestCase 
 
     @BeforeClass
     public static void setup() {
-        TransactionWrapper.useTxn(handle -> testData = TestDataSetupUtil.generateBasicUserTestData(handle));
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         url = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.TEMP_USERS;
         usersToDelete = new HashSet<>();
         gson = new Gson();

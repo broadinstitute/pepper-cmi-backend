@@ -101,8 +101,6 @@ public class MySqlTestContainerUtil {
             apisDb.withConfigurationOverride(TEST_DB_MYSQL_CONF_DIR);
 
             // todo arz make these vm vars
-            housekeepingDb.withReuse(true);
-            apisDb.withReuse(true);
             Startables.deepStart(apisDb, housekeepingDb).join();
 
             log.info("It took {}ms to start the test containers.", System.currentTimeMillis() - containerStartTime);

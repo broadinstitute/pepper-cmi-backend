@@ -41,8 +41,8 @@ public class UserDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
-            testData = TestDataSetupUtil.generateBasicUserTestData(handle);
 
             long now = Instant.now().toEpochMilli();
             textSid = "text" + now;

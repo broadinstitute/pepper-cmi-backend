@@ -6,7 +6,6 @@ import com.auth0.exception.Auth0Exception;
 import com.auth0.json.mgmt.users.User;
 
 import org.broadinstitute.ddp.TxnAwareBaseTest;
-import org.broadinstitute.ddp.db.TransactionWrapper;
 import org.broadinstitute.ddp.db.dto.UserDto;
 import org.broadinstitute.ddp.json.auth0.Auth0CallResponse;
 
@@ -25,7 +24,7 @@ public class UpdateUserLoginDataUtilTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setupClass() {
-        testData = TransactionWrapper.withTxn(TestDataSetupUtil::generateBasicUserTestData);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
     }
 
     public UserDto convertTestingUserToDto(SharedTestUserUtil.SharedTestUser testingUser) {
