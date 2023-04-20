@@ -15,6 +15,18 @@ public interface JdbiClientUmbrellaStudy extends SqlObject {
     @GetGeneratedKeys
     Long insert(@Bind("clientId") long clientId, @Bind("studyId") long studyId);
 
+    /**
+     * Upserts a row if it doesn't exist
+     */
+    @SqlUpdate("upsert into client__umbrella_study(client_id,umbrella_study_id)\n"
+            + " (select c.client_id, s.umbrella_study_id\n"
+            + " from client c, umbrella_study s\n"
+            + " where c.auth0_client_id = :auth0ClientId and s.guid = :studyGuid)\n"
+            + " ON DUPLICATE KEY UPDATE client_id = (select c.client_id from client c where c.auth0_client_id = :auth0ClientId), \n"
+            + "                         umbrella_study_id = (select s.umbrella_study_id from umbrella_study s where s.guid = :studyGuid)")
+    @GetGeneratedKeys
+    Long upsert(@Bind("auth0ClientId") String clientId, @Bind("studyGuid") String studyGuid);
+
     @SqlQuery("select us.guid from client__umbrella_study as cus "
             + "join client as c on c.client_id = cus.client_id "
             + "join umbrella_study as us on us.umbrella_study_id = cus.umbrella_study_id "

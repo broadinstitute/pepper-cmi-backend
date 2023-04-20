@@ -1,8 +1,5 @@
 package org.broadinstitute.ddp.util;
 
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
-import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD;
 import static org.broadinstitute.ddp.constants.TestConstants.SECOND_STUDY_GUID;
 import static org.broadinstitute.ddp.constants.TestConstants.TEST_STUDY_GUID;
 import static org.broadinstitute.ddp.constants.TestConstants.getTestStudyBloodPexEXPR;
@@ -121,7 +118,7 @@ import org.jdbi.v3.core.Handle;
 public class TestDataSetupUtil {
     private static final Config cfg = ConfigManager.getInstance().getConfig();
     private static final Config auth0Config = cfg.getConfig(ConfigFile.AUTH0);
-    private static final String password = auth0Config.getString(AUTH0_TEST_PASSWORD);
+    private static final String password = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_TEST_PASSWORD);
     private static final List<GeneratedTestData> testDataToDelete = new ArrayList<>();
     private static final String CONSENT_PDF_LOCATION = "src/test/resources/ConsentForm.pdf";
 
@@ -142,8 +139,8 @@ public class TestDataSetupUtil {
         String backendTestSecret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
         String backendTestClientName = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_NAME);
         String auth0domain = auth0Config.getString(ConfigFile.DOMAIN);
-        String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
-        String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
+        String mgmtClientId = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID);
+        String mgmtSecret = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET);
         String encryptionSecret = auth0Config.getString(ConfigFile.ENCRYPTION_SECRET);
 
         return generateBasicUserTestData(
@@ -180,9 +177,10 @@ public class TestDataSetupUtil {
         GeneratedTestData generatedTestData = null;
         AtomicReference<StudyDto> study = new AtomicReference<>();
         AtomicReference<StudyClientConfiguration> studyClientConfiguration = new AtomicReference<>();
+        List<String> clientIds = Arrays.asList(auth0clientId, mgmtClientId);
 
         TransactionWrapper.useTxn(handle -> {
-            study.set(generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret));
+            study.set(generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret, clientIds));
 
             configureStudyForSendgrid(handle, sendgridApiKey, study.get());
 
@@ -301,13 +299,14 @@ public class TestDataSetupUtil {
     public static StudyDto generateTestStudy(Handle handle, Config topLevelConfig) {
         Config auth0Config = topLevelConfig.getConfig(ConfigFile.AUTH0);
         String auth0Domain = auth0Config.getString(ConfigFile.DOMAIN);
-        String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
-        String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
-        return generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret);
+        String mgmtClientId = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID);
+        String mgmtSecret = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET);
+        String clientId = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_CLIENT_ID);
+        List<String> auth0ClientIds = Arrays.asList(clientId, mgmtClientId);
+        return generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret, auth0ClientIds);
     }
 
-    public static StudyDto generateTestStudy(Handle handle, String auth0Domain, String mgmtClientId,
-                                             String mgmtSecret) {
+    public static StudyDto generateTestStudy(Handle handle, String auth0Domain, String mgmtClientId, String mgmtSecret, List<String> auth0ClientIds) {
         String umbrellaName = TestConstants.BACKEND_BASE_TEST_UMBRELLA
                 + GuidUtils.randomStringFromDictionary(UPPER_ALPHA_NUMERIC, 10);
         long umbrellaId = handle.attach(JdbiUmbrella.class)
@@ -315,12 +314,11 @@ public class TestDataSetupUtil {
 
         OLCPrecision studyPrecision = OLCPrecision.MEDIUM;
         boolean shareParticipantLocation = true;
-        return generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret, studyPrecision, shareParticipantLocation, umbrellaId);
+        return generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret, studyPrecision, shareParticipantLocation, umbrellaId, auth0ClientIds);
     }
 
     public static StudyDto generateTestStudy(Handle handle, String auth0Domain, String mgmtClientId, String
-            mgmtSecret, OLCPrecision studyPrecision, boolean shareParticipantLocation,
-                                             long umbrellaId) {
+            mgmtSecret, OLCPrecision studyPrecision, boolean shareParticipantLocation, long umbrellaId, List<String> auth0ClientIds) {
 
         String studyGuid = DBUtils.uniqueStandardGuid(handle,
                 SqlConstants.UmbrellaStudyTable.TABLE_NAME, SqlConstants.UmbrellaStudyTable.GUID);
@@ -337,6 +335,11 @@ public class TestDataSetupUtil {
 
         long studyId = handle.attach(JdbiUmbrellaStudy.class).insert(studyName, studyGuid, umbrellaId, webBaseUrl,
                 auth0TenantDto.getId(), studyPrecision, shareParticipantLocation, null, null, null, false);
+
+        JdbiClientUmbrellaStudy clientStudyDao = handle.attach(JdbiClientUmbrellaStudy.class);
+        for (String auth0ClientId : auth0ClientIds) {
+            clientStudyDao.upsert(auth0ClientId, studyGuid);
+        }
 
         return StudyDto.builder()
                 .id(studyId)
@@ -814,8 +817,8 @@ public class TestDataSetupUtil {
 
     public static void deleteAuth0User(GeneratedTestData generatedTestData) throws Auth0Exception {
         String auth0domain = auth0Config.getString(ConfigFile.DOMAIN);
-        String mgmtClientId = auth0Config.getString(AUTH0_MGMT_API_CLIENT_ID);
-        String mgmtSecret = auth0Config.getString(AUTH0_MGMT_API_CLIENT_SECRET);
+        String mgmtClientId = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID);
+        String mgmtSecret = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET);
 
         TestingUserUtil.deleteTestUser(generatedTestData.getTestingUser().getAuth0UserId(),
                 auth0domain,

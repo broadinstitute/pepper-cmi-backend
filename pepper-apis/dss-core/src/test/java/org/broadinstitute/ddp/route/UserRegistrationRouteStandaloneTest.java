@@ -406,7 +406,8 @@ public class UserRegistrationRouteStandaloneTest extends IntegrationTestSuite.Te
             String auth0Domain = auth0Cfg.getString(ConfigFile.Auth0Testing.AUTH0_DOMAIN2);
             String mgmtClientId = auth0Cfg.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID2);
             String mgmtSecret = auth0Cfg.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET2);
-            return TestDataSetupUtil.generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret);
+
+            return TestDataSetupUtil.generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret, Collections.singletonList(mgmtClientId));
         });
 
         UserRegistrationPayload payload = new UserRegistrationPayload(auth0UserId, auth0ClientId,
