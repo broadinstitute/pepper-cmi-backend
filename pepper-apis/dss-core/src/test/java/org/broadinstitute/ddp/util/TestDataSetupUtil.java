@@ -206,6 +206,7 @@ public class TestDataSetupUtil {
                         auth0Domain,
                         auth0clientId,
                         AesUtil.encrypt(auth0Secret, EncryptionKey.getEncryptionKey())));
+                handle.attach(JdbiClientUmbrellaStudy.class).insert(clientId, study.get().getId());
             } else {
                 // Just grant access to generated study.
                 clientId = studyClientConfiguration.get().getClientId();
