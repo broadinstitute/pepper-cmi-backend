@@ -612,7 +612,7 @@ public class Auth0ManagementClient {
         });
     }
 
-    private <B, E> ApiResult<B, E> withRetries(String retryMessage, Supplier<ApiResult<B, E>> callback) {
+    public <B, E> ApiResult<B, E> withRetries(String retryMessage, Supplier<ApiResult<B, E>> callback) {
         ApiResult<B, E> res = null;
         int numTries = 0;
         int maxTries = maxRetries + 1;

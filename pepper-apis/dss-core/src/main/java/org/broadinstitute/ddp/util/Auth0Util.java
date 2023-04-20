@@ -467,23 +467,37 @@ public class Auth0Util {
     }
 
     public static <T> T retryIfRateLimited(com.auth0.net.Request<T> req) throws Auth0Exception {
-        try {
-            return req.execute();
-        } catch (APIException e) {
-            if (e.getStatusCode() == 429) {
-                long sleepTime = DEFAULT_RETRY_TIMEOUT;
-                if (e instanceof RateLimitException) {
-                    // if there's a hint from auth0 for how long to wait, use it
-                    RateLimitException rateLimit = (RateLimitException)e;
-                    sleepTime = rateLimit.getReset() - System.currentTimeMillis();
-                }
-                log.warn("Pausing for retry for " + sleepTime + " after hitting rate limit.");
-                sleepBeforeRetry(sleepTime);
+        boolean retryingDueToWait = false;
+        final int maxRetries = 5;
+        int retryCount = 0;
+
+        while ((retryingDueToWait && retryCount < maxRetries) || retryCount == 0) {
+            try {
                 return req.execute();
-            } else {
-                throw e;
+            } catch (APIException e) {
+                if (e.getStatusCode() == 429) {
+                    long sleepTime = DEFAULT_RETRY_TIMEOUT;
+                    if (e instanceof RateLimitException) {
+                        // if there's a hint from auth0 for how long to wait, use it
+                        RateLimitException rateLimit = (RateLimitException) e;
+                        sleepTime = rateLimit.getReset() - System.currentTimeMillis();
+                        if (sleepTime < 0) {
+                            log.warn("Current time {} and rate limit time {} imply a negative wait time.", System.currentTimeMillis(), rateLimit.getReset());
+                            sleepTime = DEFAULT_RETRY_TIMEOUT;
+                        }
+                        retryingDueToWait = true;
+                    } else {
+                        retryingDueToWait = false;
+                    }
+                    log.warn("Pausing for retry for " + sleepTime + " after hitting rate limit.");
+                    sleepBeforeRetry(sleepTime);
+                } else {
+                    throw e;
+                }
             }
+            retryCount++;
         }
+        throw new DDPException("Could not perform auth0 operation");
     }
 
     /**

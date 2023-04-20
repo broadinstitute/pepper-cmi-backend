@@ -5,10 +5,12 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.typesafe.config.Config;
 import io.restassured.RestAssured;
 import okhttp3.HttpUrl;
 import org.apache.http.HttpEntity;
@@ -17,6 +19,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.fluent.Response;
 import org.apache.http.util.EntityUtils;
 import org.broadinstitute.ddp.cache.LanguageStore;
+import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.ErrorCodes;
 import org.broadinstitute.ddp.constants.RouteConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
@@ -25,6 +28,7 @@ import org.broadinstitute.ddp.db.dao.JdbiUmbrellaStudyI18n;
 import org.broadinstitute.ddp.db.dao.JdbiUserStudyEnrollment;
 import org.broadinstitute.ddp.db.dto.StudyDto;
 import org.broadinstitute.ddp.json.errors.ApiError;
+import org.broadinstitute.ddp.model.address.OLCPrecision;
 import org.broadinstitute.ddp.model.study.EnrollmentStatusCount;
 import org.broadinstitute.ddp.model.study.StudySummary;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
@@ -43,6 +47,7 @@ public class GetStudiesRouteTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void beforeClass() {
+        Config cfg = RouteTestUtil.getConfig();
         gson = new Gson();
         testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
@@ -57,6 +62,14 @@ public class GetStudiesRouteTest extends IntegrationTestSuite.TestCase {
                             handle.attach(JdbiUserStudyEnrollment.class).findByStudyGuid(studyDtos.get(0).getGuid())
                     )
             );
+
+            Config auth0Config = cfg.getConfig(ConfigFile.AUTH0);
+            String auth0Domain = auth0Config.getString(ConfigFile.DOMAIN);
+            String mgmtClientId = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID);
+            String mgmtSecret = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET);
+            String clientId = auth0Config.getString(ConfigFile.Auth0Testing.AUTH0_CLIENT_ID);
+            studyDtos.add(TestDataSetupUtil.generateTestStudy(handle, auth0Domain, mgmtClientId, mgmtSecret,
+                    OLCPrecision.MEDIUM, true, testData.getTestingStudy().getUmbrellaId(), Collections.singletonList(clientId)));
             enrollmentStatusCounts.add(new EnrollmentStatusCount(0, 0));
         });
     }
