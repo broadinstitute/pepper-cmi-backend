@@ -26,7 +26,7 @@ import org.junit.runners.Suite;
         SendEmailRouteStandaloneTest.class,
         UserActivityInstanceListRouteStandaloneTest.class,
         UserRegistrationRouteStandaloneTest.class,
-        GetStudiesRouteTest.class,
+        GetStudiesRouteTest.class, // todo arz consider moving this back to integration test
         AdminLookupInvitationRouteTest.class,
         GetMailAddressInfoRouteTest.class,
         GetWorkflowRouteTest.class
