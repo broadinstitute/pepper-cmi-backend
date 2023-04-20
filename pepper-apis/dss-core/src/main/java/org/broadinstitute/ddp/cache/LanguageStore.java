@@ -64,4 +64,8 @@ public class LanguageStore {
     private LanguageStore() {
         // Not constructable.
     }
+
+    public static boolean isEmpty() {
+        return languages.isEmpty();
+    }
 }

@@ -262,6 +262,9 @@ public class TestDataSetupUtil {
         Config cfg = ConfigManager.getInstance().getConfig();
         String testUmbrellaName = "test-umbrella";
         TransactionWrapper.useTxn(handle -> {
+            if (LanguageStore.isEmpty()) {
+                LanguageStore.init(handle);
+            }
             Auth0TenantDto testTenant =  insertTestingTenant(handle, cfg.getConfig(ConfigFile.AUTH0));
             JdbiUmbrella umbrellaDao = handle.attach(JdbiUmbrella.class);
             JdbiUmbrellaStudy studyDao = handle.attach(JdbiUmbrellaStudy.class);
