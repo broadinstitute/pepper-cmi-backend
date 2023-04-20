@@ -18,7 +18,7 @@ public interface JdbiClientUmbrellaStudy extends SqlObject {
     /**
      * Upserts a row if it doesn't exist
      */
-    @SqlUpdate("upsert into client__umbrella_study(client_id,umbrella_study_id)\n"
+    @SqlUpdate("insert into client__umbrella_study(client_id,umbrella_study_id)\n"
             + " (select c.client_id, s.umbrella_study_id\n"
             + " from client c, umbrella_study s\n"
             + " where c.auth0_client_id = :auth0ClientId and s.guid = :studyGuid)\n"
