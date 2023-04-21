@@ -61,7 +61,7 @@ public class GetDsmReleasePdfRouteTest extends DsmRouteTest {
                 pdfFilename,
                 answerText
         );
-        secondStudy = TestDataSetupUtil.generateBasicUserTestData(true);
+        secondStudy = TestDataSetupUtil.generateBasicUserTestData();
 
         TransactionWrapper.useTxn(handle -> {
             assertEquals(1, handle.createUpdate("update user set legacy_altpid = :legacyAltPid where guid = :guid")
