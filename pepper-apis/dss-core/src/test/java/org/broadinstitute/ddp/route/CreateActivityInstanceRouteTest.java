@@ -67,7 +67,7 @@ public class CreateActivityInstanceRouteTest extends IntegrationTestSuite.TestCa
 
     @BeforeClass
     public static void setup() {
-        testData = TestDataSetupUtil.generateBasicUserTestData(true);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
             String endpoint = RouteConstants.API.USER_ACTIVITIES
                     .replace(RouteConstants.PathParam.USER_GUID, testData.getUserGuid())
