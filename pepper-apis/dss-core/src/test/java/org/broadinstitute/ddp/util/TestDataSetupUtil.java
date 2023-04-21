@@ -387,15 +387,6 @@ public class TestDataSetupUtil {
                 auth0Secret, studyGuid);
     }
 
-    public static Auth0Util.TestingUser generateTestUser(Handle handle, String studyGuid) throws Auth0Exception {
-        String backendTestAuth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
-        String backendTestSecret = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_SECRET);
-        String backendTestClientName = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_NAME);
-        String auth0domain = auth0Config.getString(ConfigFile.DOMAIN);
-
-        return generateTestUser(handle, auth0domain, backendTestClientName, backendTestAuth0ClientId, backendTestSecret, studyGuid);
-    }
-
     /**
      * Creates a profile for this user
      */

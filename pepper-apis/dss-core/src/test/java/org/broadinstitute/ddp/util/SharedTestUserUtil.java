@@ -109,8 +109,6 @@ public class SharedTestUserUtil {
             return createNewTestUser(null);
         });
     }
-
-    // todo arz separate table to coordinate locking across vms when setting up test users
     private SharedTestUser createNewTestUser(String testUserEmail) {
         Config auth0Config = configManager.getConfig().getConfig("auth0");
         String auth0ClientId = auth0Config.getString(ConfigFile.BACKEND_AUTH0_TEST_CLIENT_ID);
