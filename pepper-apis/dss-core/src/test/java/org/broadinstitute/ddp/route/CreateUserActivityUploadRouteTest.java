@@ -34,7 +34,7 @@ public class CreateUserActivityUploadRouteTest extends IntegrationTestSuite.Test
 
     @BeforeClass
     public static void setup() {
-        testData = TestDataSetupUtil.generateBasicUserTestData(true);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
 
         TransactionWrapper.useTxn(handle -> {
             token = testData.getTestingUser().getToken();
