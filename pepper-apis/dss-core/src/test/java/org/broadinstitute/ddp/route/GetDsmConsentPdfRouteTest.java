@@ -65,8 +65,8 @@ public class GetDsmConsentPdfRouteTest extends DsmRouteTest {
         );
 
         // todo arz should these create new users?
-        secondStudy = TestDataSetupUtil.generateBasicUserTestData(true);
-        thirdStudy = TestDataSetupUtil.generateBasicUserTestData(true);
+        secondStudy = TestDataSetupUtil.generateBasicUserTestData();
+        thirdStudy = TestDataSetupUtil.generateBasicUserTestData();
 
         TransactionWrapper.useTxn(handle -> {
             assertEquals(1, handle.createUpdate("update user set legacy_altpid = :legacyAltPid where guid = :guid")
