@@ -48,7 +48,7 @@ public class PostMedicalProviderRouteTest extends IntegrationTestSuite.TestCase 
 
     @BeforeClass
     public static void setup() {
-        testData = TestDataSetupUtil.generateBasicUserTestData(true);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         token = testData.getTestingUser().getToken();
         url = RouteTestUtil.getTestingBaseUrl() + API.USER_MEDICAL_PROVIDERS;
     }
