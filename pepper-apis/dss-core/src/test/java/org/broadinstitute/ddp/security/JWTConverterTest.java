@@ -22,7 +22,7 @@ public class JWTConverterTest extends IntegrationTestSuite.TestCase {
 
     @BeforeClass
     public static void setup() {
-        testData = TestDataSetupUtil.generateBasicUserTestData();
+        testData = TestDataSetupUtil.generateBasicUserTestData(true);
         token = testData.getTestingUser().getToken();
         auth0Config = RouteTestUtil.getConfig().getConfig(ConfigFile.AUTH0);
     }

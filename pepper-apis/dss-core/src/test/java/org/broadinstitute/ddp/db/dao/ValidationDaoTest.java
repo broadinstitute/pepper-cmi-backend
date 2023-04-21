@@ -60,7 +60,7 @@ public class ValidationDaoTest extends TxnAwareBaseTest {
 
     @BeforeClass
     public static void setup() {
-        testData = TestDataSetupUtil.generateBasicUserTestData(true);
+        testData = TestDataSetupUtil.generateBasicUserTestData();
         TransactionWrapper.useTxn(handle -> {
             userGuid = testData.getTestingUser().getUserGuid();
             studyGuid = testData.getStudyGuid();
