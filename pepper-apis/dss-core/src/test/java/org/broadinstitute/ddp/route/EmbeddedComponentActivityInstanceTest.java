@@ -141,7 +141,7 @@ public class EmbeddedComponentActivityInstanceTest extends IntegrationTestSuite.
 
     @BeforeClass
     public static void setUp() {
-        testData = TestDataSetupUtil.generateBasicUserTestData();
+        testData = TestDataSetupUtil.generateBasicUserTestData(true);
         TransactionWrapper.useTxn(handle -> {
             FormActivityDef testForm = setupTestActivityWithEmbeddedComponents(handle, testData.getStudyGuid());
 
