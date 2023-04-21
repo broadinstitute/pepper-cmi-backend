@@ -65,7 +65,7 @@ public class AdminCreateUserLoginAccountRouteTest extends TxnAwareBaseTest {
         urlTemplate = "http://localhost:" + port + RouteConstants.API.ADMIN_STUDY_USER_LOGIN_ACCOUNT
                 .replace(RouteConstants.PathParam.STUDY_GUID, "{study}")
                 .replace(RouteConstants.PathParam.USER_GUID, "{user}");
-        testData = TestDataSetupUtil.generateBasicUserTestData();
+        testData = TestDataSetupUtil.generateBasicUserTestData(true);
         TransactionWrapper.useTxn(handle -> {
             handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
             handle.attach(JdbiClient.class).updateWebPasswordRedirectUrlByAuth0ClientIdAndAuth0Domain(
