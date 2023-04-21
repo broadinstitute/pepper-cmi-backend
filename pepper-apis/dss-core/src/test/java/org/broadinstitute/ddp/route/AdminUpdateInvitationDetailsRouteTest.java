@@ -13,6 +13,7 @@ import org.broadinstitute.ddp.db.dao.InvitationSql;
 import org.broadinstitute.ddp.json.admin.UpdateInvitationDetailsPayload;
 import org.broadinstitute.ddp.util.TestDataSetupUtil;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,10 +27,11 @@ public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.
         urlTemplate = RouteTestUtil.getTestingBaseUrl() + RouteConstants.API.ADMIN_STUDY_INVITATION_DETAILS
                 .replace(RouteConstants.PathParam.STUDY_GUID, "{study}");
         testData = TestDataSetupUtil.generateBasicUserTestData();
+    }
 
-        TransactionWrapper.useTxn(handle -> {
-            handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
-        });
+    @Before
+    public void makeTestUserAnAdminForTestStudy() {
+        TransactionWrapper.useTxn(handle -> handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId()));
     }
 
     @AfterClass
@@ -44,13 +46,17 @@ public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.
         TransactionWrapper.useTxn(handle -> {
             handle.attach(AuthDao.class).removeAdminFromStudy(testData.getUserId(), testData.getStudyId());
         });
-        var payload = new UpdateInvitationDetailsPayload("foobar", "notes notes");
-        given().auth().oauth2(testData.getTestingUser().getToken())
-                .pathParam("study", testData.getStudyGuid())
-                .body(payload, ObjectMapperType.GSON)
-                .when().patch(urlTemplate)
-                .then().assertThat()
-                .statusCode(401);
+        try {
+            var payload = new UpdateInvitationDetailsPayload("foobar", "notes notes");
+            given().auth().oauth2(testData.getTestingUser().getToken())
+                    .pathParam("study", testData.getStudyGuid())
+                    .body(payload, ObjectMapperType.GSON)
+                    .when().patch(urlTemplate)
+                    .then().assertThat()
+                    .statusCode(401);
+        } finally {
+            TransactionWrapper.useTxn(handle -> handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId()));
+        }
     }
 
     @Test
@@ -66,8 +72,7 @@ public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.
 
     @Test
     public void testNotesAreUpdated() {
-        var invitation = TransactionWrapper.withTxn(handle -> handle.attach(InvitationFactory.class)
-                .createRecruitmentInvitation(testData.getStudyId(), "invite" + System.currentTimeMillis()));
+        var invitation = TransactionWrapper.withTxn(handle -> handle.attach(InvitationFactory.class).createRecruitmentInvitation(testData.getStudyId(), "invite" + System.currentTimeMillis()));
         try {
             var payload = new UpdateInvitationDetailsPayload(invitation.getInvitationGuid(), "notes notes");
             given().auth().oauth2(testData.getTestingUser().getToken())
@@ -76,15 +81,14 @@ public class AdminUpdateInvitationDetailsRouteTest extends IntegrationTestSuite.
                     .when().post(urlTemplate)
                     .then().assertThat()
                     .statusCode(200);
+            // todo arz user in url does not have admin access, 
             TransactionWrapper.useTxn(handle -> {
-                var actual = handle.attach(InvitationDao.class)
-                        .findByInvitationGuid(testData.getStudyId(), invitation.getInvitationGuid());
+                var actual = handle.attach(InvitationDao.class).findByInvitationGuid(testData.getStudyId(), invitation.getInvitationGuid());
                 assertEquals("notes notes", actual.get().getNotes());
             });
         } finally {
             if (invitation != null) {
-                TransactionWrapper.useTxn(handle -> handle.attach(InvitationSql.class)
-                        .deleteById(invitation.getInvitationId()));
+                TransactionWrapper.useTxn(handle -> handle.attach(InvitationSql.class).deleteById(invitation.getInvitationId()));
             }
         }
     }
