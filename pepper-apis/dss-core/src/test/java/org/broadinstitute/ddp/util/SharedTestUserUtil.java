@@ -255,7 +255,10 @@ public class SharedTestUserUtil {
                     if (!userGuid.equals(auth0AppMetadataUserGuid)) {
                         // if the auth0 test user already exists, skip creating it.  auth0 js rule can resolve
                         // the same user with different clients, but for parallel tests, the client is the same
-                        throw new DDPException("Auth0 test user " + auth0User.get().getId() + " can't be different user guids "
+
+                        // todo arz how to create a partitioning in auth0 app metadata not just for client but for
+                        // groups generated at runtime, like per VM, to allow parallel tests without overwhelming auth0?
+                        throw new DDPException("Auth0 test user " + auth0User.get().getId() + " can't use different user guids "
                                 + userGuid + " and " + auth0AppMetadataUserGuid + ".  Expect other tests to fail with authz errors or user id/guid mismatch errors."
                                 + " If this is happening in circleCI, try reducing the test_parallelism setting in the yml files.");
                     }
