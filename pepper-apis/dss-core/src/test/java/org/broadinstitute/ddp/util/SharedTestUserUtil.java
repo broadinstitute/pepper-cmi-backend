@@ -181,6 +181,7 @@ public class SharedTestUserUtil {
         AtomicReference<String> existingUserGuid = new AtomicReference<>();
         var mgmtClient = new Auth0ManagementClient(auth0Domain, mgmtClientId, mgmtClientSecret);
         AtomicBoolean shouldCreateUser = new AtomicBoolean(true);
+        AtomicBoolean shouldCreateAuth0User = new AtomicBoolean(true);
         ApiResult<User, APIException> existingAuth0User = mgmtClient.getAuth0UserByEmail(userEmail.get());
         if (!existingAuth0User.hasFailure()) {
             if (existingAuth0User.hasBody()) {
@@ -188,6 +189,7 @@ public class SharedTestUserUtil {
                 if (auth0User.get().getAppMetadata() != null) {
                     existingUserGuid.set(auth0User.get().getAppMetadata().get(AUTH0_TEST_USER_GUID_FIELD).toString());
                 }
+                shouldCreateAuth0User.set(false);
             }
         } else {
             throw new DDPException("Could not query auth0 user " + userEmail + ": " + existingAuth0User.getError(),
@@ -224,26 +226,41 @@ public class SharedTestUserUtil {
             String userGuid = GuidUtils.randomUserGuid();
             String userHruid = GuidUtils.randomUserHruid();
             AtomicLong testUserId = new AtomicLong();
-            log.info("Creating new test user " + testUserEmail + " with guid " + userGuid);
-            ApiResult<User, APIException> createdUser = mgmtClient.createAuth0User(
-                    Auth0ManagementClient.DEFAULT_DB_CONN_NAME, userEmail.get(), testUserPassword);
-            if (createdUser.hasFailure()) {
-                if (createdUser.getError() != null && createdUser.getError().getStatusCode() == 409) {
-                    // try to query by username.  we might have the user in auth0 but have the wrong auth0 user id
-                    log.info("User " + userEmail + " already exists.  Will query by username.");
-                    createdUser = mgmtClient.getAuth0UserByEmail(userEmail.get());
-                    if (createdUser.hasFailure()) {
+
+            if (shouldCreateAuth0User.get()) {
+                log.info("Creating new test user " + testUserEmail + " with guid " + userGuid);
+                ApiResult<User, APIException> createdUser = mgmtClient.createAuth0User(
+                        Auth0ManagementClient.DEFAULT_DB_CONN_NAME, userEmail.get(), testUserPassword);
+                if (createdUser.hasFailure()) {
+                    if (createdUser.getError() != null && createdUser.getError().getStatusCode() == 409) {
+                        // try to query by username.  we might have the user in auth0 but have the wrong auth0 user id
+                        log.info("User " + userEmail + " already exists.  Will query by username.");
+                        createdUser = mgmtClient.getAuth0UserByEmail(userEmail.get());
+                        if (createdUser.hasFailure()) {
+                            throw new DDPException("Could not find test user " + userEmail + " in auth0",
+                                    createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
+                        }
+                    } else {
                         throw new DDPException("Could not find test user " + userEmail + " in auth0",
                                 createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
                     }
-                } else {
-                    throw new DDPException("Could not find test user " + userEmail + " in auth0",
-                            createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
+                }
+                log.info("Created new test auth0 user " + createdUser.getBody().getId() + " for user guid "
+                        + userGuid);
+                auth0User.set(createdUser.getBody());
+            } else {
+                log.info("Test user {} already exists in auth0.  Querying to see if it clashes with another test in a different parallel test.", auth0User.get().getId());
+                if (auth0User.get().getAppMetadata() != null && auth0User.get().getAppMetadata().containsKey(AUTH0_TEST_USER_GUID_FIELD)) {
+                    String auth0AppMetadataUserGuid = auth0User.get().getAppMetadata().get(AUTH0_TEST_USER_GUID_FIELD).toString();
+                    if (!userGuid.equals(auth0AppMetadataUserGuid)) {
+                        // if the auth0 test user already exists, skip creating it.  auth0 js rule can resolve
+                        // the same user with different clients, but for parallel tests, the client is the same
+                        throw new DDPException("Auth0 test user " + auth0User.get().getId() + " can't be different user guids "
+                                + userGuid + " and " + auth0AppMetadataUserGuid + ".  Expect other tests to fail with authz errors or user id/guid mismatch errors."
+                                + " If this is happening in circleCI, try reducing the test_parallelism setting in the yml files.");
+                    }
                 }
             }
-            log.info("Created new test auth0 user " + createdUser.getBody().getId() + " for user guid "
-                    + userGuid);
-            auth0User.set(createdUser.getBody());
 
             TransactionWrapper.useTxn(handle -> {
                 JdbiUser userDao = handle.attach(JdbiUser.class);

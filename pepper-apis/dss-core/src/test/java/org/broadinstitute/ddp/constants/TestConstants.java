@@ -18,7 +18,6 @@ public class TestConstants {
 
     public static final String TEST_STUDY_GUID = "TESTSTUDY1";
     public static final String SECOND_STUDY_GUID = "TESTSTUDY2";
-    public static final String TEST_ADMIN_GUID = "CA390377Y7D18X4CB2SS";
 
     // Some profile info for our test user
     public static final String TEST_USER_PROFILE_FIRST_NAME = "Grace";
