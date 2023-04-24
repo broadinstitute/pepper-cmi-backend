@@ -5,10 +5,8 @@ package org.broadinstitute.ddp;
  */
 public class ConfigFile {
 
-    public static final String BASE_URL = "baseUrl";
     public static final String ANGIO_URL = "angioUrl";
     public static final String BRAIN_URL = "brainUrl";
-    public static final String AUTH0_URL_TEMPLATE = "auth0UrlTemplate";
     public static final String TEST_USER = "testUser";
     public static final String TEST_USER_PASSWORD = "testUserPassword";
     public static final String SOCIAL_MEDIA_USER = "socialTestEmail";

@@ -108,7 +108,7 @@ class UserLoader {
         ArrayUtils.shuffle(chars, PW_RANDOMIZER);
         String randomPassword = new String(chars);
 
-        var result = mgmtClient.createAuth0User(connection, email, randomPassword, true);
+        var result = mgmtClient.createAuth0User(connection, email, randomPassword, true, null);
         if (result.hasThrown()) {
             throw new LoaderException("Error while creating auth0 account for email: " + email, result.getThrown());
         } else if (result.hasError()) {

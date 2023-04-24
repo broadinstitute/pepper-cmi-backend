@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.ddp.client.ApiResult;
 import org.broadinstitute.ddp.client.Auth0ManagementClient;
-import org.broadinstitute.ddp.constants.Auth0Constants;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.constants.TestConstants;
 import org.broadinstitute.ddp.db.TransactionWrapper;
@@ -30,7 +29,6 @@ import org.broadinstitute.ddp.model.user.UserProfile;
 import org.broadinstitute.ddp.security.AesUtil;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,7 +37,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_ID;
 import static org.broadinstitute.ddp.constants.ConfigFile.Auth0Testing.AUTH0_MGMT_API_CLIENT_SECRET;
-import static org.broadinstitute.ddp.constants.TestConstants.AUTH0_TEST_USER_GUID_FIELD;
 
 @Slf4j
 public class SharedTestUserUtil {
@@ -52,8 +49,11 @@ public class SharedTestUserUtil {
 
     private final ConfigManager configManager;
 
+    private final String uniqueIdForPartitioningParallelTestsInAuth0;
+
     private SharedTestUserUtil(ConfigManager configManager) {
         this.configManager = configManager;
+        this.uniqueIdForPartitioningParallelTestsInAuth0 = GuidUtils.randomStringFromDictionary(GuidUtils.UPPER_ALPHA_NUMERIC, 12);
     }
 
     /**
@@ -187,7 +187,7 @@ public class SharedTestUserUtil {
             if (existingAuth0User.hasBody()) {
                 auth0User.set(existingAuth0User.getBody());
                 if (auth0User.get().getAppMetadata() != null) {
-                    existingUserGuid.set(auth0User.get().getAppMetadata().get(AUTH0_TEST_USER_GUID_FIELD).toString());
+                    existingUserGuid.set(Auth0Util.getTestUserGuidFromParallelTestMap(auth0User.get(), uniqueIdForPartitioningParallelTestsInAuth0));
                 }
                 shouldCreateAuth0User.set(false);
             }
@@ -229,40 +229,19 @@ public class SharedTestUserUtil {
 
             if (shouldCreateAuth0User.get()) {
                 log.info("Creating new test user " + testUserEmail + " with guid " + userGuid);
-                ApiResult<User, APIException> createdUser = mgmtClient.createAuth0User(
-                        Auth0ManagementClient.DEFAULT_DB_CONN_NAME, userEmail.get(), testUserPassword);
+
+                Map<String, Object> userAppMetadata = Auth0Util.newAuth0GuidsForParallelTestMap(uniqueIdForPartitioningParallelTestsInAuth0, userGuid);
+                ApiResult<User, APIException> createdUser = mgmtClient.createAuth0User(Auth0ManagementClient.DEFAULT_DB_CONN_NAME, userEmail.get(), testUserPassword, null, userAppMetadata);
                 if (createdUser.hasFailure()) {
-                    if (createdUser.getError() != null && createdUser.getError().getStatusCode() == 409) {
-                        // try to query by username.  we might have the user in auth0 but have the wrong auth0 user id
-                        log.info("User " + userEmail + " already exists.  Will query by username.");
-                        createdUser = mgmtClient.getAuth0UserByEmail(userEmail.get());
-                        if (createdUser.hasFailure()) {
-                            throw new DDPException("Could not find test user " + userEmail + " in auth0",
-                                    createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
-                        }
-                    } else {
-                        throw new DDPException("Could not find test user " + userEmail + " in auth0",
-                                createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
-                    }
+                    throw new DDPException("Error creating test user " + userEmail + " in auth0", createdUser.hasThrown() ? createdUser.getThrown() : createdUser.getError());
                 }
                 log.info("Created new test auth0 user " + createdUser.getBody().getId() + " for user guid "
                         + userGuid);
                 auth0User.set(createdUser.getBody());
             } else {
-                log.info("Test user {} already exists in auth0.  Querying to see if it clashes with another test in a different parallel test.", auth0User.get().getId());
-                if (auth0User.get().getAppMetadata() != null && auth0User.get().getAppMetadata().containsKey(AUTH0_TEST_USER_GUID_FIELD)) {
-                    String auth0AppMetadataUserGuid = auth0User.get().getAppMetadata().get(AUTH0_TEST_USER_GUID_FIELD).toString();
-                    if (!userGuid.equals(auth0AppMetadataUserGuid)) {
-                        // if the auth0 test user already exists, skip creating it.  auth0 js rule can resolve
-                        // the same user with different clients, but for parallel tests, the client is the same
-
-                        // todo arz how to create a partitioning in auth0 app metadata not just for client but for
-                        // groups generated at runtime, like per VM, to allow parallel tests without overwhelming auth0?
-                        throw new DDPException("Auth0 test user " + auth0User.get().getId() + " can't use different user guids "
-                                + userGuid + " and " + auth0AppMetadataUserGuid + ".  Expect other tests to fail with authz errors or user id/guid mismatch errors."
-                                + " If this is happening in circleCI, try reducing the test_parallelism setting in the yml files.");
-                    }
-                }
+                log.info("Test user {} already exists in auth0.  Updating to use guid {} for testing session{}.", auth0User.get().getId(), userGuid, uniqueIdForPartitioningParallelTestsInAuth0);
+                Map<String, Object> updatedAppMetadata = Auth0Util.createAppMetadataWithTestUserGuid(auth0User.get(), uniqueIdForPartitioningParallelTestsInAuth0, userGuid);
+                mgmtClient.updateUserAppMetadata(auth0User.get().getId(), updatedAppMetadata);
             }
 
             TransactionWrapper.useTxn(handle -> {
@@ -287,30 +266,6 @@ public class SharedTestUserUtil {
                         + " and db id " + testUserId);
                 user.set(userDao.findByUserId(testUserId.get()));
             });
-
-            Map<String, Object> auth0UserMetadata = new HashMap<>();
-            auth0UserMetadata.put(Auth0Constants.USER_METADATA_GUID_FIELD, userGuid);
-            auth0UserMetadata.put("test_jvm_user", jvmUser);
-
-            var result = mgmtClient.updateUserMetadata(auth0User.get().getId(), auth0UserMetadata);
-
-            if (result.hasThrown() || result.hasError()) {
-                var e = result.hasThrown() ? result.getThrown() : result.getError();
-                throw new DDPException("Could not update auth0 metadata for test user with auth0 id "
-                        + auth0User.get().getId() + " and guid " + userGuid, e);
-            }
-
-            Map<String, Object> auth0UserAppMetadata = new HashMap<>();
-            auth0UserAppMetadata.put(AUTH0_TEST_USER_GUID_FIELD, userGuid);
-            result = mgmtClient.updateUserAppMetadata(auth0User.get().getId(), auth0UserAppMetadata);
-
-            if (result.hasThrown() || result.hasError()) {
-                var e = result.hasThrown() ? result.getThrown() : result.getError();
-                throw new DDPException("Could not update auth0 app metadata for test user with auth0 id "
-                        + auth0User.get().getId() + " and guid " + userGuid, e);
-            }
-            log.info("Updated auth0 test user " + auth0User.get().getId() + " metadata to reference guid "
-                    + userGuid);
         }
 
         testUser = new SharedTestUser(user.get().getUserId(), userEmail.get(), testUserPassword, user.get().getUserGuid(),

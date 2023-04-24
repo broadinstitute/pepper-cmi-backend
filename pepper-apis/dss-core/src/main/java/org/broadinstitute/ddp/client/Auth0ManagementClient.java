@@ -325,9 +325,10 @@ public class Auth0ManagementClient {
      * @param email         the user's email
      * @param password      the user's password
      * @param emailVerified optional, if non-null then set email verified
+     * @param userAppMetadata option, if non-null then this sets the user's app_metadata field
      * @return result with created user, or error response
      */
-    public ApiResult<User, APIException> createAuth0User(String connection, String email, String password, Boolean emailVerified) {
+    public ApiResult<User, APIException> createAuth0User(String connection, String email, String password, Boolean emailVerified, Map<String, Object> userAppMetadata) {
         String msg = String.format(
                 "Hit rate limit while creating auth0 user with email %s in connection %s, retrying",
                 email, connection);
@@ -338,6 +339,11 @@ public class Auth0ManagementClient {
                 user.setEmail(email);
                 user.setPassword(password);
                 user.setConnection(connection);
+                if (userAppMetadata != null) {
+                    user.setAppMetadata(userAppMetadata);
+                } else {
+                    user.setAppMetadata(new HashMap<>());
+                }
                 if (emailVerified != null) {
                     user.setEmailVerified(emailVerified);
                 }
@@ -352,8 +358,14 @@ public class Auth0ManagementClient {
     }
 
     public ApiResult<User, APIException> createAuth0User(String connection, String email, String password) {
-        return createAuth0User(connection, email, password, null);
+        return createAuth0User(connection, email, password, null, null);
     }
+
+    public ApiResult<User, APIException> createAuth0User(String connection, String email, String password, Map<String, Object> userAppMetadata) {
+        return createAuth0User(connection, email, password, null, userAppMetadata);
+    }
+
+
 
     /**
      * Fetch the auth0 user. Will retry a few times if hit rate limit.
