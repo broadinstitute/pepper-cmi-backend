@@ -58,14 +58,6 @@ public class Auth0Util {
     // map of cached jwk providers so we don't hammer auth0
     private static final Map<String, JwkProvider> jwkProviderMap = new HashMap<>();
 
-    /**
-     * Maps between a unique id for a batch of tests and
-     * a guid so that a single auth0 user id can be shared
-     * across different pepper instances during parallel tests.
-     */
-    public static final String AUTH0_GUIDS_FOR_PARALLEL_TESTS = "parallel_test_user_guids";
-
-
     public Auth0Util(String baseUrl) {
         this.baseUrl = baseUrl;
     }
@@ -120,57 +112,6 @@ public class Auth0Util {
             log.warn("Attempt to verify auth0 user: {} by user credentials failed with error: {}", userGuid, e);
         }
         return isValid;
-    }
-
-    public static Map<String, Object> createAppMetadataWithTestUserGuid(User user, String jvmId, String testUserGuid) {
-        Map<String, Object> updatedAppMetadata = new HashMap<>();
-        if (user.getAppMetadata() != null) {
-            updatedAppMetadata = newUserAppMetadata(jvmId, testUserGuid);
-        } else {
-            if (!updatedAppMetadata.containsKey(AUTH0_GUIDS_FOR_PARALLEL_TESTS)) {
-                updatedAppMetadata.put(AUTH0_GUIDS_FOR_PARALLEL_TESTS, newAuth0GuidsForParallelTestMap(jvmId, testUserGuid));
-            } else {
-                Map parallelTestGuidMap = (Map) updatedAppMetadata.get(AUTH0_GUIDS_FOR_PARALLEL_TESTS);
-                if (parallelTestGuidMap.containsKey(jvmId)) {
-                    String testGuidInAuth0Map = parallelTestGuidMap.get(jvmId).toString();
-                    if (!testGuidInAuth0Map.equals(testUserGuid)) {
-                        String errorMesssage = "Auth0 test user " + user.getId() + " can't use different user guids "
-                                + testGuidInAuth0Map + " and " + testUserGuid + ".  Expect other tests to fail with authz errors or user id/guid mismatch errors."
-                                + " This should be an extremely rare occurrence since each test session makes its own random id.";
-                        log.error(errorMesssage);
-                        throw new DDPException(errorMesssage);
-                    }
-                } else {
-                    ((Map) updatedAppMetadata.get(AUTH0_GUIDS_FOR_PARALLEL_TESTS)).put(jvmId, testUserGuid);
-                    return updatedAppMetadata;
-                }
-
-            }
-        }
-        return updatedAppMetadata;
-    }
-
-    public static String getTestUserGuidFromParallelTestMap(User user, String jvmId) {
-        String testUserGuid = null;
-        if (user.getAppMetadata() != null && user.getAppMetadata().containsKey(AUTH0_GUIDS_FOR_PARALLEL_TESTS)) {
-            Map auth0GuidsForParallTestMap = (Map)user.getAppMetadata().get(AUTH0_GUIDS_FOR_PARALLEL_TESTS);
-            if (auth0GuidsForParallTestMap.containsKey(jvmId)) {
-                testUserGuid = auth0GuidsForParallTestMap.get(jvmId).toString();
-            }
-        }
-        return testUserGuid;
-    }
-
-    public static Map<String, Object> newAuth0GuidsForParallelTestMap(String jvmId, String testUserGuid) {
-        Map<String, Object> parallelTestingGuidMap = new HashMap<>();
-        parallelTestingGuidMap.put(jvmId, testUserGuid);
-        return parallelTestingGuidMap;
-    }
-
-    public static Map<String, Object> newUserAppMetadata(String jvmId, String testUserGuid) {
-        Map<String, Object> userAppMetadata = new HashMap<>();
-        userAppMetadata.put(AUTH0_GUIDS_FOR_PARALLEL_TESTS, newAuth0GuidsForParallelTestMap(jvmId, testUserGuid));
-        return userAppMetadata;
     }
 
     private static boolean verifyAuth0UserCredentials(String auth0ClientId, String auth0Domain,
