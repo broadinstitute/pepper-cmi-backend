@@ -71,7 +71,7 @@ public class AdminLookupInvitationRouteTest extends IntegrationTestSuite.TestCas
                     .statusCode(401);
         } finally {
             TransactionWrapper.useTxn(handle -> {
-                handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getUserId());
+                handle.attach(AuthDao.class).assignStudyAdmin(testData.getUserId(), testData.getStudyId());
             });
         }
     }
