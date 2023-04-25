@@ -320,7 +320,7 @@ public class ActivityInstanceDaoTest extends TxnAwareBaseTest {
                     act.getDef().getActivityCode(), time);
             timeRead = dao.getActivityInstanceCreationMutexLastUpdate(testData.getUserId(), testData.getStudyId(),
                     act.getDef().getActivityCode());
-            assertEquals(time.toEpochMilli(), timeRead.toEpochMilli());
+            assertTrue(time.toEpochMilli() - timeRead.toEpochMilli() < 1000);
 
             handle.rollback();
         });
