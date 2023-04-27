@@ -1,0 +1,532 @@
+tenant:
+  default_directory: Username-Password-Authentication
+  friendly_name: "##TENANT_NAME##"
+
+  flags:
+    allow_legacy_tokeninfo_endpoint: false
+    enable_idtoken_api2: false
+    enable_legacy_profile: false
+    enable_public_signup_user_exists_error: true
+    dashboard_ui_next: true
+    disable_clickjack_protection_headers: true
+    include_email_in_reset_pwd_redirect: true
+    include_email_in_verify_email_redirect: true
+
+rules:
+  - name: Check Admin Role
+    script: ./rules/check-admin-role.js
+    stage: login_success
+    enabled: true
+    order: 1
+  - name: Register User in Pepper
+    script: ../register-user-in-pepper.js
+    stage: login_success
+    enabled: true
+    order: 2
+
+pages:
+  - name: login
+    html: ./pages/login.html
+    enabled: true
+  - name: password_reset
+    html: ./pages/password_reset.html
+    enabled: true
+
+emailProvider:
+  name: "sendgrid"
+  enabled: true
+  default_from_address: ##SENDGRID_EMAIL##
+  credentials:
+    api_key: ##SENDGRID_TOKEN##
+
+emailTemplates:
+  - template: reset_email
+    body: ./emails/change_password.html
+    from: Count Me In <info@joincountmein.org>
+    resultUrl: '##SERVER_BASE_URL##/pepper/v1/post-password-reset?clientId={{ application.clientID }}'
+    subject: >-
+      {% if client.client_metadata.study == "ANGIO" %} Angiosarcoma Project
+      {% elsif client.client_metadata.study == "cmi-brain" %} Brain Tumor Project
+      {% elsif client.client_metadata.study == "cmi-mbc" %} Metastatic Breast Cancer Project
+      {% elsif client.client_metadata.study == "CMI-OSTEO" %} Osteosarcoma Project
+      {% elsif client.client_metadata.study == "cmi-mpc" %} Metastatic Prostate Cancer Project
+      {% elsif client.client_metadata.study == "cmi-esc" %} Esophageal and Stomach Cancer Project
+      {% elsif client.client_metadata.study == "cmi-pancan" %} Count Me In
+      {% elsif client.client_metadata.study == "cmi-lms" %} Leiomyosarcoma Project
+      {% endif %} Password Reset
+    urlLifetimeInSeconds: 432000
+    syntax: liquid
+    enabled: true
+
+clients:
+  - name: dsm-angular-client
+    allowed_clients: []
+    allowed_origins:
+    ##DSM_ALLOWED_ORIGINS
+    app_type: regular_web
+    callbacks:
+    ##DSM_ALLOWED_CALLBACKS##
+    client_aliases: []
+    cross_origin_auth: false
+    custom_login_page_on: true
+    grant_types:
+      - authorization_code
+      - implicit
+      - refresh_token
+      - client_credentials
+      - password
+      - http://auth0.com/oauth/grant-type/password-realm
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 300
+      secret_encoded: false
+    native_social_login:
+      apple:
+        enabled: false
+      facebook:
+        enabled: false
+    oidc_conformant: false
+    refresh_token:
+      expiration_type: non-expiring
+      leeway: 0
+      infinite_token_lifetime: true
+      infinite_idle_token_lifetime: true
+      token_lifetime: 31557600
+      idle_token_lifetime: 2592000
+      rotation_type: non-rotating
+    sso_disabled: false
+    token_endpoint_auth_method: client_secret_post
+    web_origins:
+    ##DSM_WEB_ORIGINS##
+  - name: predeployment-testing
+    allowed_clients: []
+    allowed_logout_urls:
+    ##TESTING_LOGOUT_URLS##
+    allowed_origins: []
+    app_type: spa
+    callbacks:
+    ##TESTING_CALLBACKS##
+    client_metadata:
+      mockRegistration: 'true'
+    cross_origin_auth: false
+    custom_login_page_on: true
+    description: ''
+    grant_types:
+      - authorization_code
+      - http://auth0.com/oauth/grant-type/password-realm
+      - implicit
+      - password
+      - refresh_token
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    logo_uri: ''
+    oidc_conformant: true
+    refresh_token:
+      rotation_type: non-rotating
+      expiration_type: non-expiring
+    sso: true
+    sso_disabled: false
+    token_endpoint_auth_method: none
+    web_origins: []
+  - name: backend-testing
+    allowed_clients: []
+    allowed_logout_urls: []
+    allowed_origins: []
+    app_type: spa
+    callbacks:
+    ##TESTING_CALLBACKS##
+    client_metadata:
+      mockRegistration: 'true'
+    cross_origin_auth: false
+    custom_login_page_on: true
+    description: ''
+    grant_types:
+      - authorization_code
+      - http://auth0.com/oauth/grant-type/mfa-oob
+      - http://auth0.com/oauth/grant-type/mfa-otp
+      - http://auth0.com/oauth/grant-type/mfa-recovery-code
+      - http://auth0.com/oauth/grant-type/password-realm
+      - implicit
+      - password
+      - refresh_token
+    is_first_party: true
+    is_token_endpoint_ip_header_trusted: false
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+      secret_encoded: false
+    logo_uri: ''
+    oidc_conformant: true
+    refresh_token:
+      rotation_type: non-rotating
+      expiration_type: non-expiring
+    sso: true
+    sso_disabled: false
+    token_endpoint_auth_method: none
+    web_origins:
+    ##TESTING_WEB_ORIGINS##
+  - name: angio-angular-client
+    app_type: spa
+    callbacks: [
+      '##ANGIO_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##ANGIO_BASE_URL##',
+      '##ANGIO_BASE_URL##/error',
+      '##ANGIO_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##ANGIO_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: ANGIO
+      backendUrl: '##SERVER_BASE_URL##'
+
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+  - name: angio-admin-client
+    app_type: spa
+    callbacks: [
+      '##ANGIO_BASE_URL##/admin-login-landing'
+      ##LOCALHOST_ADMIN_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##ANGIO_BASE_URL##',
+      '##ANGIO_BASE_URL##/error',
+      '##ANGIO_BASE_URL##/admin-session-expired'
+      ##LOCALHOST_ADMIN_LOGOUTS##
+    ]
+    web_origins: [
+      '##ANGIO_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: ANGIO
+      isAdminClient: 'true'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+
+  - name: brain-angular-client
+    app_type: spa
+    callbacks: [
+      '##BRAIN_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##BRAIN_BASE_URL##',
+      '##BRAIN_BASE_URL##/error',
+      '##BRAIN_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##BRAIN_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-brain
+      backendUrl: '##SERVER_BASE_URL##'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+  - name: brain-admin-client
+    app_type: spa
+    callbacks: [
+      '##BRAIN_BASE_URL##/admin-login-landing'
+      ##LOCALHOST_ADMIN_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##BRAIN_BASE_URL##',
+      '##BRAIN_BASE_URL##/error',
+      '##BRAIN_BASE_URL##/admin-session-expired'
+      ##LOCALHOST_ADMIN_LOGOUTS##
+    ]
+    web_origins: [
+      '##BRAIN_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-brain
+      isAdminClient: 'true'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+
+  - name: mbc-angular-client
+    app_type: spa
+    callbacks: [
+      '##MBC_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##MBC_BASE_URL##',
+      '##MBC_BASE_URL##/error',
+      '##MBC_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##MBC_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-mbc
+      backendUrl: '##SERVER_BASE_URL##'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+  - name: mbc-admin-client
+    app_type: spa
+    callbacks: [
+      '##MBC_BASE_URL##/admin-login-landing'
+      ##LOCALHOST_ADMIN_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##MBC_BASE_URL##',
+      '##MBC_BASE_URL##/error',
+      '##MBC_BASE_URL##/admin-session-expired'
+      ##LOCALHOST_ADMIN_LOGOUTS##
+    ]
+    web_origins: [
+      '##MBC_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-mbc
+      isAdminClient: 'true'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+
+  - name: osteo-angular-client
+    app_type: spa
+    callbacks: [
+      '##OSTEO_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##OSTEO_BASE_URL##',
+      '##OSTEO_BASE_URL##/error',
+      '##OSTEO_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##OSTEO_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: CMI-OSTEO
+      backendUrl: '##SERVER_BASE_URL##'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+  - name: osteo-admin-client
+    app_type: spa
+    callbacks: [
+      '##OSTEO_BASE_URL##/admin-login-landing'
+      ##LOCALHOST_ADMIN_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##OSTEO_BASE_URL##',
+      '##OSTEO_BASE_URL##/error',
+      '##OSTEO_BASE_URL##/admin-session-expired'
+      ##LOCALHOST_ADMIN_LOGOUTS##
+    ]
+    web_origins: [
+      '##OSTEO_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: CMI-OSTEO
+      isAdminClient: 'true'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+
+  - name: mpc-angular-client
+    app_type: spa
+    callbacks: [
+      '##MPC_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##MPC_BASE_URL##',
+      '##MPC_BASE_URL##/error',
+      '##MPC_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##MPC_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-mpc
+      backendUrl: '##SERVER_BASE_URL##'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+  - name: mpc-admin-client
+    app_type: spa
+    callbacks: [
+      '##MPC_BASE_URL##/admin-login-landing'
+      ##LOCALHOST_ADMIN_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##MPC_BASE_URL##',
+      '##MPC_BASE_URL##/error',
+      '##MPC_BASE_URL##/admin-session-expired'
+      ##LOCALHOST_ADMIN_LOGOUTS##
+    ]
+    web_origins: [
+      '##MPC_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-mpc
+      isAdminClient: 'true'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+
+  - name: esc-angular-client
+    app_type: spa
+    callbacks: [
+      '##ESC_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##ESC_BASE_URL##',
+      '##ESC_BASE_URL##/error',
+      '##ESC_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##ESC_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-esc
+      backendUrl: '##SERVER_BASE_URL##'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+  - name: esc-admin-client
+    app_type: spa
+    callbacks: [
+      '##ESC_BASE_URL##/admin-login-landing'
+      ##LOCALHOST_ADMIN_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##ESC_BASE_URL##',
+      '##ESC_BASE_URL##/error',
+      '##ESC_BASE_URL##/admin-session-expired'
+      ##LOCALHOST_ADMIN_LOGOUTS##
+    ]
+    web_origins: [
+      '##ESC_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-esc
+      isAdminClient: 'true'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+  - name: pancan-angular-client
+    app_type: spa
+    callbacks: [
+      '##PANCAN_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##PANCAN_BASE_URL##',
+      '##PANCAN_BASE_URL##/error',
+      '##PANCAN_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##PANCAN_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-pancan
+      backendUrl: '##SERVER_BASE_URL##'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+
+  - name: lms-angular-client
+    app_type: spa
+    callbacks: [
+      '##LMS_BASE_URL##/login-landing'
+      ##LOCALHOST_CALLBACKS##
+    ]
+    allowed_logout_urls: [
+      '##LMS_BASE_URL##',
+      '##LMS_BASE_URL##/error',
+      '##LMS_BASE_URL##/session-expired'
+      ##LOCALHOST_LOGOUTS##
+    ]
+    web_origins: [
+      '##LMS_BASE_URL##'
+      ##LOCALHOST_ORIGINS##
+    ]
+    client_metadata:
+      study: cmi-lms
+      backendUrl: '##SERVER_BASE_URL##'
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 36000
+    oidc_conformant: true
+
+connections:
+  - name: google-oauth2
+    strategy: google-oauth2
+    is_domain_connection: false
+    options:
+      email: true
+      scope:
+        - email
+        - profile
+      profile: true
+
+resourceServers:
+  - name: dsm - RS256
+    identifier: https://dsm.datadonationplatform.org
+    allow_offline_access: false
+    enforce_policies: true
+    scopes:
+      - value: change:code
+        description: permission to change code
+    signing_alg: RS256
+    skip_consent_for_verifiable_first_party_clients: true
+    token_dialect: access_token_authz
+    token_lifetime: 86400
+    token_lifetime_for_web: 7200
+
+clientGrants:
+  - client_id: dsm-angular-client
+    audience: https://cmi-dev.us.auth0.com/api/v2/
+    scope: []

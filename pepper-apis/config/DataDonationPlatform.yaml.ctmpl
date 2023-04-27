@@ -3,20 +3,8 @@
 service: pepper-backend
 runtime: java11
 instance_class: B8
-{{if eq $environment "pepper-cmi-prod"}}
 manual_scaling:
   instances: 3
-{{else if eq $environment "pepper-cmi-staging"}}
-manual_scaling:
-  instances: 1
-{{else if eq $environment "pepper-cmi-dev"}}
-manual_scaling:
-  instances: 3
-{{else}}
-basic_scaling:
-  max_instances: 4
-  idle_timeout: 20m
-{{end}}
 
 vpc_access_connector:
   name: "projects/{{$environment}}/locations/us-central1/connectors/appengine-connector"
@@ -24,11 +12,9 @@ vpc_access_connector:
 
 network: # todo arz fixme caching disabled tcell
   instance_tag: study-server # necessary for firewall rules so that DSM will accept https requests from pepper
-{{if and (or (eq $environment "pepper-cmi-prod") (eq $environment "pepper-cmi-staging") (eq $environment "pepper-cmi-dev") (eq $environment "pepper-cmi-test")) (eq $gae "true") }}
-entrypoint: java -Xmx1640m -Dio.grpc.netty.shaded.io.netty.transport.noNative=true -jar DataDonationPlatform.jar #  -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_enable_heap_sampling=true,-cprof_service=pepper-backend,-cprof_cpu_use_per_thread_timers=true,-logtostderr
-{{else}}
-entrypoint: java  -Xmx1640m -Dio.grpc.netty.shaded.io.netty.transport.noNative=true -jar DataDonationPlatform.jar
-{{end}}
+
+entrypoint: java  -javaagent:tcell/tcellagent.jar -Xmx1640m -Dio.grpc.netty.shaded.io.netty.transport.noNative=true -jar DataDonationPlatform.jar
+
 # GAE does not like the "=" character in entrypoint and does not support "." in environment variables
 env_variables:
   config_file: application.conf
