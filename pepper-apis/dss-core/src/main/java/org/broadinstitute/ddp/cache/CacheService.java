@@ -64,7 +64,7 @@ public class CacheService {
             String configFileName = manager.getConfig().getString(ConfigFile.JCACHE_CONFIGURATION_FILE);
             Path redissonConfigPath = Paths.get(configFileName);
             if (!redissonConfigPath.toFile().exists()) {
-                throw new DDPException("Path for configuration file: " + redissonConfigPath + " could not be found");
+                throw new DDPException("Path for redis configuration file: " + redissonConfigPath + " could not be found");
             }
             URI redissonConfigPathUri = redissonConfigPath.toUri();
             log.info("Will use redis cache " + redissonConfigPathUri.toASCIIString());
@@ -74,10 +74,15 @@ public class CacheService {
                 Config redissonConfig = Config.fromYAML(redissonConfigPathUri.toURL());
                 redissonClient = Redisson.create(redissonConfig);
             } catch (IOException e) {
-                throw new DDPException("Path for configuration file: " + ConfigFile.JCACHE_CONFIGURATION_FILE + " could not be read");
+                throw new DDPException("Path for redis configuration file: " + ConfigFile.JCACHE_CONFIGURATION_FILE + " could not be read");
             }
         } else {
-            log.warn("Configuration file not set: " + ConfigFile.JCACHE_CONFIGURATION_FILE + "JCache is not enabled");
+            if (!configFileSet) {
+                log.warn("Configuration file not set for redis: " + ConfigFile.JCACHE_CONFIGURATION_FILE + "JCache is not enabled");
+            }
+            if (cachingDisabled) {
+                log.warn("Redis caching is disabled.");
+            }
             cacheManager = new NullCacheManager();
         }
     }
