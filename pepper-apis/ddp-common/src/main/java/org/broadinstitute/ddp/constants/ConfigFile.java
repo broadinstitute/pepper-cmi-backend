@@ -46,9 +46,6 @@ public class ConfigFile {
     // Google project id to use for study export
     public static final String GOOGLE_PROJECT_ID = "googleProjectId";
 
-    // Google Storage bucket name to use for study export
-    public static final String STUDY_EXPORT_BUCKET = "studyExportBucket";
-
     // Google Storage bucket name to use for generated PDFs
     public static final String PDF_ARCHIVE_BUCKET = "pdfArchiveBucket";
 

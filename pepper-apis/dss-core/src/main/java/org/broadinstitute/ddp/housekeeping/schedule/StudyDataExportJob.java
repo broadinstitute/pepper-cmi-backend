@@ -10,6 +10,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Bucket;
 import com.typesafe.config.Config;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.ddp.client.GoogleBucketClient;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.db.ActivityDefStore;
@@ -97,18 +98,10 @@ public class StudyDataExportJob implements Job {
         Config cfg = ConfigManager.getInstance().getConfig();
 
         String gcpProjectId = cfg.getString(ConfigFile.GOOGLE_PROJECT_ID);
-        String bucketName = cfg.getString(ConfigFile.STUDY_EXPORT_BUCKET);
         GoogleCredentials credentials = GoogleCredentialUtil
                 .initCredentials(cfg.getBoolean(ConfigFile.REQUIRE_DEFAULT_GCP_CREDENTIALS));
         if (credentials == null) {
             log.error("No Google credentials are provided, skipping job {}", getKey());
-            return;
-        }
-
-        var bucketClient = new GoogleBucketClient(gcpProjectId, credentials);
-        Bucket bucket = bucketClient.getBucket(bucketName);
-        if (bucket == null) {
-            log.error("Could not find google bucket {}, skipping job {}", bucketName, getKey());
             return;
         }
 
@@ -121,12 +114,7 @@ public class StudyDataExportJob implements Job {
         ActivityDefStore.getInstance().clear();
         DataExporter.clearCachedAuth0Emails();
 
-        var coordinator = new DataExportCoordinator(exporter)
-                .withBatchSize(cfg.getInt(ConfigFile.ELASTICSEARCH_EXPORT_BATCH_SIZE))
-                .includeIndex(ElasticSearchIndexType.PARTICIPANTS_STRUCTURED)
-                .includeIndex(ElasticSearchIndexType.PARTICIPANTS)
-                .includeIndex(ElasticSearchIndexType.USERS)
-                .includeCsv(bucket);
+
 
         for (var studyDto : studyDtos) {
             String studyGuid = studyDto.getGuid();
@@ -136,6 +124,25 @@ public class StudyDataExportJob implements Job {
             }
 
             try {
+                var bucketClient = new GoogleBucketClient(gcpProjectId, credentials);
+                if (StringUtils.isBlank(studyDto.getExportBucket())) {
+                    log.error("No export bucket configured for {}.  Cannot export to a nonexistent bucket.", studyDto.getExportBucket());
+                    return;
+                }
+                Bucket bucket = bucketClient.getBucket(studyDto.getExportBucket());
+                if (bucket == null) {
+                    log.error("Could not find google bucket {}, skipping job {}", studyDto.getExportBucket(), getKey());
+                    return;
+                }
+
+                var coordinator = new DataExportCoordinator(exporter)
+                        .withBatchSize(cfg.getInt(ConfigFile.ELASTICSEARCH_EXPORT_BATCH_SIZE))
+                        .includeIndex(ElasticSearchIndexType.PARTICIPANTS_STRUCTURED)
+                        .includeIndex(ElasticSearchIndexType.PARTICIPANTS)
+                        .includeIndex(ElasticSearchIndexType.USERS)
+                        .includeCsv(bucket);
+
+
                 boolean success = coordinator.export(studyDto);
                 if (success) {
                     new StackdriverMetricsTracker(StackdriverCustomMetric.DATA_EXPORTS,

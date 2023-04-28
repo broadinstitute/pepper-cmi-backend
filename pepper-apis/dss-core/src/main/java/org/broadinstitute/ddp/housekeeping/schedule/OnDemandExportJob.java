@@ -6,6 +6,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Bucket;
 import com.typesafe.config.Config;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.ddp.client.GoogleBucketClient;
 import org.broadinstitute.ddp.constants.ConfigFile;
 import org.broadinstitute.ddp.db.TransactionWrapper;
@@ -99,6 +100,11 @@ public class OnDemandExportJob implements Job {
             return;
         }
 
+        if (StringUtils.isBlank(studyDto.getExportBucket())) {
+            log.error("Study {} does not have an export bucket configured but is marked for export.", studyDto.getGuid());
+            return;
+        }
+
         var coordinator = new DataExportCoordinator(exporter)
                 .withBatchSize(cfg.getInt(ConfigFile.ELASTICSEARCH_EXPORT_BATCH_SIZE));
 
@@ -121,7 +127,6 @@ public class OnDemandExportJob implements Job {
 
         if (doCsv) {
             String gcpProjectId = cfg.getString(ConfigFile.GOOGLE_PROJECT_ID);
-            String bucketName = cfg.getString(ConfigFile.STUDY_EXPORT_BUCKET);
             GoogleCredentials credentials = GoogleCredentialUtil
                     .initCredentials(cfg.getBoolean(ConfigFile.REQUIRE_DEFAULT_GCP_CREDENTIALS));
             if (credentials == null) {
@@ -130,9 +135,9 @@ public class OnDemandExportJob implements Job {
             }
 
             var bucketClient = new GoogleBucketClient(gcpProjectId, credentials);
-            Bucket bucket = bucketClient.getBucket(bucketName);
+            Bucket bucket = bucketClient.getBucket(studyDto.getExportBucket());
             if (bucket == null) {
-                log.error("Could not find google bucket {}, skipping job {}", bucketName, getKey());
+                log.error("Could not find google bucket {}, skipping job {}", studyDto.getExportBucket(), getKey());
                 return;
             }
 
