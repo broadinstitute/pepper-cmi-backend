@@ -52,23 +52,23 @@ public class GoogleAnalyticsMetricsTracker {
     }
 
     private synchronized void initStudyMetricTracker(String studyGuid, StudySettings studySettings) {
-        if (!studyAnalyticsTrackers.containsKey(studyGuid)) {
-            if (studySettings == null || !studySettings.isAnalyticsEnabled()) {
-                noAnalyticsTokenStudies.add(studyGuid);
-                return;
-            } else if (StringUtils.isEmpty(studySettings.getAnalyticsToken())) {
-                log.error("NO analytics token found for study : {} . skipping sending analytics. ", studyGuid);
-                noAnalyticsTokenStudies.add(studyGuid);
-                return;
+        if (!noAnalyticsTokenStudies.contains(studyGuid)) {
+            if (!studyAnalyticsTrackers.containsKey(studyGuid)) {
+                if (studySettings == null || !studySettings.isAnalyticsEnabled()) {
+                    noAnalyticsTokenStudies.add(studyGuid);
+                } else if (StringUtils.isEmpty(studySettings.getAnalyticsToken())) {
+                    log.error("NO analytics token found for study : {} . skipping sending analytics. ", studyGuid);
+                    noAnalyticsTokenStudies.add(studyGuid);
+                } else {
+                    GoogleAnalytics metricTracker = GoogleAnalytics.builder()
+                            .withConfig(new GoogleAnalyticsConfig().setBatchingEnabled(true).setBatchSize(DEFAULT_BATCH_SIZE)
+                                    .setUserAgent(CUSTOM_USER_AGENT))
+                            .withTrackingId(studySettings.getAnalyticsToken())
+                            .build();
+                    studyAnalyticsTrackers.put(studyGuid, metricTracker);
+                    log.info("Initialized GA Metrics Tracker for study GUID: {} ", studyGuid);
+                }
             }
-
-            GoogleAnalytics metricTracker = GoogleAnalytics.builder()
-                    .withConfig(new GoogleAnalyticsConfig().setBatchingEnabled(true).setBatchSize(DEFAULT_BATCH_SIZE)
-                            .setUserAgent(CUSTOM_USER_AGENT))
-                    .withTrackingId(studySettings.getAnalyticsToken())
-                    .build();
-            studyAnalyticsTrackers.put(studyGuid, metricTracker);
-            log.info("Initialized GA Metrics Tracker for study GUID: {} ", studyGuid);
         }
     }
 
