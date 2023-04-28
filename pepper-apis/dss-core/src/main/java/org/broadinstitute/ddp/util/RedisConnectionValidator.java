@@ -19,6 +19,7 @@ public class RedisConnectionValidator {
 
     public static void doTest(String host, int port) {
         String testHash = "testhash";
+        // todo arz switch to jedispool?
         String valToWrite = Math.random() + "";
         try (var jedis = new Jedis(host, port)) {
             jedis.hset(testHash, "hello", valToWrite);

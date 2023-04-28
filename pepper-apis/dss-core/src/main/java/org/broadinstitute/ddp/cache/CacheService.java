@@ -117,6 +117,7 @@ public class CacheService {
                                                  Object cacheParentObject) {
         Cache existingCache = cacheManager.getCache(cacheName);
         if (existingCache == null || existingCache.isClosed()) {
+            log.info("No redis cache for " + cacheName + ".  Will create it.");
             synchronized (cacheParentObject) {
                 Cache<K, V> cache = _getOrCreateCache(cacheName, entryDuration);
                 if (mapper instanceof IdToCacheKeyCollectionMapper) {
@@ -132,6 +133,7 @@ public class CacheService {
                 return cache;
             }
         } else {
+            log.info("Found redis cache for " + cacheName);
             return (Cache<K, V>) existingCache;
         }
     }
