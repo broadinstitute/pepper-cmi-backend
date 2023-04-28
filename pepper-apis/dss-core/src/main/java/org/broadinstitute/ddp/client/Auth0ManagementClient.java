@@ -9,6 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -642,7 +643,7 @@ public class Auth0ManagementClient {
                 if (res.getError() instanceof RateLimitException) {
                     RateLimitException rateLimit = (RateLimitException) res.getError();
                     long unixTimeAtWhichToRetry = rateLimit.getReset();
-                    long suggestedWaitTime = unixTimeAtWhichToRetry - System.currentTimeMillis();
+                    long suggestedWaitTime = unixTimeAtWhichToRetry - Instant.now().getEpochSecond();
                     if (suggestedWaitTime > 0) {
                         wait = suggestedWaitTime;
                     }
