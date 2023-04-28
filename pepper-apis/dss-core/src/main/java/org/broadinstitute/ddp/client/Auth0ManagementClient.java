@@ -652,7 +652,7 @@ public class Auth0ManagementClient {
                     log.warn("Hit auth0 rate limit.  Pausing for " + wait + "ms");
                 }
                 try {
-                    TimeUnit.MILLISECONDS.sleep(wait);
+                    TimeUnit.SECONDS.sleep(wait);
                 } catch (InterruptedException e) {
                     log.warn("Interrupted while waiting after rate limit", e);
                 }

@@ -490,8 +490,8 @@ public class Auth0Util {
                     } else {
                         retryingDueToWait = false;
                     }
-                    log.warn("Pausing for retry for " + sleepTime + " after hitting rate limit.");
-                    sleepBeforeRetry(sleepTime);
+                    log.warn("Pausing for retry for " + sleepTime + "s after hitting rate limit.");
+                    sleepBeforeRetry(sleepTime * 1000);
                 } else {
                     throw e;
                 }
