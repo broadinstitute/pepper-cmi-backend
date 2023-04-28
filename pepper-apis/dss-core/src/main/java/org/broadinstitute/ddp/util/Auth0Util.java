@@ -481,7 +481,7 @@ public class Auth0Util {
                         // if there's a hint from auth0 for how long to wait, use it
                         RateLimitException rateLimit = (RateLimitException) e;
                         long now = Instant.now().getEpochSecond();
-                        sleepTime = rateLimit.getReset() - now;
+                        sleepTime = (rateLimit.getReset() - now) * 1000;
                         if (sleepTime < 0) {
                             log.warn("Current time {} and rate limit time {} imply a negative wait time.", now, rateLimit.getReset());
                             sleepTime = DEFAULT_RETRY_TIMEOUT;
@@ -491,7 +491,7 @@ public class Auth0Util {
                         retryingDueToWait = false;
                     }
                     log.warn("Pausing for retry for " + sleepTime + "s after hitting rate limit.");
-                    sleepBeforeRetry(sleepTime * 1000);
+                    sleepBeforeRetry(sleepTime);
                 } else {
                     throw e;
                 }
