@@ -77,7 +77,6 @@
         "pubSubDsmTasksTopic": "{{$conf.Data.pubsub.pubSubDsmTasksTopic}}"
         "pubSubTaskSubscriberAwaitRunningTimeout": "{{$conf.Data.pubsub.pubSubTaskSubscriberAwaitRunningTimeout}}"
     },
-    "studyExportBucket": "{{$conf.Data.studyExportBucket}}",
     "schedules": {
         "checkAgeUp": "{{$conf.Data.schedules.checkAgeUp}}",
         "dbBackup": "{{$conf.Data.schedules.dbBackup}}",

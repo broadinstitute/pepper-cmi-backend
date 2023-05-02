@@ -126,7 +126,7 @@ public class StudyDataExportJob implements Job {
             try {
                 var bucketClient = new GoogleBucketClient(gcpProjectId, credentials);
                 if (StringUtils.isBlank(studyDto.getExportBucket())) {
-                    log.error("No export bucket configured for {}.  Cannot export to a nonexistent bucket.", studyDto.getExportBucket());
+                    log.error("No export bucket configured for {}.  Cannot export to a nonexistent bucket.", studyDto.getGuid(), studyDto.getExportBucket());
                     return;
                 }
                 Bucket bucket = bucketClient.getBucket(studyDto.getExportBucket());

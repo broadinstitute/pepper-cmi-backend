@@ -127,7 +127,6 @@
         "pubSubDsmTasksTopic": " local-dsm-tasks",
         "pubSubTaskSubscriberAwaitRunningTimeout": 30
     },
-    "studyExportBucket": "ddp-dev-study-exports-testing",
     "schedules": {
         "checkAgeUp": "0 0 7 ? * * *",
         "dbBackup": "0 30 4,10,14 ? * * *",
