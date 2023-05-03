@@ -13,7 +13,7 @@ vpc_access_connector:
 network: # todo arz fixme caching disabled tcell
   instance_tag: study-server # necessary for firewall rules so that DSM will accept https requests from pepper
 
-entrypoint: java  -javaagent:tcell/tcellagent.jar -Xmx1640m -Dio.grpc.netty.shaded.io.netty.transport.noNative=true -jar DataDonationPlatform.jar
+entrypoint: java  -javaagent:tcell/tcellagent.jar -Xmx1640m -Dio.grpc.netty.shaded.io.netty.transport.noNative=false -jar DataDonationPlatform.jar
 
 # GAE does not like the "=" character in entrypoint and does not support "." in environment variables
 env_variables:
