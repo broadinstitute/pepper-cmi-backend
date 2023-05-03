@@ -34,7 +34,7 @@ public interface JdbiUmbrellaStudy extends SqlObject {
 
     @SqlQuery("select us.umbrella_study_id, us.umbrella_id, us.study_name, us.guid, us.irb_password, us.web_base_url, us.auth0_tenant_id,"
             + " op.olc_precision_code, us.share_participant_location, us.study_email, us.enable_data_export, us.recaptcha_site_key,"
-            + " us.default_auth0_connection, us.error_present_status_enabled, us.notification_mail_template_id"
+            + " us.default_auth0_connection, us.error_present_status_enabled, us.notification_mail_template_id, us.export_bucket"
             + " from umbrella_study us"
             + " left join olc_precision op on op.olc_precision_id = us.olc_precision_id"
             + " where us.guid = :studyGuid")
@@ -43,7 +43,7 @@ public interface JdbiUmbrellaStudy extends SqlObject {
 
     @SqlQuery("select us.umbrella_study_id, us.umbrella_id, us.study_name, us.guid, us.irb_password, us.web_base_url, us.auth0_tenant_id,"
             + " op.olc_precision_code, us.share_participant_location, us.study_email, us.enable_data_export, us.recaptcha_site_key,"
-            + " us.default_auth0_connection, us.error_present_status_enabled, us.notification_email, us.notification_mail_template_id"
+            + " us.default_auth0_connection, us.error_present_status_enabled, us.notification_email, us.notification_mail_template_id, us.export_bucket"
             + " from umbrella_study us"
             + " left join olc_precision op on op.olc_precision_id = us.olc_precision_id"
             + " where us.umbrella_study_id = :studyId")
@@ -52,7 +52,7 @@ public interface JdbiUmbrellaStudy extends SqlObject {
 
     @SqlQuery("select us.umbrella_study_id, us.umbrella_id, us.study_name, us.guid, us.irb_password, us.web_base_url, us.auth0_tenant_id,"
             + " op.olc_precision_code, us.share_participant_location, us.study_email, us.enable_data_export, us.recaptcha_site_key,"
-            + " us.default_auth0_connection, us.error_present_status_enabled"
+            + " us.default_auth0_connection, us.error_present_status_enabled, us.export_bucket"
             + " from umbrella_study as us"
             + " join umbrella as u on us.umbrella_id = u.umbrella_id"
             + " left join olc_precision op on op.olc_precision_id = us.olc_precision_id"
@@ -62,7 +62,7 @@ public interface JdbiUmbrellaStudy extends SqlObject {
 
     @SqlQuery("select us.umbrella_study_id, us.umbrella_id, us.study_name, us.guid, us.irb_password, us.web_base_url, us.auth0_tenant_id,"
             + " op.olc_precision_code, us.share_participant_location, us.study_email, us.enable_data_export, us.recaptcha_site_key,"
-            + " us.default_auth0_connection, us.error_present_status_enabled"
+            + " us.default_auth0_connection, us.error_present_status_enabled, us.export_bucket"
             + " from umbrella_study as us"
             + " join auth0_tenant as t on t.auth0_tenant_id = us.auth0_tenant_id "
             + " left join olc_precision op on op.olc_precision_id = us.olc_precision_id"
