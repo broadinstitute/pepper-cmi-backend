@@ -394,6 +394,7 @@ public class TransactionWrapper {
 
     private HikariDataSource createDataSource(int maxConnections, String dbUrl, DB db) {
         HikariConfig config = new HikariConfig();
+        int mysqlServerWaitTimeoutSeconds = 28800;
         config.setJdbcUrl(dbUrl);
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
@@ -404,8 +405,10 @@ public class TransactionWrapper {
         config.setAutoCommit(true); // will be managed by jdbi, which expects autcommit to be enabled initially
         config.setTransactionIsolation("TRANSACTION_READ_COMMITTED");
         config.setMaximumPoolSize(maxConnections);
-        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(5));
-        config.setMaxLifetime(TimeUnit.SECONDS.toMillis(14400)); // 4 hours, which is half the default wait_timeout of mysql
+        // https://github.com/brettwooldridge/HikariCP/wiki/FAQ#q2
+        config.setIdleTimeout(mysqlServerWaitTimeoutSeconds - 60);
+        config.setMaxLifetime(mysqlServerWaitTimeoutSeconds - 60);
+        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(20));
         config.setPoolName(db.name());
 
         // todo arz leverage allowPoolSuspension and mxbeans to fully  automate password rotation
