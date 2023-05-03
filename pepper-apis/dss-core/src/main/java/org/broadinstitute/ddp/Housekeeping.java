@@ -202,12 +202,22 @@ public class Housekeeping {
     public static void start(String[] args, SendGridSupplier sendGridSupplier) {
         LogbackConfigurationPrinter.printLoggingConfiguration();
 
+
+
         String envPort = System.getenv(ENV_PORT);
+        /*
         if (envPort != null) {
             // We're likely in an GAE environment, so respond to the start hook before starting main event loop.
             log.info("adding startup hook listener");
             respondToGAEStartHook(envPort);
         }
+        */
+
+        Spark.port(Integer.parseInt(envPort));
+        Spark.get(RouteConstants.GAE.START_ENDPOINT, (request, response) -> {
+            response.status(200);
+            return "";
+        });
 
         Config cfg = ConfigManager.getInstance().getConfig();
         boolean doLiquibase = cfg.getBoolean(ConfigFile.DO_LIQUIBASE);
