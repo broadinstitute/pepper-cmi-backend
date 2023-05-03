@@ -400,6 +400,7 @@ public class TransactionWrapper {
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         config.addDataSourceProperty("cacheServerConfiguration", "true");
         config.addDataSourceProperty("useCursorFetch", "true");
+        config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
         config.setInitializationFailTimeout(0); // don't fail to  create the pool if the db is not available
         config.setAutoCommit(true); // will be managed by jdbi, which expects autcommit to be enabled initially
         config.setTransactionIsolation("TRANSACTION_READ_COMMITTED");
