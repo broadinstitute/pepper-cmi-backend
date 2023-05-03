@@ -56,7 +56,7 @@ public class GoogleAnalyticsMetricsTracker {
             if (!studyAnalyticsTrackers.containsKey(studyGuid)) {
                 if (studySettings == null || !studySettings.isAnalyticsEnabled()) {
                     noAnalyticsTokenStudies.add(studyGuid);
-                } else if (StringUtils.isEmpty(studySettings.getAnalyticsToken())) {
+                } else if (StringUtils.isBlank(studySettings.getAnalyticsToken())) {
                     log.error("NO analytics token found for study : {} . skipping sending analytics. ", studyGuid);
                     noAnalyticsTokenStudies.add(studyGuid);
                 } else {
@@ -66,7 +66,7 @@ public class GoogleAnalyticsMetricsTracker {
                             .withTrackingId(studySettings.getAnalyticsToken())
                             .build();
                     studyAnalyticsTrackers.put(studyGuid, metricTracker);
-                    log.info("Initialized GA Metrics Tracker for study GUID: {} ", studyGuid);
+                    log.info("Initialized GA Metrics Tracker for study GUID: {} with token {}", studyGuid, studySettings.getAnalyticsToken());
                 }
             }
         }

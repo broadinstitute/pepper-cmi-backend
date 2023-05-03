@@ -114,8 +114,6 @@ public class StudyDataExportJob implements Job {
         ActivityDefStore.getInstance().clear();
         DataExporter.clearCachedAuth0Emails();
 
-
-
         for (var studyDto : studyDtos) {
             String studyGuid = studyDto.getGuid();
             if (!studyDto.isDataExportEnabled()) {
@@ -145,6 +143,7 @@ public class StudyDataExportJob implements Job {
 
                 boolean success = coordinator.export(studyDto);
                 if (success) {
+                    log.info("Exported study {} to bucket {}", studyDto.getGuid(), studyDto.getExportBucket());
                     new StackdriverMetricsTracker(StackdriverCustomMetric.DATA_EXPORTS,
                             studyGuid, PointsReducerFactory.buildSumReducer())
                             .addPoint(1, Instant.now().toEpochMilli());

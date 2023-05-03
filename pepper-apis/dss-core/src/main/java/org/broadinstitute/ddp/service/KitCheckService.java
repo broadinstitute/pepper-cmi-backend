@@ -160,7 +160,7 @@ public class KitCheckService {
         if (wasSuccessful) {
             kitCheckResult.addQueuedParticipantForStudy(studyGuid, candidate.getUserId());
         } else {
-            log.warn("Participant {} was ineligible for a kit", userGuid);
+            log.debug("Participant {} was ineligible for a kit", userGuid);
         }
 
         return kitCheckResult;
@@ -357,7 +357,7 @@ public class KitCheckService {
             log.info("Finished occurrence {} for participant {} and kit_configuration_id={}",
                     record.getNumOccurrences() + 1, pending.getUserGuid(), schedule.getConfigId());
         } else {
-            log.warn("Participant {} was ineligible for next kit, kitConfigurationId={}", userGuid, kitConfig.getId());
+            log.debug("Participant {} was ineligible for next kit, kitConfigurationId={}", userGuid, kitConfig.getId());
         }
     }
 

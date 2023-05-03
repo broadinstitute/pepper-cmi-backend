@@ -171,7 +171,7 @@ public class DataExportCoordinator {
             var iterator = new PaginatedParticipantIterator(studyDto, batchSize);
             exportStudyToGoogleBucket(studyDto, exporter, csvBucket, activities, iterator);
             long elapsed = Instant.now().toEpochMilli() - start;
-            log.info("Finished csv export for study {} in {}s", studyGuid, elapsed / 1000);
+            log.info("Finished csv export for study {} to {} in {}s", studyGuid, csvBucket.getName(), elapsed / 1000);
             return true;
         } catch (Exception e) {
             log.error("Error while running csv export for study {}, continuing", studyGuid, e);
