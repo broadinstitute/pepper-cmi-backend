@@ -29,6 +29,7 @@ function (user, context, callback) {
 
     user.app_metadata = user.app_metadata || {};
     user.app_metadata.pepper_user_guids = user.app_metadata.pepper_user_guids || {};
+    user.app_metadata.test_guids = user.app_metadata.test_guids || {};
 
     // Use of the m2mClients list below should be considered legacy behavior, and
     // may be removed at any time. Any new clients should set the key 'skipPepperRegistration'
@@ -61,6 +62,9 @@ function (user, context, callback) {
     if (mockRegistration) {
         var overrideUserGuid;
         if (user.app_metadata.testingGuid) {
+            // test_guids
+            // context.request.body.test_group -> user.app_metadata.test_guids[test_group] = testingGuid
+            // todo arz allow for another level of partitioning like app_metadata.testing[parallel-test-id].testingGuid
             overrideUserGuid = user.app_metadata.testingGuid;
             console.log('Using hardcoded guid ' + overrideUserGuid + ' during registration for ' + user.user_id + ' for client ' + context.clientID);
         } else if (context.clientMetadata.overrideUserGuid) {
